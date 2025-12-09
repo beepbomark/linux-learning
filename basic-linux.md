@@ -46,6 +46,11 @@ cp file.txt /tmp/           # copy file to directory
 cp -r folder1 folder2       # copy directories recursively
 cp -i file1 file2           # prompt before overwriting
 cp -v file1 file2           # show progress 
+cp -p                       # (Preserve) Maintains the original file's modification time, access time, and permissions
+cp -u                       # Copy only when the source file is newer than the destination file or when the destination file is missing
+cp -v                       # Verbose mode, explaining what is being done
+cp -l                       # Create hard links instead of copying files
+cp -s                       # Create symbolic links instead of copying files
 ```
 ---
 3. `mv` - Move or rename files and directories
@@ -69,6 +74,10 @@ rm -rf folder/              # force delete
 ```bash
 mkdir project
 mkdir -p folder/subfolder   # create parent directories if needed
+mkdir -m 700                # Sets the permission
+mkdir -v                    # (Verbose) Tells mkdir to print a message for each directory it creates
+mkdir --help                # Display help message and exit
+mkdir --version             # Output version information and exit
 ```
 ---
 6. `rmdir` - Remove empty directories
@@ -96,11 +105,18 @@ file script.sh
 
 ## Files and Directories
 1. `pwd` - Print the current working directory
+```bash
+pwd -L          # Shows the logical path, following symbolic links to their target
+pwd -P          # Shows the physical path, showing the actual symbolic link without following it
+```
 2. `ls` - List files and directories
+```bash
+ls -ld          # To check permissions
 3. `tree` - Display directory structure as a tree
 ```bash
 tree -L 2   # limit depth
 tree -a     # include hidden files
+tree -p     # See more details including permissions
 ```
 ---
 4. `cd` - Change directories
@@ -110,6 +126,7 @@ cd ../..        # go up two levels
 cd ~            # go to home directory
 cd -            # go to previous directory
 cd /etc         # go to an absolute path
+cd $HOME        # Go to home directory
 ```
 ---
 5. `find` - Search for files and directories based on name, type, size, time, etc.
