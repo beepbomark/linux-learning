@@ -64,6 +64,7 @@ mv -v file1 file2           # verbose output
 4. `rm` - Remove files or directories
 ```bash
 rm file.txt                 # remove a file
+rm file1 file2 file3        # To remove multiple files
 rm -i file.txt              # interactive prompt
 rm -v file.txt              # verbose
 rm -r folder/               # remove directory recursively
@@ -153,12 +154,36 @@ df -h | grep "/dev/"
 ---
 8. `stat` - Show detailed info about a file or directory
 ---
+9. `more` - View contents of a text file one screen at a time
+- Press the `Space` bar to move to the next page.
+- Press `Enter` to move down one line.
+- Press `b` to go back one page.
+- Press `q` to quit and return to the command prompt.
+```bash
+more +100 file.txt              # File will open starting from line 100
+more -10 file.txt               # See only 10 lines of the file at a time
+more +/"2023-07-15" file.txt    # `+/` tells to start at the first occurrence of this pattern.
+more -d                         # displays helpful prompts
+more -f                         # Counts logical lines instead of screen lines
+more -p                         # Clears the screen before displaying the page
+more -c                         # Repaints the screen instead of scrolling
+more -s                         # Squeezes multiple blank lines into one
+more -u                         # Suppresses underlining
+```
 
 ## File Contents and Comparing
 1. `cat` - Display file contents or concatenate multiple files
 ```bash
-cat -n file.txt         # add line numbers
-cat file.txt | less     # view with scroll
+cat -n file.txt                 # add line numbers
+cat -E file.txt                 # Display a `$` at the end of each line
+cat -A file.txt                 # Show all non-printing characters
+cat -b file.txt                 # Suppress repeated empty output lines
+cat -T file.txt                 # Display TAB characters as ^|
+cat -v file.txt                 # USe ^ and M- notations, except for LFD and TAB
+cat file.txt | less             # view with scroll
+cat file1.txt file2.txt         # Display the contents of both files
+cat file1.txt file2.txt > combined.txt  # Combines contents of both files into 1
+
 ```
 ---
 2. `tac` - Display file contents in reverse order (bottom to top).
