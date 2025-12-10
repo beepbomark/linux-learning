@@ -154,21 +154,7 @@ df -h | grep "/dev/"
 ---
 8. `stat` - Show detailed info about a file or directory
 ---
-9. `more` - View contents of a text file one screen at a time
-- Press the `Space` bar to move to the next page.
-- Press `Enter` to move down one line.
-- Press `b` to go back one page.
-- Press `q` to quit and return to the command prompt.
-```bash
-more +100 file.txt              # File will open starting from line 100
-more -10 file.txt               # See only 10 lines of the file at a time
-more +/"2023-07-15" file.txt    # `+/` tells to start at the first occurrence of this pattern.
-more -d                         # displays helpful prompts
-more -f                         # Counts logical lines instead of screen lines
-more -p                         # Clears the screen before displaying the page
-more -c                         # Repaints the screen instead of scrolling
-more -s                         # Squeezes multiple blank lines into one
-more -u                         # Suppresses underlining
+
 ```
 
 ## File Contents and Comparing
@@ -183,7 +169,6 @@ cat -v file.txt                 # USe ^ and M- notations, except for LFD and TAB
 cat file.txt | less             # view with scroll
 cat file1.txt file2.txt         # Display the contents of both files
 cat file1.txt file2.txt > combined.txt  # Combines contents of both files into 1
-
 ```
 ---
 2. `tac` - Display file contents in reverse order (bottom to top).
@@ -193,10 +178,17 @@ cat file1.txt file2.txt > combined.txt  # Combines contents of both files into 1
 4. `less` - View file contents page-by-page (scroll up/down)
 Navigation shortcuts:
 * Up/Down arrow - scroll line-by-line
-* Space - next page
+* Space or page down - next page
 * b - previous page
 * / - text search
 * q - quit
+* Shift + g to go to the end of the file
+* g to go to the beginning of the file
+```bash
+less -i     # Ignore case in searches
+less -F     # Quit if the entire file can be displayed on one screen
+less -S     # Chop long lines instead of wrapping them
+less +F     # Keep reading the file, displaying new contents as they appear 
 ---
 5. `head` - Display the first part of a file
 ```bash
@@ -224,6 +216,21 @@ md5sum file1 file2
 sha256sum file1 file2
 ```
 ---
+10. `more` - View contents of a text file one screen at a time
+- Press the `Space` bar to move to the next page.
+- Press `Enter` to move down one line.
+- Press `b` to go back one page.
+- Press `q` to quit and return to the command prompt.
+```bash
+more +100 file.txt              # File will open starting from line 100
+more -10 file.txt               # See only 10 lines of the file at a time
+more +/"2023-07-15" file.txt    # `+/` tells to start at the first occurrence of this pattern.
+more -d                         # displays helpful prompts
+more -f                         # Counts logical lines instead of screen lines
+more -p                         # Clears the screen before displaying the page
+more -c                         # Repaints the screen instead of scrolling
+more -s                         # Squeezes multiple blank lines into one
+more -u                         # Suppresses underlining
 
 ## File Permissions & Ownership
 1. Understanding Linux Permissions
