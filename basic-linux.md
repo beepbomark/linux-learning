@@ -1,5 +1,99 @@
 # Linux Command Reference
-A personal reference guide.
+A personal reference guide based on Labex
+
+## Command Line
+1. pwd
+2. cd
+3. ls
+4. touch
+5. file
+6. cat
+7. less
+8. history
+9. cp 
+10. mv
+11. mkdir
+12. rm
+13. find
+14. help
+15. man
+16. whatis
+17. whatis
+18. alias
+19. exit
+
+## Text Manipulation and Navigation
+### Basic
+1. stdout
+2. stdin
+3. stderr
+4. pipe and tee
+5. env
+6. cut
+7. paste
+8. head
+9. tail
+10. expand and unexpand
+11. join and split
+12. sort
+13. tr
+14. uniq
+15. wc and nl
+16. grep
+### Advanced
+1. regex
+2. Text Editors
+3. Vim
+4. Vim Search Patterns
+5. Vim Navigation
+6. Vim Inserting and Appending Text
+7. Vim Editing
+8. Vim Saving and Exiting
+9. Emacs
+10. Emacs Manipulate Files
+11. Emacs Buffer Navigation
+12. Emacs Editing
+13. Emacs Exiting and Help
+
+## User Management
+1. Users ang Groups
+2. root
+3. /etc/passwd
+4. /etc/shadow
+5. /etc/group
+6. User Management Tools
+
+## Permissions
+1. File Permissions
+2. Modifying Permissions
+3. Ownership Permissions
+4. Umask
+5. Setuid
+6. Setgid
+7. Process Permissions
+8. The Sticky Bit
+
+## Processes
+1. ps 
+2. Controlling Terminal
+3. Process Details
+4. Process Creation
+5. Process Termination
+6. Signals
+7. Kill
+8. niceness
+9. Process States
+10. /proc filesystem
+11. Job Control
+
+## Packages
+1. Software Distribution
+2. Package Repositories
+3. tar and gzip
+4. Package Dependencies
+5. rpm and dpkg
+6. yum and apt
+7. Compile Source Code
 
 ## Display User and Group Information
 1. `whoami` - Show the current logged-in username.
@@ -231,6 +325,7 @@ more -p                         # Clears the screen before displaying the page
 more -c                         # Repaints the screen instead of scrolling
 more -s                         # Squeezes multiple blank lines into one
 more -u                         # Suppresses underlining
+```
 
 ## File Permissions & Ownership
 1. Understanding Linux Permissions
@@ -273,3 +368,5 @@ Common presets:
 |700|user rwx only|
 ---
 Using Symbolic Notation
+
+
