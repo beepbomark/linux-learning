@@ -30,6 +30,9 @@ A personal reference guide based on Labex
 4. pipe and tee
 5. env
 6. cut
+```bash
+cut -d '"' -f2 access.log       # Splits each line at the quotation marks and selects the second field
+```
 7. paste
 8. head
 9. tail
@@ -40,6 +43,9 @@ A personal reference guide based on Labex
 14. uniq
 15. wc and nl
 16. grep
+```bash
+grep "/admin" access.log    # Searches for lines containing "/admin" in the access.log file
+```
 ### Advanced
 1. regex
 2. Text Editors
@@ -206,7 +212,11 @@ pwd -P          # Shows the physical path, showing the actual symbolic link with
 ```
 2. `ls` - List files and directories
 ```bash
+ls -l           # Long listing format
+ls -h           # Human-readable file sizes
 ls -ld          # To check permissions
+ls -lh          # Shows detailed file info with human-readable sizes
+```
 3. `tree` - Display directory structure as a tree
 ```bash
 tree -L 2   # limit depth
@@ -268,6 +278,16 @@ cat file1.txt file2.txt > combined.txt  # Combines contents of both files into 1
 2. `tac` - Display file contents in reverse order (bottom to top).
 ---
 3. `nl` - Print file with line numbers.
+```bash
+nl -b a     # `-b` contros the line numbering for the body of the file, a stands for "all" and tells `nl` to number all lines, including blank ones.
+nl -n rz    # `-n` is used to specify the numbering format, `r` means right aligned, `z` means adding leading zeros
+nl -b p     # tells nl to number only the lines that match a specific pattern
+nl -b a -n rz -s ': ' -w 3 config.txt   # `-s ': '`, uses ': ' as the separator between the number and the line content, `-w 3` sets the width of the number field to 3 characters
+nl -v NUM   # Start numbering at NUM instead of 1
+nl -i NUM   # Increment numbers by NUM instead of 1
+nl -l NUM   # Group NUM lines together and only number the first line of each group
+nl -f a     # Number all header lines (lines before the first body line)
+```
 ---
 4. `less` - View file contents page-by-page (scroll up/down)
 Navigation shortcuts:
@@ -283,17 +303,22 @@ less -i     # Ignore case in searches
 less -F     # Quit if the entire file can be displayed on one screen
 less -S     # Chop long lines instead of wrapping them
 less +F     # Keep reading the file, displaying new contents as they appear 
+```
 ---
 5. `head` - Display the first part of a file
 ```bash
-head -n 20 file.txt     # first 20 lines
-head -c 50 file.txt     # first 50 bytes
+head -n 20 file.txt         # first 20 lines
+head -c 50 file.txt         # first 50 bytes
+head file1.log file2.log    # Look at multiple files
+head -q                     # Suppress headers when examining multiple files
+head -v                     # Always display headers when examining multiple files
 ```
 ---
 6. `tail` - Display the last part of a file.
 ```bash
 tail -n 20 file.txt     # last 20 lines
 tail -f file.txt        # follow a file in real time (logs)
+tail -n +50 file.log    # View the content of log file starting from the 50th line.
 ```
 ---
 7. `diff` - Show differences between two files (line-by-line comparison).
