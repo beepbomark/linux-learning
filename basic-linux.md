@@ -393,5 +393,5 @@ Common presets:
 |700|user rwx only|
 ---
 Using Symbolic Notation
-
+3. `which` - Used to locate the executable file associated with a given command
 
