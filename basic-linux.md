@@ -42,9 +42,20 @@ cut -d '"' -f2 access.log       # Splits each line at the quotation marks and se
 13. tr
 14. uniq
 15. wc and nl
-16. grep
+16. grep - (Global Regular Expression Print)
 ```bash
 grep "/admin" access.log    # Searches for lines containing "/admin" in the access.log file
+grep -c "Error" logs/server.log     # Count the number of matching lines instead of displaying there
+grep -i "error" logs/server.log     # Makes the search case-insensitive, matches "error", "ERROR", "Error" or any other combination of upper and lowercase letters
+grep "database connection failed" logs/*    # Searches for the phrase in all files within the `logs` directory. `*` is called a wildcard.
+grep -B 2 -A 2 "CRITICAL" logs/server.log   # `-B2` shows 2 lines before the match, `-A 2` shows 2 lines after the match
+grep -v "ERROR" logs/server.log             # `-v` option inverts the match, showing all lines that don't contain "ERROR"
+grep -n # Display line numbers along with the matched lines
+grep -r # or `-R`, Recursively search subdirectories
+grep -l # Only display the names of files with matching lines
+grep -w # Match whole words only
+grep -E # Use extended regular expressions
+grep -F # Interpret the pattern as a fixed string, not a regular expression
 ```
 ### Advanced
 1. regex
@@ -240,8 +251,17 @@ find . -name "*.txt"            # find all .txt files in current dir
 find /var/log -type f           # find files only
 find /home -type d              # find directories only
 find . -size +10M               # files larger than 10MB
-find . -mtime -1                # files modified in last 24 hours
+find . -mtime -1                # files modified in last 24 hours, `-mtime` options measures time in 24-hour increments.
 find . -name "*.log" - delete   # delete matching files
+find . -name "*.txt" -o -name "*.log"   # `-o` means "or".
+find . -type f -size +1M        # `-type f` tells `find` to look only for regular files
+find . -name "*.txt" -exec cat {} \;    # `exec cat {} \;` execute the `cat` command on each file it finds
+find -user                      # Find files owned by a specific user
+find -group                     # Find files belonging to a specific group
+find -perm                      # Limit the depth of directory traversal
+find -mindepth                  # Start searching from a minimum depth
+find -empty                     # Find empty files or directories
+find -newer                     # Find files newer than a specified file
 ```
 ---
 6. `du` - Show disk usage of files and directories
@@ -394,4 +414,17 @@ Common presets:
 ---
 Using Symbolic Notation
 3. `which` - Used to locate the executable file associated with a given command
-
+```bash
+which -a    # Discover all installations of a command
+```
+4. `whereis` - used to locate the binary, source, and manual page files for a specified command.
+```bash
+whereis -b  # Specifically searches for binary files
+whereis -m  # Locate manual pages
+whereis -bm # Find both the binary and the manual page
+whereis -s  # Search for source files
+whereis -u  # Search for unusual entres (files that do not follow the usual naming pattern)
+whereis -B  # Change or restrict the places where `whereis` searches for binaries
+whereis -M  # Change or restrict the places where `whereis` searches for manual pages
+whereis -S  # Change or restrict the places where `whereis` searches for sources
+```
