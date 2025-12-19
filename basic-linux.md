@@ -31,17 +31,60 @@ A personal reference guide based on Labex
 5. env
 6. cut
 ```bash
-cut -d '"' -f2 access.log       # Splits each line at the quotation marks and selects the second field
+cut -d '"' -f 2 access.log       # Splits each line at the quotation marks and selects the second field
+cut -c 11-25 inventory.txt       # `-c` is used to specify character positions
+cut -s                           # Suppress lines not containing delimiters
 ```
 7. paste
 8. head
 9. tail
 10. expand and unexpand
 11. join and split
+join - Merge information from 2 files
+```bash
+join employees.txt salaries.txt
+join -o 1.2,1.3,2.2,1.1 employees.txt salaries.txt      # `-o` stands for output format
+join -a 1 employees.txt salaries.txt    # `-a 1`: include unpairable lines from the first file.
+join -1 3 -2 1 employees.txt salariest.xt   # `-1 3`: use the third field from the first file as the join field. `-2 1` use the first field from the second file as the join field.
+```
 12. sort
-13. tr
+```bash
+sort -n -t: -k2 student_ages.txt    # `-n`: performs numeric sort, `-t`: specifies that fields are separated by colons, `-k2`: use the second field as the sorting key.
+sort -nr -t: -k2 student_grades.txt # `-r`: reverse the sort order
+sort -t: -k2n -k3nr student_records.txt     # `-k2n`: sorts based on second field numerically, `-k3nr` sorts based on the third field numerically in reverse order
+sort -u student_clubs.txt           # Removes duplicate lines after sorting.
+sort -f     # Ignore case when sorting
+sort -b     # Ignore leading blanks
+sort -c     # CHeck if the input is already sorted
+sort -o     # Write output to a file instead of standard output
+```
+13. tr 
+* Reads text from stdin, transforms it according to the specified options and character sets, and writes the result to stdout.
+* Can also delete specific characters from the input.
+* Can be used for simple encryption and decryption.
+```bash
+cat punctuated.txt | tr -d '[:punct:]'  # `-d': Deletes specified characters, `[:punct:]`: a character class that represents all punctuation characters.
+cat log_entry.txt | tr -cd '[:digit:]'  # Extracts numerical data from the mixed text.
+cat spaced.txt | tr -s ' '              # Command for dealing with poorly formatted data or need to normalize whitespace in a text file.
+```
+
 14. uniq
+```bash
+uniq sorted_purchases.txt unique_purchases.txt     
+uniq -c sorted_purchases.txt purchase_counts.txt    # `-c` is an option that tells `uniq` to prefix lines with the number of occurrences
+uniq -d sorted_purchases.txt repeat_customers.txt   # `-d` is an option that tells `uniq` to only print duplicate lines
+uniq -u     # Display only unique lines
+uniq -i     # Ignore case when comparing lines
+uniq -f N   # Skip the first N fields when comparing lines
+uniq -s N   # Skip the first N characters when comparing lines
+```
 15. wc and nl
+wc (Word Count)
+```bash
+wc -l requirements.txt      # Counts the number of lines in requirements.txt
+wc -w project_overview.md   # Counts the number of words in the document
+wc -m src/utils.py          # Count characters
+```
 16. grep - (Global Regular Expression Print)
 ```bash
 grep "/admin" access.log    # Searches for lines containing "/admin" in the access.log file
@@ -345,6 +388,13 @@ tail -n +50 file.log    # View the content of log file starting from the 50th li
 ```bash
 diff -u file1 file2     # unified format (most common)
 diff -y file1 file2     # side-by-side comparison
+diff -w script1 script2 # Ignores white space
+diff -r unique1.txt unique2.txt # Useful for comparing complex directory structures
+diff -y file1 file2     # Side-by-side comparison
+diff -i file1 file2     # Ignore case differences
+diff -b file1 file2     # Ignore changes in the amount of whitespace
+diff -B file1 file2     # Ignore changes whose lines are all blank
+diff -q file1 file2     # Report only when files differ, without showing the differences
 ```
 ---
 8. `cmp` - Compare files byte-by-byte (shows first difference only).
