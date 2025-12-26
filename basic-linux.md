@@ -1,6 +1,97 @@
 # Linux Command Reference
 A personal reference guide based on Labex
 
+## Table of Contents
+1. Command Line Basics
+2. Text Manipulation and Navigation
+3. Users and Groups
+4. Files and Directories
+5. File Contents and Comparing
+6. Permissions and Ownership
+7. Processes and Performance
+8. Packages
+
+## 1. Command Line Basics
+**Core commands (daily use)**
+|Command|Purpose|
+|---|---|
+|`pwd`|print current directory|
+|`cd`|change directory|
+|`ls`|list files/directories|
+|`touch`|create empty file / update timestamp|
+|`file`|show file type|
+|`cat`|display file content|
+|`less`|view file page-by-page|
+|`history`|show command history|
+|`cp`|copy|
+|`mv`|move/rename|
+|`mkdir`|create directories|
+|`rm`|delete files/directories|
+|`find`|search files/directories|
+|`help`|bash built-in help|
+|`man`|manual pages|
+|`whatis`|one-line description|
+|`alias`|create command shortcut|
+|`exit`|exit shell|
+
+## 2. Text Manipulation and Navigation
+### 2.1 Streams + Pipes
+* stdin (0): input stream
+* stdout (1): normal output
+* stderr (2): error output
+* pipe `|`: output of left -> input of right
+* tee: output to screen + file
+
+Example:
+```bash
+df -h | tee disk_usage.txt
+```
+
+### 2.2 `env` (environment variables)
+Shows environment variables (PATH, HOME, etc.)
+```bash
+env
+echo "$PATH"
+```
+
+### 2.3 `cut` (extact columns/characters)
+Use when data is structured (CSV, logs, delimiters).
+```bash
+cut -d '"' -f2 access.log       # delimiter = "
+cut -c 11-25 inventory.txt      # character positions
+cut -s -d',' -f2 file.csv       # suppress lines without delimiter
+```
+
+### 2.4 `head`/`tail`
+```bash
+head -n 20 file.txt
+tail -n 20 file.txt
+tail -f app.log                 # follow log updates
+tail -n +50 file.log            # start from line 50
+```
+
+### 2.5 `paste` (merge files side-by-side)
+```bash
+paste file1.txt file2.txt
+paste -d ',' file1.txt file2.txt    # customer delimiter
+```
+
+### 2.6 `expand`/`unexpand` (tab <-> spaces)
+```bash
+expand file.txt
+unexpand file.txt
+```
+
+### 2.7 `join` (merge two files by a key)
+**Important**: `join` expects BOTH files sorted on the join field.
+```bash
+join employees.txt salaries.txt
+
+join -i 1.2,1.3,2.2,1.1 employees.txt salaries.txt
+join -a 1 employees.txt salaries.txt                # include unpaired lines from file1
+join -1 3 -2 1 employees.txt salaries.txt           # join field: file1 col3, file2 col1
+```
+
 ## Command Line
 1. pwd
 2. cd
@@ -84,6 +175,7 @@ wc (Word Count)
 wc -l requirements.txt      # Counts the number of lines in requirements.txt
 wc -w project_overview.md   # Counts the number of words in the document
 wc -m src/utils.py          # Count characters
+wc -l < access.log > task1_output.txt   # To avoid showing the filename in output
 ```
 16. grep - (Global Regular Expression Print)
 ```bash
@@ -312,11 +404,19 @@ find -newer                     # Find files newer than a specified file
 du -sh .        # total size of current directory
 du -sh *        # size of each item in current directory
 du -h /var/log  # size of /var/log (human-readable)
+du -h --max-depth=0
 ```
 ---
 7. `df` - Display available disk space on filesystems
 ```bash
 df -h | grep "/dev/"
+df -i
+df -hT
+df -h /home
+df -h -x tmpfs
+df -h --total
+du -h | sort -hr
+find . -type f -size +1M -exec du -h {} + | sort -hr
 ```
 ---
 8. `stat` - Show detailed info about a file or directory
@@ -477,4 +577,56 @@ whereis -u  # Search for unusual entres (files that do not follow the usual nami
 whereis -B  # Change or restrict the places where `whereis` searches for binaries
 whereis -M  # Change or restrict the places where `whereis` searches for manual pages
 whereis -S  # Change or restrict the places where `whereis` searches for sources
+```
+5. `xargs` - To deal with large lists or when the target command can handle multiple arguments
+```bash
+cat ~/project/fruits.txt | xargs echo
+cat ~/project/books.txt | xargs -I {} touch ~/project/{}/txt 
+cat ~/project/books.txt | xargs -n 2 echo "Processing books:"
+cat ~/project/more_books.txt | xargs -P 3 -I {} ~/project/process_book.sh {}
+cat ~/project/classic_books.txt | xargs -n 2 -P 3 sh -c 'echo "Processing batch: $@"' _
+```
+6. `awk` - Splits each line into fields based on whitespace
+```bash
+awk '{print $3}' server_logs.txt | head -n 5
+awk '{print $3, $5}' server_logs.txt | head -n 5
+awk '$4 == "POST" {print $0}' server_logs.txt
+awk '$6 == "404" {print $1, $2, $5}' server_logs.txt
+awk '$4 == "POST" && $6 >= 400 {print $0}' server_logs.txt
+awk '{count[$6]++} END {for (code in count) print code, count[code]}' server_logs.txt | sort -n
+awk '{count[$5]++} END {for (resource in count) print count[resource], resource}' server_logs.txt | sort -rn | head -n 5
+awk '{count[$3]++} END {for (ip in count) print ip, count[ip]}' server_logs.txt
+awk '{key=$4"-"$6; count[key]++} END {for (k in count) print k, count[k]}' server_logs.txt
+```
+7. `top` - give a real-time, dynamic view of the system's processes
+M (Uppercase) - Sort the processes by memory usage
+P (Uppercase) - Sort by CPU usage
+N (Uppercase) - Sort by process ID (PID)
+R (Uppercase) - Reverse the current sort order
+q - Exit `top`
+```bash
+top -d 1
+top -u user
+top -i 
+```
+
+8. `free` - Give an overview of the system's memory usage
+```bash
+free -h
+free -m
+free -h -s 3 -c 5
+free -t
+free -b
+free -k 
+free -g
+free -w
+free -s
+free --si
+```
+
+9. `time` - Provides insights into the resources consumed during command execution
+```bash
+time echo {1..10000} | wc -w
+time find / -name "*.txt" 2> /dev/null
+time sort -R /etc/passwd | head -n 5
 ```
