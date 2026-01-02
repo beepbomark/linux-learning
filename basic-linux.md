@@ -92,6 +92,172 @@ join -a 1 employees.txt salaries.txt                # include unpaired lines fro
 join -1 3 -2 1 employees.txt salaries.txt           # join field: file1 col3, file2 col1
 ```
 
+### 2.9 `tr` (translate/delete/squeeze characters)
+Reads from stdin, outputs to stdout.
+```bash
+tr -d '[:punct:]' < punctuated.txt      # delete punctuation
+tr -cd '[:digit:]' < log_entry.txt       # keep only digits
+tr -s ' ' < spaced.txt                  # squeeze repeated spaces
+```
+
+### 2.10 `uniq` (deduplicate / count duplicates)
+**Important**: `uniq` works best after `sort` (needs duplicates adjacent).
+```bash
+uniq sorted_purchases.txt unique purchases.txt
+uniq -c sorted_purchases.txt purchase_counts.txt
+uniq -d sorted_purchases.txt repeat_customers.txt
+uniq -u                                             # only unique lines
+uniq -i                                             # ignore case
+uniq -f N                                           # skip N fields
+uniq -s N                                           # skip N chars
+```
+
+### 2.11 `wc` (word count) and `nl` (line numbering)
+`wc`:
+```bash
+wc -l requirements.txt
+wc -w project_overview.md
+wc -m src/utils.py
+wc -l < access.log > task1_output.txt       # number only (no filename)
+```
+`nl`:
+```bash
+nl -ba file.txt                             # number all lines incl blanks
+nl -n rz -w 3 file.txt                      # right aligned, Leading zeros, width 3
+nl -b p"ERROR" file.txt                     # number lines matching pattern
+nl -v 10 file.txt                           # start numbering at 10
+nl -i 2 file.txt                            # increment by 2
+nl -l 3 file.txt                            # group 3 lines, number first only
+```
+
+### 2.12 `grep` (search text)
+```bash
+grep "/admin" access.log
+grep -c "Error" logs/server.log
+grep -i "error" logs/server.log
+grep "database connection failed" logs/*
+grep -B 2 -A 2 "CRITICAL" logs/server.log
+grep -v "ERROR" logs/server.log
+```
+Common flags:
+```bash
+grep -n "pattern" file      # show line numbers
+grep -r "pattern" dir/      # recursive
+grep -l "pattern" *.log     # show filenames only
+grep -w "word" file         # whole word match
+grep -E "regex" file        # extended regex
+grep -F "literal" file      # fixed string (no regex)
+```
+
+### 2.13 Advanced
+
+## 3. Users and Groups
+**Key system files**
+* `/etc/passwd` user accounts
+* `/etc/shadow` password hashes (root only)
+* `/etc/group` groups
+
+**Useful commands**:
+|Command|What it shows/does|
+|---|---|
+|`whoami`|Prints the current effective username|
+|`id`|Shows user identify info: UID, GID, and groups|
+|`groups`|Lists the groups a user belongs to|
+|`who`|Shows who is logged in|
+|`w`|Shows logged-in users + what they're doing (process/activity summary)|
+|`last`|Shows login history (reads `/var/log/wtmp`)|
+|`users`|Prints usernames of currently logged-in users|
+|`cat /etc/passwd`|List local user accounts (one line per user)|
+|`cat /etc/group`|Lists local groups|
+|`useradd`|Creates a user|
+|`adduser`|Creates a user|
+|`usermod`|Modifies an existing user (groups, shell, home, etc)|
+|`userdel`|Deletes a user|
+|`groupadd`|Creates a new group|
+|`groupdel`|Deletes a group|
+|`groupmod`|Modifies a group (name, GID)|
+|`passwd`|Sets/changes a user password|
+|`chage`|Manages password aging/expiry|
+|`su`| Switch user|
+|`sudo -l`|Shows what commands you can run with sudo|
+
+## 4. Files and Directories
+4.1 `pwd` - print working directory, displays the full path of the directory you are currently in.
+```bash
+pwd -L      # show logical path (follows symbolic links)
+pwd -P      # show physical path (real directory on disk)
+```
+
+4.2 `ls` - list files and directories, used to view directory contents and check permissions, ownership, and sizes.
+```bash
+ls -l           # show detailed listing (permissions, owner, size, date)
+ls -h           # show file sizes in human-readable form
+ls -ld src/     # show info about the directory itself, not its contents
+ls -lh          # detailed listing with readable file sizes
+ls -la          # include hidden files (starting with .)
+```
+
+4.3 `tree` - display directory structure visually, shows folders and files in a tree-like structure, useful for understanding layouts.
+```bash
+tree -L 2       # show directory structure up to 2 levels deep
+tree -a         # include hidden files and directories
+tree -p         # show permissiosn for each file and directory
+```
+
+4.4 `cd` - change directory, moves between directories in the filesystem
+```bash
+cd ..           # move up one directory level
+cd ../..        # move up two directory levels
+cd ~            # go to home directory
+cd -            # return to previous directory
+cd /etc         # move to an absolute path
+cd "$HOME"      # explicitly go to home directory
+```
+
+4.5 `find` - search for files and directories
+```bash
+find . -name "*.txt"                        # find all .txt files in current directory tree
+find /var/log -type f                       # find regular files only
+find /home -type d                          # find directories only
+find . -size +10M                           # find files larger than 10MB
+find . -name "*.txt" -o -name "*.log"       # find .txt or .Log files
+find . -type f -size +1M                    # find files larger than 1MB
+find . -name "*.txt" -exec cat {} \;        # display contents of each matched file
+find . -user labex                          # find files owned by user labex
+find . -group dev                           # find files belonging to group dev
+find . -empty                               # find empty files or directories
+find . -newer reference.txt                 # find files newer than reference.txt
+find . -name "*.log" -delete                # delete matched files 
+```
+
+4.6 `du` / `df` - disk usage and disk space
+`du` - show disk usage of files and directories, used to check how much space directories or files are consuming
+```bash
+du -sh                      # total size of current directory
+du -sh *                    # size of each item in current directory
+du -h /var/log              # size of /var/log contents
+du -h --max-depth=0 .       # summary size only (no subdirectories)
+```
+`df` - show available disk space on filesystems, used to check free and used space on mounted file systems
+```bash
+df -h                       # show disk usage in human-readbable form
+df -i                       # show inode usage
+df -hT                      # show filesystem type
+df -h /home                 # show usage for /home filesystem
+df -h -x tmpfs              # exclude tmpfs filesystems
+df -h --total               # show total disk usage summary
+```
+
+
+
+## 5. File Contents and Comparing
+
+## 6. Permissions and Ownership
+
+## 7. Processes and Performance
+
+## 8. Packages (outline to expand later)
+
 ## Command Line
 1. pwd
 2. cd
@@ -421,9 +587,6 @@ find . -type f -size +1M -exec du -h {} + | sort -hr
 ---
 8. `stat` - Show detailed info about a file or directory
 ---
-
-```
-
 ## File Contents and Comparing
 1. `cat` - Display file contents or concatenate multiple files
 ```bash
