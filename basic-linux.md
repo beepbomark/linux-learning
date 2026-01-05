@@ -182,13 +182,13 @@ grep -F "literal" file      # fixed string (no regex)
 |`sudo -l`|Shows what commands you can run with sudo|
 
 ## 4. Files and Directories
-4.1 `pwd` - print working directory, displays the full path of the directory you are currently in.
+### 4.1 `pwd` - print working directory, displays the full path of the directory you are currently in.
 ```bash
 pwd -L      # show logical path (follows symbolic links)
 pwd -P      # show physical path (real directory on disk)
 ```
 
-4.2 `ls` - list files and directories, used to view directory contents and check permissions, ownership, and sizes.
+### 4.2 `ls` - list files and directories, used to view directory contents and check permissions, ownership, and sizes.
 ```bash
 ls -l           # show detailed listing (permissions, owner, size, date)
 ls -h           # show file sizes in human-readable form
@@ -197,14 +197,14 @@ ls -lh          # detailed listing with readable file sizes
 ls -la          # include hidden files (starting with .)
 ```
 
-4.3 `tree` - display directory structure visually, shows folders and files in a tree-like structure, useful for understanding layouts.
+### 4.3 `tree` - display directory structure visually, shows folders and files in a tree-like structure, useful for understanding layouts.
 ```bash
 tree -L 2       # show directory structure up to 2 levels deep
 tree -a         # include hidden files and directories
 tree -p         # show permissiosn for each file and directory
 ```
 
-4.4 `cd` - change directory, moves between directories in the filesystem
+### 4.4 `cd` - change directory, moves between directories in the filesystem
 ```bash
 cd ..           # move up one directory level
 cd ../..        # move up two directory levels
@@ -214,7 +214,7 @@ cd /etc         # move to an absolute path
 cd "$HOME"      # explicitly go to home directory
 ```
 
-4.5 `find` - search for files and directories
+### 4.5 `find` - search for files and directories
 ```bash
 find . -name "*.txt"                        # find all .txt files in current directory tree
 find /var/log -type f                       # find regular files only
@@ -230,7 +230,7 @@ find . -newer reference.txt                 # find files newer than reference.tx
 find . -name "*.log" -delete                # delete matched files 
 ```
 
-4.6 `du` / `df` - disk usage and disk space
+### 4.6 `du` / `df` - disk usage and disk space
 `du` - show disk usage of files and directories, used to check how much space directories or files are consuming
 ```bash
 du -sh                      # total size of current directory
@@ -248,13 +248,169 @@ df -h -x tmpfs              # exclude tmpfs filesystems
 df -h --total               # show total disk usage summary
 ```
 
-
-
 ## 5. File Contents and Comparing
+### 5.1 `cat` - display or combine file conents
+Used for quickly viewing files, numbering lines or combining multiple files into one.
+```bash
+cat -n file.txt                 # number all lines
+cat -E file.txt                 # show line endings with $
+cat -A file.txt                 # show non-printing characters
+cat -b file.txt                 # number non-blank lines
+cat -T file.txt                 # show TAB as ^I
+cat -v file.txt                 # show control chars
+cat file1 file2 > combined.txt  # merge file1 and file2 into a new file
+```
+
+### 5.2 `tac` - display file contents in reverse order
+Outputs the file starting from the last line to the first.
+```bash
+tac file.txt
+```
+
+### 5.3 `less` - view file page by page
+Used for viewing large files safely without loading everything into memory.
+```bash
+less -i file.txt                # ignore case when searching
+less -F file.txt                # auto-exit if file fits on one screen
+less -S file.txt                # disable line wrapping (horizontal scroll)
+less +F log.txt                 # follow file as it grows (log monitoring)
+```
+**Navigation shortcuts inside** `less`:
+* arrows / `j` `k` -> scroll line by line
+* `space` -> next page
+* `b` -> previous page
+* `/text` -> search
+* `g` -> beginning of file
+* `G` -> end of file
+* `q` -> quit
+
+### 5.4 `diff` - compare files or directories line by line
+Used to see differences between files or directory trees.
+```bash
+diff -u file1 file2             # unified format (most common and readable)
+diff -y file1 file2             # side-by-side comparison
+diff -w file1 file2             # ignore whitespace differences
+diff -r dir1 dir2               # compare directories recursively
+diff -i file1 file2             # ignore case differences
+diff -b file1 file2             # ignore changes in amount of whitespace
+diff -B file1 file2             # ignore blank lines
+diff -q file1 file2             # report only whether files differ
+```
+
+### 5.5 `cmp` - compare files byte by byte
+Used for low-level comparison; stops at the first difference.
+```bash
+cmp file1 file2                 # show first byte position where files differ
+```
+
+### 5.6 Checksums - verify file integrity
+Used to confirm files are identical or detect corruption.
+```bash
+md5sum file1 file2              # generate MD5 checksums
+sha256sum file1 file2           # generate SHA-256 checksums (more secure)
+```
+
+### 5.7 `more` - view file one screen at a time
+Older pager similar to `less`, but with fewer features
+```bash
+more file.txt                   # open file one screen at a time
+more +100 file.txt              # start viewing from line 100
+more -10 file.txt               # show 10 lines per screen
+more +/"2023-07-15" file.txt    # start at first match of pattern
+more -d file.txt                # show help prompts
+```
+**Comparison with `less`**:
+* `more` -> basic, forward-only
+* `less` -> advanced, bidirectional, preferred
 
 ## 6. Permissions and Ownership
+### 6.1 Linux Permission Model
+Linux controls access to files and directories using user, group, and others permissions.
+Example from `ls -l`:
+Example:
+```bash
+-rwxr-x---
+```
+Breakdown:
+|Part|Meaning|
+|---|---|
+|`-`/`d`|file (`-`) / directory (`d`)|
+|`rwx`|Owner (user) permissions|
+|`r-x`|Group permissions|
+|`---`|Others (everyone else) permissions|
+
+**Permission meanings**
+|Permission|Letter|Value|What it allows|
+|---|---|---|---|
+|Read|r|4|View file contents / list directory|
+|Write|w|2|Modify file / create-delete files in directory|
+|Execute|x|1|Run file / access directory|
+
+### 6.2 `chmod` - change file permissions
+Used to modify permissions for files and directories
+---
+**Numeric (octal) notation**
+
+Permissions are set using **three numbers**:
+`user | group | others`
+```bash
+chmod 755 script.sh        # user: rwx, group: r-x, others: r-x
+chmod 644 file.txt         # user: rw-, group: r--, others: r--
+chmod 700 secret.txt       # user: rwx, no access for others
+```
+|Mode|Meaning|
+|---|---|
+|`755`|executable programs or directories|
+|`644`|normal text files|
+|`700`|private files or scripts|
+---
+**Symbolic notation (alternative style)**
+
+More readable when changing specific permissions.
+```bash
+chmod u+x script.sh        # add execute permission for user
+chmod g+w shared.txt       # add write permission for group
+chmod o-r file.txt         # remove read permission from others
+chmod a+r file.txt         # add read permission for all
+```
 
 ## 7. Processes and Performance
+### 7.1 `top` - real time process monitoring
+Displays a live view of running processes and system resource usage.
+```bash
+top                           # open real-time process monitor
+top -d 1                      # refresh display every 1 second
+top -u user                   # show processes owned by a specific user
+top -i                        # hide idle processes
+```
+**Common interactive keys inside** `top`:
+* `P` -> sort processes by CPU usage
+* `M` -> sort processes by memory usage
+* `N` -> sort by process ID (PID)
+* `R` -> reverse the current sort order
+* `q` -> quit `top`
+
+### 7.2 `free` - display system memory usage
+Shows how much RAM and swap memory is used and available.
+
+```bash
+free -h
+free -m
+free -h -s 3 -c 5
+free -t
+free -b
+free -k
+free -g
+free -w
+free --si
+```
+
+### 7.3 `time`
+```bash
+time echo {1..10000} | wc -w
+time find / -name "*.txt" 2> /dev/null
+time sort -R /etc/passwd | head -n 5
+```
 
 ## 8. Packages (outline to expand later)
 
