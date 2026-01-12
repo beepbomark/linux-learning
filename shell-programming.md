@@ -309,3 +309,262 @@ else
   echo "The number is between 5 and 15, but not 10"
 fi
 ```
+
+### String Comparisons and Logical Operations
+```bash
+#!/bin/bash
+
+STRING1="hello"
+STRING2="world"
+NUMBER1=5
+NUMBER2=10
+
+if [ "$STRING1" = "hello" ] && [ "$STRING2" = "world" ]; then
+  echo "Both strings match"
+fi
+
+if [ $NUMBER1 -lt 10 ] || [ $NUMBER2 -gt 5 ]; then
+  echo "At least one of the number conditions is true"
+fi
+
+if [[ "$STRING1" != "$STRING2" ]]; then
+  echo "The strings are different"
+fi
+
+if [[ -z "$STRING3" ]]; then
+  echo "STRING3 is empty or not set"
+fi
+```
+
+## Loops
+```bash
+#!/bin/bash
+
+# Loop through an array of names
+echo "Looping through an array:"
+NAMES=("Alice" "Bob" "Charlie" "David")
+for name in "${NAMES[@]}"; do
+  echo "Hello, $name!"
+done
+
+echo # Print an empty line for readability
+
+# Loop through a range of numbers
+echo "Looping through a range of numbers:"
+for i in {1..5}; do
+  echo "Number: $i"
+done
+```
+### for loops
+```bash
+#!/bin/bash
+
+# Loop through an array of names
+echo "Looping through an array:"
+NAMES=("Alice" "Bob" "Charlie" "David")
+for name in "${NAMES[@]}"; do
+  echo "Hello, $name!"
+done
+
+echo # Print an empty line for readability
+
+# Loop through a range of numbers
+echo "Looping through a range of numbers:"
+for i in {1..5}; do
+  echo "Number: $i"
+done
+```
+
+### while loops
+```bash
+#!/bin/bash
+
+# Simple countdown using a while loop
+count=5
+echo "Countdown:"
+while [ $count -gt 0 ]; do
+  echo $count
+  count=$((count - 1))
+  sleep 1 # Wait for 1 second
+done
+echo "Blast off!"
+```
+
+### until loop
+```bash
+#!/bin/bash
+
+# Count up to 5 using an until loop
+count=1
+echo "Counting up to 5:"
+until [ $count -gt 5 ]; do
+  echo $count
+  count=$((count + 1))
+  sleep 1 # Wait for 1 second
+done
+```
+
+### break and continue statements
+```bash
+#!/bin/bash
+
+# Using break to exit a loop early
+echo "Demonstration of break:"
+for i in {1..10}; do
+  if [ $i -eq 6 ]; then
+    echo "Breaking the loop at $i"
+    break
+  fi
+  echo $i
+done
+
+echo # Print an empty line for readability
+
+# Using continue to skip iterations
+echo "Demonstration of continue (printing odd numbers):"
+for i in {1..10}; do
+  if [ $((i % 2)) -eq 0 ]; then
+    continue
+  fi
+  echo $i
+done
+```
+
+## Arrays
+```bash
+#!/bin/bash
+
+# Initialize the arrays
+a=(3 5 8 10 6)
+b=(6 5 4 12)
+c=(14 7 5 7)
+
+# Initialize an array to store common elements between a and b
+z=()
+
+# Compare arrays a and b
+for x in "${a[@]}"; do
+  for y in "${b[@]}"; do
+    if [ $x = $y ]; then
+      z+=($x)
+    fi
+  done
+done
+
+echo "Common elements between a and b: ${z[@]}"
+
+# Initialize an array to store common elements among a, b, and c
+j=()
+
+# Compare array c with the common elements found in z
+for i in "${c[@]}"; do
+  for k in "${z[@]}"; do
+    if [ $i = $k ]; then
+      j+=($i)
+    fi
+  done
+done
+
+echo "Common elements among a, b, and c: ${j[@]}"
+```
+
+## Shell Functions
+```bash
+#!/bin/bash
+
+# Function with a parameter
+greet() {
+  echo "Hello, $1!"
+}
+
+# Function with multiple parameters
+calculate() {
+  echo "The sum of $1 and $2 is $(($1 + $2))"
+}
+
+# Call functions with arguments
+greet "Alice"
+calculate 5 3
+```
+### Returb Values from Functions
+```bash
+#!/bin/bash
+
+# Function that echoes a result
+get_square() {
+  echo $(($1 * $1))
+}
+
+# Function that modifies a global variable
+RESULT=0
+set_global_result() {
+  RESULT=$(($1 * $1))
+}
+
+# Capture the echoed result
+square_of_5=$(get_square 5)
+echo "The square of 5 is $square_of_5"
+
+# Use the function to modify the global variable
+set_global_result 6
+echo "The square of 6 is $RESULT"
+```
+### Understanding Variable Scope
+```bash
+#!/bin/bash
+
+# Global variable
+GLOBAL_VAR="I'm global"
+
+# Function with a local variable
+demonstrate_scope() {
+  local LOCAL_VAR="I'm local"
+  echo "Inside function: GLOBAL_VAR = $GLOBAL_VAR"
+  echo "Inside function: LOCAL_VAR = $LOCAL_VAR"
+}
+
+# Call the function
+demonstrate_scope
+
+echo "Outside function: GLOBAL_VAR = $GLOBAL_VAR"
+echo "Outside function: LOCAL_VAR = $LOCAL_VAR"
+```
+
+### Advanced Function
+```bash
+#!/bin/bash
+
+ENGLISH_CALC() {
+  local num1=$1
+  local operation=$2
+  local num2=$3
+  local result
+
+  case $operation in
+    plus)
+      result=$((num1 + num2))
+      echo "$num1 + $num2 = $result"
+      ;;
+    minus)
+      result=$((num1 - num2))
+      echo "$num1 - $num2 = $result"
+      ;;
+    times)
+      result=$((num1 * num2))
+      echo "$num1 * $num2 = $result"
+      ;;
+    *)
+      echo "Invalid operation. Please use 'plus', 'minus', or 'times'."
+      return 1
+      ;;
+  esac
+}
+
+# Test the function
+ENGLISH_CALC 3 plus 5
+ENGLISH_CALC 5 minus 1
+ENGLISH_CALC 4 times 6
+ENGLISH_CALC 2 divide 2 # This should show an error message
+```
+
+## Special Variables in Shell
