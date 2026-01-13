@@ -162,6 +162,53 @@ grep -F "literal" file      # fixed string (no regex)
 ```
 
 ### 2.13 Advanced
+### 2.13.1 Command Pipelines
+```bash
+grep "ERROR" app.log | wc -l            # count number of ERROR lines in a log file
+cut -d: -f1 /etc/passwd | sort | uniq   # list unique usernames from /etc/passwd
+```
+
+### 2.13.2 Sorting + Deduplication Patterns
+```bash
+sort data.txt | uniq                    # remove duplicate lines
+sort data.txt | uniq -c | sort -nr      # count and rank repeated lines
+```
+
+### 2.13.3 Contextual Searches with grep
+```bash
+grep -n "ERROR" app.log                 # show errors with line numbers
+grep -B 2 -A 2 "CRITICAL" app.log       # show context around critical errors
+```
+
+### 2.13.4 Basic Regular Expressions
+```bash
+grep "^ERROR" app.log                   # match lines starting with ERROR
+grep "[0-9]\{3\}" access.log            # match three consecutive digits
+grep -E "(ERROR|WARN)" app.log          # match ERROR or WARN
+```
+
+### 2.13.5 Intro to awk
+```bash
+awk '{print $1, $3}' data.txt           # print selected fields
+awk '$3 > 100 {print $1, $3}' sales.txt # print lines where a condition is true
+```
+
+### 2.13.6 Examples
+```bash
+grep "POST" access.log | wc -l          # count POST requests
+cut -d' ' -f1 access.log | sort | uniq -c | sort -nr | head # find top IP addresses
+df -h | grep "/dev/"                    # show disk usage for real devices only
+```
+
+### 2.13.7 When to use which tool
+|Task|Best tool|
+|---|---|
+|Find lines|`grep`|
+|Extract columns|`cut`|
+|Reformat / condition|`awk`|
+|Sort data|`sort`|
+|Count duplicates|`sort`|
+
 
 ## 3. Users and Groups
 **Key system files**
@@ -497,4 +544,27 @@ tar -xf archive.tar                    # extract tar file into current directory
 tar -xzf file.tar.gz                   # extract .tar.gz (gzip)
 tar -xJf file.tar.xz                   # extract .tar.xz (xz)
 tar -czf backup.tar.gz folder/         # create .tar.gz from folder/
+```
+
+### 8.8 Building from source 
+Used when software isn't available as a package.
+Typical flow:
+```bash
+./configure                            # check system + generate Makefile
+make                                   # compile source code
+sudo make install                      # install compiled binaries
+```
+Modern projects may use:
+```bash
+cmake .                                # generate build files
+make
+sudo make install
+```
+
+### 8.9 Quick troubleshooting notes
+```bash
+sudo apt update && sudo apt install -f     # fix broken dependencies (APT)
+sudo apt autoremove                        # remove unused dependencies
+dpkg -l | grep package_name                # check installed (Debian/Ubuntu)
+rpm -qa | grep package_name                # check installed (RHEL/Fedora)
 ```
