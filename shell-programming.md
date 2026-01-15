@@ -1,6 +1,8 @@
 # Shell Scripting Notes
 Personal study notes
 
+
+
 ## Introduction
 * In Bash, we don't need to declare variables before using them. We simply assign a value to a variable name.
 * Variable names are case-sensitive. By convention, we often use uppercase for constants (values that won't change).
@@ -568,3 +570,135 @@ ENGLISH_CALC 2 divide 2 # This should show an error message
 ```
 
 ## Special Variables in Shell
+```bash
+#!/bin/bash
+
+echo "Script Name: $0"
+echo "First Argument: $1"
+echo "Second Argument: $2"
+echo "All Arguments: $@"
+echo "Number of Arguments: $#"
+echo "Process ID: $$"
+```
+
+### Understanding `$? and $!`
+```bash
+#!/bin/bash
+
+echo "Running a successful command:"
+ls /home
+echo "Exit status: $?"
+
+echo "Running a command that will fail:"
+ls /nonexistent_directory
+echo "Exit status: $?"
+
+echo "Running a background process:"
+sleep 2 &
+echo "Process ID of last background command: $!"
+```
+
+### Using Special Variables in Functions
+```bash
+#!/bin/bash
+
+function print_args {
+  echo "Function Name: $0"
+  echo "First Argument: $1"
+  echo "Second Argument: $2"
+  echo "All Arguments: $@"
+  echo "Number of Arguments: $#"
+}
+
+echo "Calling function with two arguments:"
+print_args hello world
+
+echo "Calling function with four arguments:"
+print_args one two three four
+```
+
+### Understanding the Difference Between $@ and $*
+```bash
+#!/bin/bash
+
+echo "Using \$@:"
+for arg in "$@"; do
+  echo "Argument: $arg"
+done
+
+echo "Using \$*:"
+for arg in "$*"; do
+  echo "Argument: $arg"
+done
+```
+
+## Bash `trap` command
+```bash
+#!/bin/bash
+
+cleanup_and_exit() {
+  echo -e "\nSignal received! Cleaning up and exiting..."
+  exit 0
+}
+
+trap cleanup_and_exit SIGINT SIGTERM
+
+echo "This script will run until you press Ctrl+C."
+echo "Press Ctrl+C to see the trap in action and exit gracefully."
+
+count=1
+while true; do
+  echo "Script is running... (iteration $count)"
+  sleep 1
+  ((count++))
+done
+```
+
+```bash
+#!/bin/bash
+
+cleanup_and_exit() {
+  echo -e "\nSignal received! Cleaning up..."
+  echo "Performing cleanup tasks..."
+  # Add any necessary cleanup code here
+  echo "Cleanup completed."
+  echo "Exiting script gracefully."
+  exit 0
+}
+
+trap cleanup_and_exit SIGINT SIGTERM
+
+echo "This script will run until you press Ctrl+C."
+echo "Press Ctrl+C to see the trap function in action and exit gracefully."
+
+count=1
+while true; do
+  echo "Script is running... (iteration $count)"
+  sleep 1
+  ((count++))
+done
+```
+
+## File System Operations in Shell
+```bash
+#!/bin/bash
+
+filename="test_file.txt"
+if [ -e "$filename" ]; then
+  echo "$filename exists"
+else
+  echo "$filename does not exist"
+fi
+```
+```bash
+#!/bin/bash
+
+filename="test_file.txt"
+if [ -r "$filename" ]; then
+  echo "You have read permission for $filename"
+else
+  echo "You do not have read permission for $filename"
+fi
+```
+
+## File System Explorer
