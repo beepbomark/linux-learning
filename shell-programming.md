@@ -1,114 +1,353 @@
 # Shell Scripting Notes
-Personal study notes
-
-
-
-## Introduction
-* In Bash, we don't need to declare variables before using them. We simply assign a value to a variable name.
-* Variable names are case-sensitive. By convention, we often use uppercase for constants (values that won't change).
-* There should be no spaces around the = sign when assigning values.
-* We don't need to specify a data type. Bash treats these as strings by default, but will handle them as numbers when we perform arithmetic operations.
-* `$(( ))` is Bash's syntax for arithmetic operations. Anything inside these double parentheses is treated as an arithmetic expression.
-
-## Working with Shell Variables
-### Create Shell Variables
+> Personal study notes for Bash shell scripting based on Labex.io.
+---
+## Table of Contents
+1. [Introduction to Bash](#1-introduction-to-bash)
+2. [Variables & Data Handling](#2-variables--data-handling)
+3. [Command Substitution & Arithmetic](#3-command-substitution--arithmetic)
+4. [Environment Variables](#4-environment-variables)
+5. [Script Arguments](#5-script-arguments)
+6. [Arrays](#6-arrays)
+7. [String Operations](#7-string-operations)
+8. [Conditionals & Tests](#8-conditionals--tests)
+9. [Loops](#9-loops)
+10. [Functions & Scope](#10-functions--scope)
+11. [Special Variables](#11-special-variables)
+12. [Signals & trap](#12-signals--trap)
+13. [File System Operations](#13-file-system-operations)
+14. [Best Practices & Style Guide](#14-best-practices--style-guide)
+---
+## 1. Introduction to Bash
+* Bash does not require variable declaration
+* Variables names are case-sensitive
+* No spaces around `=` during assignment
+* All variables are treated as **strings** by default
+* Arithmetic is done using `$(( ))`
 ```bash
-#!/bin/bash
-
+PRICE_PER_APPLE=5
+greeting="Hello world"
+```
+---
+## 2. Variables & Data Handling
+> In Bash, variables are untyped, string-based by default, and globally scoped unless specified otherwise. Correct handling of variables is critical to avoid subtle bugs.
+---
+### 2.1 Create Shell Variables
+```bash
 PRICE_PER_APPLE=5
 MyFirstLetters=ABC
 greeting='Hello        world!'
-
-echo "Price per apple: $PRICE_PER_APPLE"
-echo "My first letters: $MyFirstLetters"
-echo "Greeting: $greeting"
 ```
-### Referencing Shell Variables
+**Key Rules**: 
+* No spaces around `=`
+* Variable names cannot start with a number
+* Use letters, numbers, underscores
+* Suggested Convention:
+  * `UPPERCASE` -> constants / environment variables
+  * `lowercase` -> script variables
 ```bash
-# Escaping special characters
-echo "The price of an Apple today is: \$HK $PRICE_PER_APPLE"
+# Valid
+my_var=10
+MY_CONSTANT=100
 
-# Avoiding ambiguity
+# Invalid
+2var=10
+my var = 10
+```
+---
+### 2.2 Referencing Variables
+```bash
+echo "The price of an Apple today is: \$SGD $PRICE_PER_APPLE"
 echo "The first 10 letters in the alphabet are: ${MyFirstLetters}DEFGHIJ"
-
-# Preserving whitespace
-echo $greeting
 echo "$greeting"
 ```
-### Command Substitution
+**Why this matters**:
+|Pattern|Reason
+|---|---|
+|`$PRICE_PER_APPLE`|Basic expansion|
+|`${MyFirstLetters}`|Prevents ambiguity|
+|`"$greeting"`|Preserves whitespace|
 ```bash
-# Command substitution
-CURRENT_DATE=$(date +"%Y-%m-%d")
-echo "Today's date is: $CURRENT_DATE"
+echo $greeting    # Bug-prone
+echo "$greeting"  # Safer
+```
+---
+### 2.3 Variable Expansion & Braces `{}`
+Use braces when:
+* Appending text
+* Using parameter expansion
+* Avoiding name collisions
+```bash
+file="log"
+echo "$file.txt"    # Looks for variable named file.txt
+echo "${file}.txt"  # correct
+```
+---
+### 2.4 Quoting Rules
+|Form|Effect|When to Use|
+|---|---|---|
+|`$var`|Word splitting & globbing|Rarely|
+|`"$var"`|Preserves spaces|Almost always|
+|`'text'|Literal string|Fixed strings|
+```bash
+name="John Doe"
 
-FILES_IN_DIR=$(ls)
-echo "Files in the current directory:"
-echo "$FILES_IN_DIR"
-
+echo $name    # becomes two arguments
+echo "$name"  # correct
+```
+---
+### 2.5 Escaping Characters
+```bash
+echo "Cost: \$100"
+echo "Path: C:\\Users\\Admin"
+echo "She said: \"Hello\""
+```
+Common escaped characters:
+* `\$` -> dollar sign
+* `\"` -> double quote
+* `\\` -> backslash
+* `\n` -> newline (with `echo -e`)
+---
+### 2.6 Command Substitution into Variables
+```bash
+TODAY=$(date +"%Y-%m-%d")
+FILES=$(ls)
 UPTIME=$(uptime -p)
-echo "System uptime: $UPTIME"
+
+VAR=$(command)    # Best practice
+VAR=`command`     # Avoid
 ```
-### Arithmetic Operations
+---
+### 2.7 Read User Input into Variables
 ```bash
-#!/bin/bash
-
-X=10
-Y=5
-
-# Addition
-SUM=$((X + Y))
-echo "Sum of $X and $Y is: $SUM"
-
-# Subtraction
-DIFF=$((X - Y))
-echo "Difference between $X and $Y is: $DIFF"
-
-# Multiplication
-PRODUCT=$((X * Y))
-echo "Product of $X and $Y is: $PRODUCT"
-
-# Division
-QUOTIENT=$((X / Y))
-echo "Quotient of $X divided by $Y is: $QUOTIENT"
-
-# Modulus (remainder)
-REMAINDER=$((X % Y))
-echo "Remainder of $X divided by $Y is: $REMAINDER"
-
-# Increment
-X=$((X + 1))
-echo "After incrementing, X is now: $X"
-
-# Decrement
-Y=$((Y - 1))
-echo "After decrementing, Y is now: $Y"
+read -p "Enter your name: " name
+echo "Hello, $name"
 ```
-### Environment Variables
+With silent input (passwords):
 ```bash
-#!/bin/bash
+read -s -p "Password: " password
+echo
+```
+### 2.8 Default Values (Defensive Scripting)
+```bash
+echo "${VAR:-default_value}"
+```
+Example:
+```bash
+echo "${USERNAME:-guest}"
+```
+If unset -> prints `guest`
+---
+### 2.9 Assigning Default Values
+```bash
+: "${PORT:=8080}"
+echo "Using port $PORT"
+```
+Sets `PORT=8080` **only if unset**
+---
+### 2.10 Unsetting Variables
+```bash
+unset PRICE_PER_APPLE
+```
+Check if unset:
+```bash
+if [ -z "${PRICE_PER_APPLE+x}" ]; then
+  echo "PRICE_PER_APPLE is unset"
+fi
+```
+---
+### 2.11 Variable Scope (Preview)
+```bash
+my_func() {
+  local x=10
+  echo "Inside: $x"
+}
 
-# Displaying some common environment variables
-echo "Home directory: $HOME"
-echo "Current user: $LOGNAME"
-echo "Shell being used: $SHELL"
-echo "Current PATH: $PATH"
+my_func
+echo "Outside: $x"   # empty
+```
+* `local` limits scope to function
+* Without `local`, variables leak globally
+---
+### 2.12 Common Mistakes
+* Forgetting quotes
+* Using `$var` instead of `"$var"`
+* Assuming numbers are numeric
+* Overwriting environment variables accidentally
+---
+## 3. Command Substitution & Arithmetic
+This section covers:
+* Capturing command output into variables
+* Performing integer arithmetic safely
+* Common pitfalls and best practices
+---
+### 3.1 Command Substitution
+Command substitution allows running a command and storing it's output inside a variable.
+**Syntax**
+```bash
+current_date=$(date +"%Y-%m-%d")
+echo "Today's date is: ${current_date}"
 
-# Creating a new environment variable
+files_in_dir=$(ls)
+echo "Files in the current directory:"
+echo "${files_in_dir}"
+
+uptime_info=$(uptime -p)
+echo "System uptime: ${uptime_info}"
+```
+**Key Points**:
+* Always quote variables containing command output
+* Use `lowercase` for mutable, script-local variables
+---
+### 3.2 Arithmetic Operations
+```bash
+x=10
+y=5
+
+sum=$((x + y))
+diff=$((x - y))
+product=$((x * y))
+quotient=$((x / y))
+remainder=$((x % y))
+
+echo "Sum of ${x} and ${y} is: ${sum}"
+echo "Difference between ${x} and ${y} is: ${diff}"
+echo "Product of ${x} and ${y} is: ${product}"
+echo "Quotient of ${x} divided by ${y} is: ${quotient}"
+echo "Remainder of ${x} divided by ${y} is: ${remainder}"
+```
+**Notes**:
+* Variables inside `$(( ))` do **not** need `$`
+* Arithmetic expansion returns an integer
+---
+### 3.3 Increment and Decrement
+```bash
+x=$((x + 1))
+y=$((y - 1))
+
+((x++))       
+((y--))
+((x += 5))
+```
+---
+### 3.4 Arithmetic in Conditions
+Use `(( ))` for numeric comparisons instead of `[ ]`.
+```bash
+if (( x > y )); then
+  echo "x is greater than y"
+fi
+```
+---
+### 3.5 Arithmetic with User Input
+```bash
+read -p "Enter first number: " a
+read -p "Enter second number: " b
+
+result=$((a + b))
+echo "Result: ${result}"
+```
+Bash does **no type checking** - input must be numeric.
+---
+### 3.6 Integer Division Limitation
+```bash
+echo $((5 / 2))   # Outputs: 2, Bash truncates decimals
+
+# Floating-point math, use `bc`:
+result=$(echo "scale=2; 5 / 2" | bc)
+echo "${result}"
+```
+---
+### 3.7 Combining Command Substitution & Arithmetic
+A very common real-world pattern:
+```bash
+file_count=$(ls | wc -l)
+total_items=$((file_count * 2))
+
+echo "Computed value: ${total_items}"
+```
+### 3.8 Common Mistakes
+* Using uppercase for mutable variables
+* Forgetting to quote command substitution
+* Expecting floating-point arithmetic
+* Confusing `$(command)` with `${variable}`
+---
+### 3.9 Summary
+|Feature|Syntax|
+|---|---|
+|Command substitution|`$(command)`|
+|Arithmetic expansion|`$((expression))`|
+|Numeric condition|`(( expression ))`|
+|Floating-point math|`bc`|
+---
+## 4. Environment Variables
+Environment variables are variables that are **available to the shell and all child processes** spawned from it. They are commonly used to configure system behaviour, applications, and scripts.
+---
+### 4.1 What Are Environment Variables?
+* Stored in the process environment
+* Inherited by child processes
+* Conventionally written in **UPPERCASE**
+* Often used for configuration, not logic
+Examples:
+* `HOME`
+* `PATH`
+* `USER`
+* `SHELL`
+---
+### 4.2 Viewing Environment Variables
+```bash
+# Display selected environment variables
+echo "Home directory: ${HOME}"
+echo "Current user: ${LOGNAME}"
+echo "Shell being used: ${SHELL}"
+echo "Current PATH: ${PATH}"
+```
+List all environment variables
+```bash
+env
+```
+Or:
+```bash
+printenv
+```
+---
+### 4.3 Creating Environment Variables
+To make a variable available to child processes, it must be **exported**.
+```bash
 export MY_VARIABLE="Hello from my variable"
 
-# Displaying the new variable
-echo "My new variable: $MY_VARIABLE"
-
-# Creating a child process to demonstrate variable scope
-bash -c 'echo "MY_VARIABLE in child process: $MY_VARIABLE"'
-
-# Removing the environment variable
-unset MY_VARIABLE
-
-# Verifying the variable is unset
-echo "MY_VARIABLE after unsetting: $MY_VARIABLE"
+echo "MY_VARIABLE: ${MY_VARIABLE}"
 ```
-## Arguments in a script
+Behind the scenes:
+```bash
+MY_VARIABLE="Hello"
+export MY_VARIABLE
+```
+---
+### 4.4 Environment Variables and Child Processes
+```bash
+export MY_VARIABLE="Visible to children"
+
+bash -c 'echo "MY_VARIABLE in child process: ${MY_VARIABLE}"'
+```
+Key rule:
+> Child processes inherit environment variables, but **cannot modify the parent environment**.
+---
+### 4.5 Local vs Environment Variables
+
+## 5. Script Arguments
+## 6. Arrays
+## 7. String Operations
+## 8. Conditionals & Tests
+## 9. Loops
+## 10. Functions & Scope
+## 11. Special Variables
+## 12. Signals & Trap
+## 13. File System Operations
+## 14. Best Practices & Style Guide
+
+
+
+
+### 5. Script Arguments
 ```bash
 echo "Script name: $0"
 echo "First argument: $1"
@@ -147,7 +386,7 @@ for arg in "$@"; do
 done
 ```
 
-## Shell Arrays
+### 6. Arrays
 ```bash
 #!/bin/bash
 
@@ -200,7 +439,7 @@ TOTAL=$((COST_PINEAPPLE + (COST_BANANA * 2) + (COST_WATERMELON * 3) + COST_BASKE
 echo "Total Cost is $TOTAL cents"
 ```
 
-## Basic String Operations
+### 7. String Operations
 ### Quick Reference Guide
 |Operation|Syntax|Description|Example|
 |---|---|---|---|
