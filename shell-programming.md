@@ -332,10 +332,306 @@ Key rule:
 > Child processes inherit environment variables, but **cannot modify the parent environment**.
 ---
 ### 4.5 Local vs Environment Variables
+```bash
+local_var="I am local"
+export env_var="I am exported"
+```
+Output:
+* `local_var` -> empty
+* `env_var` -> visible
+---
+### 4.6 Temporarily Setting Environment Variables
+Set for a single commmand only:
+```bash
+MY_VAR=123 command
+```
+Example:
+```bash
+PATH="/custom/bin:${PATH}" my_script.sh
+```
+---
+### 4.7 Unsetting Environment Variables
+```bash
+unset MY_VARIABLE
 
+echo "MY_VARIABLE after unsetting: ${MY_VARIABLE}"
+```
+Check if unset:
+```bash
+if [ -z "{MY_VARIABLE+x}" ]; then
+  echo "MY_VARIABLE is unset"
+fi
+```
+---
+### 4.8 Common and Important Environment Variables
+|Variable|Purpose|
+|---|---|
+|`HOME`|User home directory|
+|`PATH`|Command search path|
+|`USER` / `LOGNAME`|Current user|
+|`PWD`|Current directory|
+|`SHELL`|Default shell|
+|`LANG`|Locale settings|
+---
+### 4.9 Modifying `PATH` Safely
+```bash
+PATH="/custom/bin"            # Dangerous
+PATH="/custom/bin:${PATH}"    # Always append or prepend - never overwrite unintentionally
+```
+---
+### 4.10 Environment Variables in Scripts
+* Use UPPERCASE names
+* Avoid generic names (`TEMP`, `DATA`)
+* Document required variables
+* Provide defaults where possible
+```bash
+: "${APP_ENV:=development}"
+echo "Running in ${APP_ENV} mode"
+```
+---
+### 4.11 Common Mistakes
+* Forgetting to export variables
+* Overwriting `PATH`
+* Using environment variables for script-only logic
+* Assuming child processes can update parent variables
+---
+### 4.12 Summary
+|Task|Command|
+|View variables|`env`,`printenv`|
+|Export variable|`export VAR=value`|
+|Unset variable|`unset VAR`|
+|Temporary env|`VAR=value command`|
+---
 ## 5. Script Arguments
+Script arguments allow you to **pass data into a script at runtime**, making scripts reusable and configurable without editing the code.
+---
+### 5.1 What are Script Arguments?
+Arguments are values passed after the script name:
+```bash
+./myscript.sh arg1 arg2 arg3
+```
+Inside the script:
+```bash
+echo "Script name: ${0}"
+echo "First argument: ${1}"
+echo "Second argument: ${2}"
+echo "Third argument: ${3}"
+```
+---
+### 5.2 Special Argument Variables
+|Variable|Meaning|
+|---|---|
+|`$0`|Script name|
+|`$1`-`$9`|Positional arguments|
+|`${10}`|Argument 10 and above|
+|`$#`|Number of arguments|
+|`$@`|All arguments (individually)|
+|`$*`|All arguments (single string)|
+---
+### 5.3 Handling the Number of Arguments
+Always validate argument count before using them.
+```bash
+if (( $# == 0 )); then
+  echo "No arguments provided."
+elif (( $# == 1 )); then
+  echo "One argument provided: ${1}"
+elif (( $# == 2 )); then
+  echo "Two arguments provided: ${1} and ${2}"
+else
+  echo "More than two arguments provided."
+  echo "Total arguments: ${#}"
+fi
+```
+---
+### 5.4 Looping Through Arguments
+Use `"$@"` to preserve each argument as a separate value.
+```bash
+echo "Total number of arguments: ${#}"
+
+
+count=1
+for arg in "$@"; do
+  echo "Argument ${count}: ${arg}"
+  ((count++))
+done
+```
+---
+### 5.5 Difference Between `$@` and `$*`
+```bash
+for arg in "$@"; do
+  echo "[$arg]"
+done
+
+
+for arg in "$*"; do
+  echo "[$arg]"
+done
+```
+|Variable|Behaviour|
+|---|---|
+|`"$@"`|Each argument preserved|
+|`"$*"`|All arguments as one string|
+---
+### 5.6 Shifting Arguments with `shift`
+`shift` moves positional parameters to the left.
+```bash
+while (( $# > 0 )); do
+  echo "Processing: ${1}"
+  shift
+done
+```
+---
+### 5.7 Validating Arguments
+Example: ensure at least one argument is provided
+```bash
+if (( $# < 1 )); then
+  echo "Usage: $0 <filename>"
+  exit 1
+fi
+```
+---
+### 5.8 Common Mistakes
+* Forgetting to quote `$@`
+* Accessing `$10` without braces
+* Not validating argument count
+* Confusing arguments with environment variables
+---
+### 5.10 Summary
+|Task|Syntax|
+|---|---|
+|Access argument|`${1}`|
+|Argument count|`$#`|
+|Loop arguments|`"$@"`|
+|Shift arguments|`shift`|
+---
 ## 6. Arrays
+Arrays allow you to store **multiple values under a single variable name**. Bash supports **indexed arrays**.\
+Arrays are zero-indexed and are especially useful when working with:
+* Script arguments
+* Lists of files
+* Command output
+* Iterative processing
+---
+### 6.1 Creating Arrays
+```bash
+numbers=(1 2 3)
+strings=("hello" "world")
+names=("John" "Eric" "Jessica")
+
+numbers=()      # Create empty arrays
+```
+---
+### 6.2 Adding Elements to Arrays
+```bash
+numbers+=(4)
+names+=("Alice")
+
+names[5]="Bob"      # Assign by index
+```
+---
+### 6.3 Accessing Array Elements
+```bash
+first_name=${names[0]}
+second_name=${names[1]}
+```
+Always quote expansions:
+```bash
+echo "${names[1]}"
+```
+---
+### 6.4 Getting Array Length
+```bash
+number_of_names=${#names[@]}
+echo "Total names: ${number_of_names}"
+```
+---
+### 6.5 Printing Arrays
+```bash
+echo "All names: ${names[@]}"
+
+# Preserving each element
+for name in "${names[@]}"; do
+  echo "Name: ${name}"
+done
+
+# Avoid:
+echo ${name[@]}
+```
+---
+### 6.6 Array Indexes
+```bash
+indexes=${!names[@]}
+echo "Indexes: ${indexes}"
+
+# Iterating with indexes:
+for i in "${!names[@]}"; do
+  echo "Index ${i}: ${names[$i]}"
+done
+```
+---
+### 6.7 Removing Elements
+```bash
+unset names[1]
+```
+This removes the element but does not reindex the array.
+---
+### 6.8 Arrays and Script Arguments
+All script arguments are automatically stored as an array:
+```bash
+args=("$@")
+
+for arg in "${args[@]}"; do
+  echo "Argument: ${arg}"
+done
+```
+---
+### 6.9 Arrays from Command Output
+```bash
+files=( $(ls) ) # Breaks on filenames with spaces.
+
+# Safer:
+mapfile -t files < <(ls)
+```
+---
+### 6.10 Associative Arrays
+Associative arrays use **key-value pairs**
+```bash
+declare -A colors
+
+colors[apple]="red"
+colors[banana]="yellow"
+colors[grape]="purple"
+
+# Access:
+echo "Apple color: ${colors[apple]}"
+
+# Iterate:
+for key in "${!colors[@]}"; do
+  echo "${key} -> ${colors[$key]}"
+done
+```
+---
+### 6.11 Common Mistakes
+* Forgetting quotes when expanding arrays
+* Assuming arrays are contiguous
+* Using `ls` unsafely
+* Treating arrays like strings
+---
+### 6.12 Summary
+|Task|Syntax|
+|---|---|
+|Create array|`arr=(a b c)`|
+|Add element|`arr+=(x)`|
+|Access elements|`${arr[i]}`|
+|Length|`${#arr[@]}`|
+|All elements|`"${arr[@]}"`|
+|Remove element|`unset arr[i]`|
+---
 ## 7. String Operations
+Strings are one of the most common data types in Bash. Although Bash treats variables as strings by default, it provides powerful built-in parameter expansion for string manipulation without calling external commands.
+---
+### 7.1 Quick Reference Guide
+
 ## 8. Conditionals & Tests
 ## 9. Loops
 ## 10. Functions & Scope
@@ -344,102 +640,7 @@ Key rule:
 ## 13. File System Operations
 ## 14. Best Practices & Style Guide
 
-
-
-
-### 5. Script Arguments
-```bash
-echo "Script name: $0"
-echo "First argument: $1"
-echo "Second argument: $2"
-echo "Third argument: $3"
-```
-### Handling the number of arguments
-```bash
-#!/bin/bash
-
-if [ $# -eq 0 ]; then
-  echo "No arguments provided."
-elif [ $# -eq 1 ]; then
-  echo "One argument provided: $1"
-elif [ $# -eq 2 ]; then
-  echo "Two arguments provided: $1 and $2"
-else
-  echo "More than two arguments provided:"
-  echo "First argument: $1"
-  echo "Second argument: $2"
-  echo "Third argument: $3"
-  echo "Total number of arguments: $#"
-fi
-```
-### Loop through all arguments
-```bash
-#!/bin/bash
-
-echo "Total number of arguments: $#"
-echo "All arguments:"
-
-count=1
-for arg in "$@"; do
-  echo "Argument $count: $arg"
-  count=$((count + 1))
-done
-```
-
-### 6. Arrays
-```bash
-#!/bin/bash
-
-# Initialize empty arrays
-NUMBERS=()
-STRINGS=()
-NAMES=()
-
-# Add elements to NUMBERS array
-NUMBERS+=(1)
-NUMBERS+=(2)
-NUMBERS+=(3)
-
-# Add elements to STRINGS array
-STRINGS+=("hello")
-STRINGS+=("world")
-
-# Add elements to NAMES array
-NAMES+=("John")
-NAMES+=("Eric")
-NAMES+=("Jessica")
-
-# Get the number of elements in the NAMES array
-NumberOfNames=${#NAMES[@]}
-
-# Access the second name in the NAMES array
-second_name=${NAMES[1]}
-
-# Print the arrays and variables
-echo "NUMBERS array: ${NUMBERS[@]}"
-echo "STRINGS array: ${STRINGS[@]}"
-echo "The number of names listed in the NAMES array: $NumberOfNames"
-echo "The second name on the NAMES list is: $second_name"
-```
-
-## Arithmetic Operations
-```bash
-#!/bin/bash
-
-# Define costs
-COST_PINEAPPLE=50
-COST_BANANA=4
-COST_WATERMELON=23
-COST_BASKET=1
-
-# Calculate total cost
-TOTAL=$((COST_PINEAPPLE + (COST_BANANA * 2) + (COST_WATERMELON * 3) + COST_BASKET))
-
-# Display the total cost
-echo "Total Cost is $TOTAL cents"
-```
-
-### 7. String Operations
+## 7. String Operations
 ### Quick Reference Guide
 |Operation|Syntax|Description|Example|
 |---|---|---|---|
