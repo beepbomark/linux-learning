@@ -631,7 +631,13 @@ done
 Strings are one of the most common data types in Bash. Although Bash treats variables as strings by default, it provides powerful built-in parameter expansion for string manipulation without calling external commands.
 ---
 ### 7.1 Quick Reference Guide
-
+|Operation|Syntax|Description|Example|
+|---|---|---|---|
+|String length|`${#string}`|Number of characters|`${#"hello"}` -> `5`|
+|Character position|`expr index "$string" "$char"`|1-indexed position|`expr index "abcdef" "c"` -> `3`|
+|Substring|`${string:start:length}`|Extract substring (0-indexed)|`${string:1:3}` -> `ell`|
+|Replace first|`${string/pat/repl}`|Replace first match|`${string/o/O}`|
+|
 ## 8. Conditionals & Tests
 ## 9. Loops
 ## 10. Functions & Scope
