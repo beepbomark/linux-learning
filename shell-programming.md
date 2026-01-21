@@ -637,383 +637,541 @@ Strings are one of the most common data types in Bash. Although Bash treats vari
 |Character position|`expr index "$string" "$char"`|1-indexed position|`expr index "abcdef" "c"` -> `3`|
 |Substring|`${string:start:length}`|Extract substring (0-indexed)|`${string:1:3}` -> `ell`|
 |Replace first|`${string/pat/repl}`|Replace first match|`${string/o/O}`|
-|
+|Replace all|`${string//pat/reply}`|Replace all matches|`${string//o/O}`|
+|Replace prefix|`${string/#pat/reply}`|Replace if at start|`${string/#he/HE}`|
+|Replace suffix|`${string/%pat/reply}`|Replace if at end|`${string/%lo/LO}`|
+---
+### 7.2 String Length
+```bash
+string="Hello, World!"
+length=${#string}
+
+echo "String: ${string}"
+echo "Length: ${length}"
+```
+Common use cases:
+* Validation (empty / non-empty)
+* Truncation logic
+* Input checks
+---
+### 7.3 Checking for Empty or Non-Empty Strings
+```bash
+if [[ -z "${string}" ]]; then
+  echo "String is empty"
+fi
+
+if [[ -n "${string}" ]]; then
+  echo "String is not empty"
+fi
+```
+---
+### 7.4 Finding Character Position
+```bash
+string="abcdefghijklmnopqrstuvwxyz"
+char="j"
+
+position=$(expr index "${string}" "${char}")
+
+echo "Character '${char}' position: ${position}"
+```
+---
+### 7.5 Substring Extraction
+```bash
+string="The quick brown fox jumps over the lazy dog"
+start=10
+length=5
+
+substring=${string:${start}:${length}}
+
+echo "Substring: ${substring}"
+```
+Useful for:
+* Parsing filenames
+* Fixed-width data
+* IDs and codes
+---
+### 7.6 String Replacement
+```bash
+string="The quick brown fox jumps over the lazy dog"
+
+first_replace=${string/o/O}
+all_replace=${string//o/O}
+prefix_replace=${string/#The quick/The slow}
+suffix_replace=${string/%dog/cat}
+
+echo "First replace: ${first_replace}"
+echo "All replace: ${all_replace}"
+echo "Prefix replace: ${prefix_replace}"
+echo "Suffix replace: ${suffix_replace}"
+```
+---
+### 7.7 Removing Prefixes and Suffixes
+```bash
+file="archive.tar.gz"
+
+echo "Remove shortest suffix: ${file%.*}"     # archive.tar
+echo "Remove longest suffix: ${file%%.*}"     # archive
+
+echo "Remove shortest prefix: ${file#*.}"     # tar.gz
+echo "Remove longest prefix: ${file##*.}"     # gz
+```
+---
+### 7.8 Case Conversion
+```bash
+name="John Doe"
+
+echo "Uppercase: ${name^^}"
+echo "Lowercase: ${name,,}"
+```
+---
+### 7.9 String Comparison
+```bash
+if [[ "${a}" == "${b}" ]]; then
+  echo "Strings are equal"
+fi
+
+if [[ "${a}" != "${b}" ]]; then
+  echo "Strings are different"
+fi
+```
+---
+### 7.10 Strings vs External Commands
+
+```bash
+${string// /_}                    # Prefer built-ins:
+echo "${string}" | sed 's/ / _/g' # Avoid when possible
+```
+---
+### 7.11 Common Mistakes
+* Forgetting to quote strings
+* Using `expr` unnecessarily
+* Confusing glob patterns with regex
+* Calling `sed` or `awk` when expansion is enough
+---
+### 7.12 Summary
+|Task|Recommended Method|
+|---|---|
+|Length|`${#string}`|
+|Substring|`${string:start:length}`|
+|Replace|Parameter expansion|
+|Compare|`[[ string1 == string2 ]]|
+|Filename parsing|`%`,`%%`,`#`,`##`|
+---
 ## 8. Conditionals & Tests
-## 9. Loops
-## 10. Functions & Scope
-## 11. Special Variables
-## 12. Signals & Trap
-## 13. File System Operations
-## 14. Best Practices & Style Guide
-
-## 7. String Operations
-### Quick Reference Guide
-|Operation|Syntax|Description|Example|
-|---|---|---|---|
-|String Length|`${#string}|Calculates the number of characters in a string|${#"hello"} returns 5|
-|Find Character Position|$(expr index "$string" "$char")|Finds the position of a character in a string (1-indexed)|$(expr index "abcdef" "c") returns 3|
-|Extract Substring|${string:start:length}|Extracts a portion of a string (0-indexed)|${"hello":1:3} returns ello|
-|Replace First Occurrence|${string/pattern/replacement}|Replaces the first occurrence of a pattern|${"Hello"/l/L} returns heLlo|
-|Replace All Occurrences|${string//pattern/replacement}|Replaces all occurrences of a pattern|${"hello"/#he/HE} returns heLLo|
-|Replace at Beginning|${string/#pattern/replacement}|Replaces pattern only if at beginning of string|${"hello"/#he/HE} returns Hello|
-|Replace at End|${string/%pattern/replacement}|Replaces pattern only if at end of string|${"hello"/%lo/LO} returns helLO|
-
-### String Length
+Conditionals allows your script to make decisions. In Bash, conditions are built on test expressions.\
+Common three forms:
+* `[ ... ]` (POSIX test) - portable but easier to misuse
+* `[[ ... ]]` (Bash test) - recommended for strings and patterns
+* `(( ... ))` (Arithmetic test) - recommended for numeric comparisons
+---
+### 8.1 `if / elif / else`
 ```bash
-#!/bin/bash
+name="George"
 
-echo "Step 2: String Length"
-
-STRING="Hello, World!"
-LENGTH=${#STRING}
-
-echo "The string is: $STRING"
-echo "Its length is: $LENGTH"
-```
-
-### Finding Character Position
-```bash
-echo -e "\nStep 3: Finding Character Position"
-
-STRING="abcdefghijklmnopqrstuvwxyz"
-CHAR="j"
-
-POSITION=$(expr index "$STRING" "$CHAR")
-
-echo "The string is: $STRING"
-echo "We're looking for the character: $CHAR"
-echo "It is at position: $POSITION"
-```
-### Substring Extraction
-```bash
-echo -e "\nStep 4: Substring Extraction"
-
-STRING="The quick brown fox jumps over the lazy dog"
-START=10
-LENGTH=5
-
-SUBSTRING=${STRING:$START:$LENGTH}
-
-echo "The original string is: $STRING"
-echo "Extracting 5 characters starting from position 10:"
-echo "The substring is: $SUBSTRING"
-```
-
-### String Replacement
-```bash
-echo -e "\nStep 5: String Replacement"
-
-STRING="The quick brown fox jumps over the lazy dog"
-echo "Original string: $STRING"
-
-# Replace the first occurrence of 'o' with 'O'
-NEW_STRING=${STRING/o/O}
-echo "Replacing first 'o' with 'O': $NEW_STRING"
-
-# Replace all occurrences of 'o' with 'O'
-NEW_STRING=${STRING//o/O}
-echo "Replacing all 'o' with 'O': $NEW_STRING"
-
-# Replace 'The quick' with 'The slow' if it's at the beginning of the string
-NEW_STRING=${STRING/#The quick/The slow}
-echo "Replacing 'The quick' with 'The slow' at the beginning: $NEW_STRING"
-
-# Replace 'dog' with 'cat' if it's at the end of the string
-NEW_STRING=${STRING/%dog/cat}
-echo "Replacing 'dog' with 'cat' at the end: $NEW_STRING"
-```
-
-### Conditional Statements in Shell
-```bash
-#!/bin/bash
-
-NAME="George"
-if [ "$NAME" = "John" ]; then
+if [[ "${name}" == "John" ]]; then
   echo "John Lennon"
-elif [ "$NAME" = "Paul" ]; then
+elif [[ "${name}" == "Paul" ]]; then
   echo "Paul McCartney"
-elif [ "$NAME" = "George" ]; then
+elif [[ "${name}" == "George" ]]; then
   echo "George Harrison"
-elif [ "$NAME" = "Ringo" ]; then
+elif [[ "${name}" == "Ringo" ]]; then
   echo "Ringo Starr"
 else
   echo "Unknown member"
 fi
 ```
-
-### Numeric Comparisons
+---
+### 8.2 String Tests with `[[ ]]` 
+Common string operators:
+|Test|Meaning|
+|---|---|
+|`[[ -z $s ]]`|string is empty|
+|`[[ -n $s ]]`|string is not empty|
+|`[[ $a == $b ]]`|equal|
+|`[[ $a != $b ]]`|not equal|
+Examples:
 ```bash
-#!/bin/bash
+string1="hello"
+string2="world"
 
-NUMBER=10
+if [[ "${string1}" == "hello" && "${string2}" == "world" ]]; then
+  echo "Both strings match"
+fi
 
-if [ $NUMBER -lt 5 ]; then
+if [[ "${string1}" != "${string2}" ]]; then
+  echo "The strings are different"
+fi
+
+if [[ -z "${string3:-}" ]]; then
+  echo "string3 is empty or not set"
+fi
+```
+---
+### 8.3 Pattern Matching vs Regex
+In `[[ ]]`, `==` supports **glob patterns** (not regex).
+```bash
+file="report_2026.txt"
+
+if [[ "${file}" == report_* ]]; then
+  echo "This looks like a report file"
+fi
+```
+For regex, use =~:
+```bash
+if [[ "${file}" =~ ^report_[0-9]{4}\.txt$ ]]; then
+  echo "Matches report_YYYY.txt"
+fi
+```
+---
+### 8.4 Numeric Tests
+```bash
+number=10
+
+if (( number < 5 )); then
   echo "The number is less than 5"
-elif [ $NUMBER -eq 10 ]; then
+elif (( number == 10 )); then
   echo "The number is exactly 10"
-elif [ $NUMBER -gt 15 ]; then
+elif (( number > 15 )); then
   echo "The number is greater than 15"
 else
   echo "The number is between 5 and 15, but not 10"
 fi
 ```
-
-### String Comparisons and Logical Operations
+Why `(( ))` is better:
+* No quoting needed
+* Cleaner operators (`<`,`>`,`==`)
+* Safer than `[ ]` for arithmetic
+---
+### 8.5 Numeric Tests with `[ ]`
+|Test|Meaning|
+|---|---|
+|`-eq`|equal|
+|`-ne`|not equal|
+|`-lt`|less than|
+|`-le`|less than or equal|
+|`-gt`|greater than|
+|`-ge`|greater than or equal|
+Example:
 ```bash
-#!/bin/bash
-
-STRING1="hello"
-STRING2="world"
-NUMBER1=5
-NUMBER2=10
-
-if [ "$STRING1" = "hello" ] && [ "$STRING2" = "world" ]; then
-  echo "Both strings match"
-fi
-
-if [ $NUMBER1 -lt 10 ] || [ $NUMBER2 -gt 5 ]; then
-  echo "At least one of the number conditions is true"
-fi
-
-if [[ "$STRING1" != "$STRING2" ]]; then
-  echo "The strings are different"
-fi
-
-if [[ -z "$STRING3" ]]; then
-  echo "STRING3 is empty or not set"
+if [ "${number}" -lt 10 ]; then
+  echo "number < 10"
 fi
 ```
-
-## Loops
+---
+### 8.6 Logical Operators
+Preferred inside `[[ ]]`:
+* `&&` AND
+* `||` OR
+* `!` NOT
 ```bash
-#!/bin/bash
+if [[ -n "${name}" && "${name}" != "admin" ]]; then
+  echo "Non-empty name and not admin"
+fi
 
-# Loop through an array of names
-echo "Looping through an array:"
-NAMES=("Alice" "Bob" "Charlie" "David")
-for name in "${NAMES[@]}"; do
-  echo "Hello, $name!"
+#For `[ ]`, prefer separate tests:
+if [ -n "${name}" ] && [ "${name}" != "admin" ]; then
+  echo "Non-empty name and not admin"
+fi
+```
+---
+### 8.7 File Tests
+File test operators:
+|Test|Meaning|
+|---|---|
+|`-e file`|exists|
+|`-f file`|regular file|
+|`-d dir`|directory|
+|`-r file`|readable|
+|`-w file`|writable|
+|`-x file`|executable|
+Example:
+```bash
+path="/etc/passwd"
+
+if [[ -f "${path}" && -r "${path}" ]]; then
+  echo "Readable file: ${path}"
+fi
+```
+---
+### 8.8 Best Practice
+* Prefer `[[ ... ]]` for strings and file tests
+* Prefer `(( ... ))` for numeric tests
+* Quote variable expansions in `[[ ... ]]` unless intentionally pattern matching
+* Use `${var:-}` when you want to safely handle unset variables.
+---
+### 8.9 Summary
+|Goal|Recommended Form|
+|---|---|
+|Compare strings|`[[ "${a}" == "${b}" ]]`|
+|Check empty string|`[[ -z "${s}" ]]`|
+|Compare numbers|`(( a < b ))`|
+|File existence|`[[ -e "${file}" ]]`|
+|Pattern match|`[[ ${name} == prefix_* ]]`|
+
+## 9. Loops
+Loops allow scripts to repeat actions, iterate over data structures, and process input efficiently. Bash provides several loop constructs, each suited for different use cases.
+---
+### 9.1 `for` Loops 
+Use `for` loops when you know **what you are iterating over** (arrays, ranges, arguments).
+**Iterating Over an Array**
+```bash
+names=("Alice" "Bob" "Charlie" "David")
+
+for names in "${names[@]}"; do
+  echo "Hello, ${name}!"
 done
-
-echo # Print an empty line for readability
-
-# Loop through a range of numbers
-echo "Looping through a range of numbers:"
+```
+---
+**Iterating Over a Range**
+```bash
 for i in {1..5}; do
-  echo "Number: $i"
+  echo "Number: ${i}"
 done
 ```
-### for loops
+---
+### 9.2 C-Style `for` Loops
+Best for numeric iteration wi  th variables.
 ```bash
-#!/bin/bash
-
-# Loop through an array of names
-echo "Looping through an array:"
-NAMES=("Alice" "Bob" "Charlie" "David")
-for name in "${NAMES[@]}"; do
-  echo "Hello, $name!"
-done
-
-echo # Print an empty line for readability
-
-# Loop through a range of numbers
-echo "Looping through a range of numbers:"
-for i in {1..5}; do
-  echo "Number: $i"
+for (( i=1; i<=5; i++ )); do
+  echo "Counter: ${i}"
 done
 ```
-
-### while loops
+---
+### 9.3 `while` Loops
+Use `while` loops when the condition should be checked before each iteration.
 ```bash
-#!/bin/bash
-
-# Simple countdown using a while loop
 count=5
+
 echo "Countdown:"
-while [ $count -gt 0 ]; do
-  echo $count
-  count=$((count - 1))
-  sleep 1 # Wait for 1 second
+while (( count > 0 )); do
+  echo "${count}"
+  ((count--))
+  sleep 1
 done
+
 echo "Blast off!"
 ```
-
-### until loop
+Common use cases:
+* Reading input
+* Waiting for a condition
+* Polling system state
+---
+### 9.4 `until` Loops
+`until` loops run **until a condition becomes true** (opposite of `while`).
 ```bash
-#!/bin/bash
-
-# Count up to 5 using an until loop
 count=1
+
 echo "Counting up to 5:"
-until [ $count -gt 5 ]; do
-  echo $count
-  count=$((count + 1))
-  sleep 1 # Wait for 1 second
+until (( count > 5 )); do
+  echo "${count}"
+  ((count++))
+  sleep 1
 done
 ```
-
-### break and continue statements
+---
+### 9.5 Reading Files Line by Line
 ```bash
-#!/bin/bash
-
-# Using break to exit a loop early
-echo "Demonstration of break:"
-for i in {1..10}; do
-  if [ $i -eq 6 ]; then
-    echo "Breaking the loop at $i"
-    break
-  fi
-  echo $i
-done
-
-echo # Print an empty line for readability
-
-# Using continue to skip iterations
-echo "Demonstration of continue (printing odd numbers):"
-for i in {1..10}; do
-  if [ $((i % 2)) -eq 0 ]; then
-    continue
-  fi
-  echo $i
-done
+while IFS= read -4 line; do
+  echo "Line: ${line}"
+done < file.txt
 ```
-
-## Arrays
+Why this form matters:
+* `IFS=` prevents trimming whitespace
+* `-r` prevents backslash escaping
+---
+### 9.6 Nested Loops
+Nested loops are useful for comparing lists or matrices.
 ```bash
-#!/bin/bash
-
-# Initialize the arrays
 a=(3 5 8 10 6)
 b=(6 5 4 12)
-c=(14 7 5 7)
 
-# Initialize an array to store common elements between a and b
-z=()
+common=()
 
-# Compare arrays a and b
 for x in "${a[@]}"; do
   for y in "${b[@]}"; do
-    if [ $x = $y ]; then
-      z+=($x)
+    if (( x == y )); then
+      common+=("${x}")
     fi
   done
 done
 
-echo "Common elements between a and b: ${z[@]}"
-
-# Initialize an array to store common elements among a, b, and c
-j=()
-
-# Compare array c with the common elements found in z
-for i in "${c[@]}"; do
-  for k in "${z[@]}"; do
-    if [ $i = $k ]; then
-      j+=($i)
-    fi
-  done
-done
-
-echo "Common elements among a, b, and c: ${j[@]}"
+echo "Common elements: ${common[@]}"
 ```
-
-## Shell Functions
+---
+### 9.7 `break` and `continue`
 ```bash
-#!/bin/bash
+for i in {1..10}; do
+  if (( i == 6 )); then
+    break
+  fi
+  echo "${i}"
+done
 
-# Function with a parameter
+for i in {1..10}; do
+  if (( i % 2 == 0 )); then
+    continue
+  fi
+  echo "${i}"
+done
+```
+---
+### 9.8 Common Mistakes
+* Forgetting quotes array expansions
+* Using brace expansion with variables
+* Parsing `ls` output unsafely
+* Infinite loops due to missing condition updates
+---
+### 9.10 Best Practice Checklist
+* use `for` with arrays and known lists
+* Use C-style `for` or `while` for numeric loops
+* Prefer `(( ))` for numeric conditions
+* Quote expansions inside loops
+* Avoid parsing `ls`
+---
+### 9.11 Summary
+|Loop Type|Use Case|
+|---|---|
+|`for`|Arrays, ranges|
+|C-style `for`|Numeric counters|
+|`while`|Condition-driven loops|
+|`until`|Inverted condition loops|
+|Nested loops|Comparisons, combinations|
+---
+## 10. Functions & Scope
+Functions allow you to **organize code**, **reuse logic**, and keep scripts readable. In Bash, functions:
+* Can take positional parameters (`$1`, `$2`, ...)
+* Return an **exit status** (0 = success, non-zero = failure)
+* Can output values via `echo` (captured using command substitution)
+---
+### 10.1 Defining and Calling Functions
+```bash
 greet() {
-  echo "Hello, $1!"
+  echo "Hello, ${1}!"
 }
 
-# Function with multiple parameters
-calculate() {
-  echo "The sum of $1 and $2 is $(($1 + $2))"
-}
-
-# Call functions with arguments
 greet "Alice"
-calculate 5 3
 ```
-### Returb Values from Functions
+Notes:
+* `()` after the name is required
+* `function name { ... }` also works, but `name() {}` is more common
+---
+### 10.2 Passing Arguments to Functions
 ```bash
-#!/bin/bash
+calculate_sum() {
+  local a=$1
+  local b=$2
+  echo $((a + b))
+}
 
-# Function that echoes a result
+sum=$(calculate_sum 5 3)
+echo "Sum is: ${sum}"
+```
+Best practices:
+* Use `local` for function variables
+* Prefer `echo` for returning computed values
+---
+### 10.3 Return Values vs Exit Status
+In Bash, `return` sets the **exit status** (0-255). It is **not** used to return strings or large numbers.
+```bash
+is_even() {
+  local n=$1
+  if (( n % 2 == 0 )); then
+    return 0  # success
+  else
+    return 1  # failure
+  fi
+}
+
+if is_even 10; then
+  echo "10 is even"
+else
+  echo "10 is odd"
+fi
+```
+---
+### 10.4 Returning Data from Functions
+**Pattern A: Echo + Command Substitution**
+```bash
 get_square() {
-  echo $(($1 * $1))
+  local n=$1
+  echo $((n * n))
 }
 
-# Function that modifies a global variable
-RESULT=0
-set_global_result() {
-  RESULT=$(($1 * $1))
-}
-
-# Capture the echoed result
-square_of_5=$(get_square 5)
-echo "The square of 5 is $square_of_5"
-
-# Use the function to modify the global variable
-set_global_result 6
-echo "The square of 6 is $RESULT"
+square=$(get_square 5)
+echo "Square of 5 is ${square}"
 ```
-### Understanding Variable Scope
+**Pattern B: Set a Global Variable**
 ```bash
-#!/bin/bash
-
-# Global variable
-GLOBAL_VAR="I'm global"
-
-# Function with a local variable
-demonstrate_scope() {
-  local LOCAL_VAR="I'm local"
-  echo "Inside function: GLOBAL_VAR = $GLOBAL_VAR"
-  echo "Inside function: LOCAL_VAR = $LOCAL_VAR"
+result=0
+set_square_global() {
+  local n=$1
+  result=$((n * n))
 }
 
-# Call the function
+set_square_global 6
+echo "Square of 6 is ${result}"
+```
+---
+### 10.5 Variable Scope: Global vs Local
+Variables are **global by default** in Bash. Use `local` to avoid accidental side effects.
+```bash
+global_var="I'm global"
+
+demonstrate_scope() {
+  local local_var="I'm local"
+  echo "Inside: global_var=${global_var}"
+  echo "Inside: local_var=${local_var}"
+}
+
 demonstrate_scope
 
-echo "Outside function: GLOBAL_VAR = $GLOBAL_VAR"
-echo "Outside function: LOCAL_VAR = $LOCAL_VAR"
+echo "Outside: global_var=${global_var}"
+echo "Outside: local_var=${local_var}"    # empty
 ```
-
-### Advanced Function
+---
+### 10.6 Function Input Validation
+Always validate inputs when functions are reused.
 ```bash
-#!/bin/bash
+require_two_numbers() {
+  if (( $# != 2 )); then
+    echo "Error: expected 2 arguments" >&2
+    return 2
+  fi
 
-ENGLISH_CALC() {
-  local num1=$1
-  local operation=$2
-  local num2=$3
-  local result
-
-  case $operation in
-    plus)
-      result=$((num1 + num2))
-      echo "$num1 + $num2 = $result"
-      ;;
-    minus)
-      result=$((num1 - num2))
-      echo "$num1 - $num2 = $result"
-      ;;
-    times)
-      result=$((num1 * num2))
-      echo "$num1 * $num2 = $result"
-      ;;
-    *)
-      echo "Invalid operation. Please use 'plus', 'minus', or 'times'."
-      return 1
-      ;;
-  esac
+  if [[ ! $1 =~ ^-?[0-9]+$ || ! $2 =~ ^-?[0-9]+$ ]]; then
+    echo "Error: arguments must be integers" >&2
+    return 2
+  fi
 }
-
-# Test the function
-ENGLISH_CALC 3 plus 5
-ENGLISH_CALC 5 minus 1
-ENGLISH_CALC 4 times 6
-ENGLISH_CALC 2 divide 2 # This should show an error message
 ```
+---
+### 10.7 Common Mistakes
+* Forgetting `local`, causing global variables to be overwritten
+* Using `return` to return strings/numbers larger than 255
+* Not validating argument count
+* Mixing printing with logic
+---
+### 10.8 Best Practice Checklist
+* Use `local` inside functions
+* Prefer `echo` + command substitution for returning data
+* Use `return` for success/failure status only
+* Print errors to stderr (`>&2`)
+* Keep functions small and single-purpose
+---
+### 10.9 Summary
+|Goal|Recommended Approach|
+|---|---|
+|Reuse logic|Functions|
+|Return data|`echo` + `$(...)`|
+|Signal success/failure|`return` / exit status|
+|Avoid side effects|`local` variables|
+---
+## 11. Special Variables
+## 12. Signals & Trap
+## 13. File System Operations
+## 14. Best Practices & Style Guide
+
+
 
 ## Special Variables in Shell
 ```bash
