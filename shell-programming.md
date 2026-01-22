@@ -1167,121 +1167,310 @@ require_two_numbers() {
 |Avoid side effects|`local` variables|
 ---
 ## 11. Special Variables
-## 12. Signals & Trap
-## 13. File System Operations
-## 14. Best Practices & Style Guide
-
-
-
-## Special Variables in Shell
+Bash provides **special variables** that expose runtime information about the script, arguments, processes, and the result of commands. These variables are **read-only** and are critical for writing reliable scripts.
+---
+### 11.1 Core Special Variables
+|Variable|Meaning|
+|---|---|
+|`$0`|Script name (or shell name)|
+|`$1`-`$9`|Positional arguments|
+|`${10}`|Arugment 10 and above|
+|`$#`|Number of arguments|
+|`$@`|All arguments (separately)|
+|`$*`|All arguments (single string)|
+|`$$`|Current shell PID|
+|`$!`|PID of last background processes|
+|`$?`|Exit status of last command|
+---
+### 11.2 Basic Usage Example
 ```bash
-#!/bin/bash
-
-echo "Script Name: $0"
-echo "First Argument: $1"
-echo "Second Argument: $2"
-echo "All Arguments: $@"
-echo "Number of Arguments: $#"
-echo "Process ID: $$"
+echo "Script Name: ${0}"
+echo "First Argument: ${1}"
+echo "Second Argument: ${2}"
+echo "All Arguments: ${@}"
+echo "Number of Arguments: ${#}"
+echo "Current PID: ${$}"
 ```
-
-### Understanding `$? and $!`
+---
+### 11.3 Exit Status: `$?`
+`$?` stores the **exit code of the last executed command**.
+* `0` -> Success
+* non-zero -> failure
 ```bash
-#!/bin/bash
-
-echo "Running a successful command:"
 ls /home
-echo "Exit status: $?"
+echo "Exit status: ${?}"
 
-echo "Running a command that will fail:"
+
 ls /nonexistent_directory
-echo "Exit status: $?"
-
-echo "Running a background process:"
-sleep 2 &
-echo "Process ID of last background command: $!"
+echo "Exit status: ${?}"
+# $? must be checked immediately after the command
 ```
-
-### Using Special Variables in Functions
+---
+### 11.4 Background Processes: `$!`
+`$!` contains the PID of the most recent **background process**.
 ```bash
-#!/bin/bash
+sleep 2 &
+bg_pid=${!}
 
-function print_args {
-  echo "Function Name: $0"
-  echo "First Argument: $1"
-  echo "Second Argument: $2"
-  echo "All Arguments: $@"
-  echo "Number of Arguments: $#"
+
+echo "Background PID: ${bg_pid}"
+wait ${bg_pid}
+echo "Background process finished"
+```
+---
+### 11.5 Special Variables Inside Functions
+Special variables inside functions refer to the **function context**, not the script context.
+```bash
+print_args() {
+  echo "Function name (script): ${0}"
+  echo "First argument: ${1}"
+  echo "Second argument: ${2}"
+  echo "All arguments: ${@}"
+  echo "Argument count: ${#}"
 }
 
-echo "Calling function with two arguments:"
-print_args hello world
 
-echo "Calling function with four arguments:"
+print_args hello world
 print_args one two three four
 ```
-
-### Understanding the Difference Between $@ and $*
+---
+### 11.6 `$@` vs `$*`
 ```bash
-#!/bin/bash
-
-echo "Using \$@:"
 for arg in "$@"; do
-  echo "Argument: $arg"
+  echo "[$arg]"
 done
 
-echo "Using \$*:"
+
+echo "---"
+
+
 for arg in "$*"; do
-  echo "Argument: $arg"
+  echo "[$arg]"
 done
 ```
-
-## Bash `trap` command
+|Variable|Behaviour when quoted|
+|---|---|
+|`"$@"`|Preserves each argument|
+|`"$*"`|Joins all arguments into one|
+---
+### 11.7 Forwarding Arugments Safely
 ```bash
-#!/bin/bash
+wrapper() {
+  echo "Forwarding arguments"
+  target "$@"
+}
+```
+This preserves spacing and argument boundaries.
+---
+### 11.8 Combining Special Variables
+```bash
+if (( $# < 1 )); then
+  echo "Usage: ${0} <file>" >&2
+  exit 1
+fi
+
+
+file=${1}
+
+
+if [[ ! -f "${file}" ]]; then
+  echo "Error: file not found" >&2
+  exit 1
+fi
+```
+---
+### 11.9 Common Mistakes
+* Checking `$?` too late
+* Using `$*` instead of `$@`
+* Forgetting `${10}` syntax
+* Assuming `$0` is always the filename
+---
+### 11.10 Best Practice Checklist
+* Check `$?` immediately
+* Use `"$@"` when looping or forwarding arguments
+* Use `${var}` for clarity
+* Use `$!` + `wait` for background jobs
+---
+### 11.11 Summary
+|Task|Variable|
+|---|---|
+|Exit status|`$?`|
+|Arugment count|`$#`|
+|All arguments|`$@"`|
+|Script name|`$0`|
+|Current PID|`$$`|
+|Background PID|`$!`|
+---
+## 12. Signals & `trap`
+Signals are notifications sent to a process by the OS (or another process). In Bash scripts, you can intercept signals using `trap` to perform cleanup (remove temp files, stop background jobs, unlock files) before existing.
+---
+### 12.1 What are Signals?
+Common signals:
+|Signal|Typical Meaning|Common Source|
+|`SIGINT`|Interrupt|Ctrl + C|
+|`SIGTERM`|Terminate (polite stop)|`kill <pid>` (default)|
+|`SIGKILL`|Force kill (cannot be trapped)|`kill -9 <pid>|
+|`SIGHUP`|Hangup / terminal closed|closing terminal / SSH drop|
+|`SIQUIT`|Quit + core dump|Ctrl + \|
+---
+### 12.2 Basic `trap` Syntax
+```bash
+trap 'handler_command' SIGNAL1 SIGNAL2
+```
+Or using a function:
+```bash
+handler() {
+  echo "Cleaning up..."
+}
+
+
+trap handler SIGINT SIGTERM
+```
+---
+### 12.3 Example: Graceful Exit on Ctrl + C
+```bash
+#!/usr/bin/env bash
+
 
 cleanup_and_exit() {
-  echo -e "\nSignal received! Cleaning up and exiting..."
+  echo -e "Signal received! Cleaning up and exiting..." >&2
   exit 0
 }
 
+
 trap cleanup_and_exit SIGINT SIGTERM
 
+
 echo "This script will run until you press Ctrl+C."
-echo "Press Ctrl+C to see the trap in action and exit gracefully."
+
 
 count=1
 while true; do
-  echo "Script is running... (iteration $count)"
+  echo "Script is running... (iteration ${count})"
   sleep 1
   ((count++))
 done
 ```
-
+Notes:
+* Messages sent during cleanup often go to stderr (`>&2`)
+* `trap` ensures cleanup runs before exiting
+---
+### 12.4 Cleaning Temporary Files
 ```bash
-#!/bin/bash
+#!/usr/bin/env bash
 
-cleanup_and_exit() {
-  echo -e "\nSignal received! Cleaning up..."
-  echo "Performing cleanup tasks..."
-  # Add any necessary cleanup code here
-  echo "Cleanup completed."
-  echo "Exiting script gracefully."
-  exit 0
+
+set -euo pipefail
+
+
+tmp_file=$(mktemp)
+
+
+cleanup() {
+  rm -f "${tmp_file}"
 }
 
-trap cleanup_and_exit SIGINT SIGTERM
 
-echo "This script will run until you press Ctrl+C."
-echo "Press Ctrl+C to see the trap function in action and exit gracefully."
+trap cleanup EXIT
 
-count=1
-while true; do
-  echo "Script is running... (iteration $count)"
-  sleep 1
-  ((count++))
-done
+
+echo "Working with ${tmp_file}"
+echo "hello" > "${tmp_file}"
+cat "${tmp_file}"
 ```
+Why trap `EXIT`?
+* Runs on normal scrip exit
+* Also runs if the scrip exits due to an error (when using `set -e`)
+---
+### 12.5 Trapping Multiple Signals
+```bash
+cleanup() {
+  echo "Stopping..." >&2
+}
+
+
+trap cleanup SIGINT SIGTERM SIGHUP
+```
+---
+### 12.6 Capturing the Exit Code in a Trap
+Sometimes you want to preserve the original exit code.
+```bash
+cleanup() {
+  exit_code=$?
+  echo "Exiting with code ${exit_code}" >&2
+  # cleanup steps here
+  exit "${exit_code}"
+}
+
+
+trap cleanup EXIT
+```
+---
+### 12.7 Cleaning Background Jobs
+If your script starts background processes, trap cleanup should stop them.
+```bash
+#!/usr/bin/env bash
+
+
+set -euo pipefail
+
+
+cleanup() {
+  echo "Cleaning up background jobs..." >&2
+  jobs -p | xargs -r kill
+}
+
+
+trap cleanup EXIT SIGINT SIGTERM
+
+
+sleep 100 &
+sleep 200 &
+
+
+echo "Background jobs started. PID(s):"
+jobs -p
+
+
+wait
+```
+---
+### 12.8 Resetting or Disabling Traps
+Reset signal handling to default:
+```bash
+trap - SIGINT
+```
+Remove all traps:
+```bash
+trap -
+```
+---
+### 12.9 Common Mistakes
+* Forgetting to quote paths in cleanup (`rm -f $tmp_file`)
+* Assuming `SIGKILL` can be trapped
+* Not cleaning background processes
+* Using `exit 0` in all traps (hides failures)
+---
+### 12.10 Best Practice Checklist
+* Use `trap ... EXIT` for temp file cleanup
+* Trap `SIGINT` + `SIGTERM` for graceful shutdown
+* Preserve exit codes when appropriate
+* Always quote variables in cleanup
+* Clean background jobs if you spawn them
+---
+### 12.11 Summary
+|Goal|Pattern|
+|Cleanup on any exit|`trap cleanup EXIT`|
+|Ctrl + C handling|`trap cleanup SIGNINT`|
+|Termination handling|`trap cleanup SIGNTERM`|
+---
+
+## 13. File System Operations
+File system operations are at the core of shell scripting. Most real-world scripts interact with files and directories: checking existence, validating permissions, creating, modifying, and cleaning up resources.
+---
+
+
+
 
 ## File System Operations in Shell
 ```bash
