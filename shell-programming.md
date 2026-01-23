@@ -1468,30 +1468,144 @@ trap -
 ## 13. File System Operations
 File system operations are at the core of shell scripting. Most real-world scripts interact with files and directories: checking existence, validating permissions, creating, modifying, and cleaning up resources.
 ---
-
-
-
-
-## File System Operations in Shell
+### 13.1 File Existence Tests
+Use file test operators with `[[ .. ]]` (recommended).
 ```bash
-#!/bin/bash
-
 filename="test_file.txt"
-if [ -e "$filename" ]; then
-  echo "$filename exists"
+
+if [[ -e "${filename}" ]]; then
+  echo "${filename} exists"
 else
-  echo "$filename does not exist"
+  echo "${filename} does not exist"
 fi
 ```
+Common existence tests:
+|Test|Meaning|
+|---|---|
+|`-e`|File exists|
+|`-f`|Regular file|
+|`-d`|Directory|
+|`-L`|Symbolic link|
+---
+### 13.2 File Permission Tests
 ```bash
-#!/bin/bash
-
 filename="test_file.txt"
-if [ -r "$filename" ]; then
-  echo "You have read permission for $filename"
-else
-  echo "You do not have read permission for $filename"
+
+if [[ -r "${filename}" ]]; then
+  echo "Readable"
+fi
+
+if [[ -w "${filename}" ]]; then
+  echo "Writable"
+fi
+
+if [[ -x "${filename}" ]]; then
+  echo "Executable"
 fi
 ```
+---
+### 13.3 Combining File Tests
+```bash
+path="/etc/passwd"
 
-## File System Explorer
+if [[ -f "${path}" && -r "${path}" ]]; then
+  echo "Readable regular file"
+fi
+```
+---
+### 13.4 Creating Files and Directories
+```bash
+touch new_file.txt
+mkdir new_dir
+mkdir -p parent/child/grandchild
+```
+* `touch` creates an empty file or updates timestamps
+* `mkdir -p` creates parent directories as needed
+---
+### 13.5 Copying, Moving, and Removing Files
+```bash
+cp source.txt backup.txt
+mv old_name.txt new_name.txt
+rm unwanted.txt
+rm -r old_directory
+```
+Use `rm -r` carefully - it is destructive.
+---
+### 13.6 Safe Deletion Patterns
+Always confirm before deleting dynamically generated paths.
+```bash
+if [[ -n "${target}" && -e "${target}" ]]; then
+  rm -r "${target}"
+fi
+```
+---
+### 13.7 Reading and Writing Files
+Write to a file:
+```bash
+echo "Hello world" > file.txt
+```
+Append to a file:
+```bash
+echo "Another line" >> file.txt
+```
+Read file contents:
+```bash
+while IFS= read -r line; do
+  echo "${line}"
+done < file.txt
+```
+---
+### 13.8 File Size Tests
+```bash
+if [[ -s "${filename}" ]]; then
+
+  echo "File is not empty"
+fi
+```
+|Test|Meaning|
+|---|---|
+|`s`|File exists and size > 0|
+---
+### 13.9 Working with Directories
+```bash
+if [[ -d "${dig}" ]]; then
+  echo "Directory exists"
+fi
+
+cd "${dir}" || exit 1
+pwd
+```
+---
+### 13.10 Temporary Files and Directories
+Always use `mktemp` instead of hardcoding paths.
+```bash
+tmp_file=$(mktemp)
+tmp_dir=$(mktemp -d)
+
+echo "Using temp file: ${tmp_file}"
+```
+Combine with `trap` for cleanup.
+---
+### 13.11 Common Mistakes
+* Unquoted file paths (breaks on spaces)
+* Assuming files exist without checking
+* Using `rm -rf /` -style patterns blindly
+* Hardcoding temp file names
+---
+### 13.12 Best Practice Checklist
+* Use `[[ ... ]]` for file tests
+* Always quote file paths
+* Prefer `mktemp` for temporary resources
+* Validate before deleting or overwriting
+* Combine with `trap` for cleanup
+---
+### 13.13 Summary
+|Task|Recommended Pattern|
+|---|---|
+|Check file exists| `[[ -e file ]]`|
+|Check directory|`[[ -d dir ]]`|
+|Check permissions|`-r`,`-w`,`-x`|
+|Read file|`while read` loop|
+|Temp files|`mktemp`|
+---
+
