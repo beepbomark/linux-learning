@@ -15,6 +15,7 @@ A personal reference guide based on Labex
 **Core commands (daily use)**
 |Command|Purpose|
 |---|---|
+|`echo`|Display text or variable values to standard output|
 |`pwd`|print current directory|
 |`cd`|change directory|
 |`ls`|list files/directories|
@@ -33,6 +34,22 @@ A personal reference guide based on Labex
 |`whatis`|one-line description|
 |`alias`|create command shortcut|
 |`exit`|exit shell|
+
+### 1.1 `echo`
+**Purpose**
+**Dispay text or variable values to standard output**
+---
+**Syntax**
+```bash
+echo [OPTION]... [STRING]...
+```
+---
+**Options**
+```bash
+echo -n "Loading..."        # no new line
+echo -e "Line 1\nLine2"     # enable escape sequences)
+```
+---
 
 ## 2. Text Manipulation and Navigation
 ### 2.1 Streams + Pipes
