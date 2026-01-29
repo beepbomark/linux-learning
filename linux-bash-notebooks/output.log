@@ -1,0 +1,10 @@
+total 36
+-rw-r--r-- 1 hladmin hladmin  73 Jan 27 22:14 app.log
+-rw-r--r-- 1 hladmin hladmin  65 Jan 27 22:14 error.log
+-rw-r--r-- 1 hladmin hladmin   6 Jan 27 22:14 file1.txt
+-rw-r--r-- 1 hladmin hladmin   6 Jan 27 22:14 file2.txt
+-rw-r--r-- 1 hladmin hladmin  13 Jan 27 22:14 input.txt
+-rw-r--r-- 1 hladmin hladmin   2 Jan 28 15:27 nums.txt
+-rw-r--r-- 1 hladmin hladmin  13 Jan 27 22:14 output.txt
+-rw-r--r-- 1 hladmin hladmin 282 Jan 27 22:14 sample.txt
+-rw-r--r-- 1 hladmin hladmin  26 Jan 27 22:14 test.txt
