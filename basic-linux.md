@@ -10,6 +10,7 @@ A personal reference guide based on Labex
 6. Permissions and Ownership
 7. Processes and Performance
 8. Packages
+9. Notes
 
 ## 1. Command Line Basics
 **Core commands (daily use)**
@@ -50,7 +51,59 @@ echo -n "Loading..."        # no new line
 echo -e "Line 1\nLine2"     # enable escape sequences)
 ```
 ---
-
+### 1.2 `pwd`
+**Purpose**
+**Display the current working directory.**
+---
+**Options**
+```bash
+-L  # print the value of $PWD if it names the current working directory
+-P  # print the physical directory, without any symbolic links
+```
+---
+### 1.3 `cd`
+**Purpose**
+**Change the current dictory to DIR. The default DIR is the value of the HOME shell variable.**
+---
+**Options**
+```bash
+-L  # force symbolic links to be followed
+-P  # use the physical directory structure without following symbolic links
+-e  # if the -P option is supplied, and the current working directory cannot be determined successfully, exit with a non-zero status
+-@  # on systems that support it, present a file with extended attributes as a directory containing the file attributes
+```
+**Notes:**
+* Absolute Pathnames: Begins with the root directory and follows the tree branch by branch until the path to the desired directory or file is completed.
+* Relative Pathnames: Starts from the working directory.
+---
+**Examples**
+```bash
+cd /etc         # Change to absolute path
+cd Documents    # Change to relative path
+cd ..           # Move up one directory
+cd -            # Return to previous directory
+cd ~            # Go to home directory
+cd ~user_name   # Changes the working directory to the home directory of user_name
+cp -P /var/www  # Use physical path (ignore symlinks)
+```
+---
+### 1.4 `ls`
+**Purpose**
+**List Directory Contents**
+---
+**Options**
+```bash
+-a      # List all files, even those with names that begin with a period. (Hidden files)
+-A      # Like the -a option except it does not list . and ..
+-d      # If a directory is specified, ls will list the contents of the directory, not the directory itself.
+-F      # This option will append an indicator character to the end of each listed name
+-h      # In long format listings, display file sizes in human-readable format rather than in bytes
+-l      # Display results in long format
+-r      # Display the results in reverse order. ls displays its results in ascending alphabetical order
+-S      # Sort results by file size
+-t      # Sort by modification time
+```
+---
 ## 2. Text Manipulation and Navigation
 ### 2.1 Streams + Pipes
 * stdin (0): input stream
@@ -344,22 +397,30 @@ tac file.txt                    # last line to first line
 ```
 
 ### 5.3 `less` - view file page by page
-Used for viewing large files safely without loading everything into memory.
+**Purpose**
+**Used for viewing large files safely without loading everything into memory.**
+---
+**Options**
 ```bash
 less -i file.txt                # ignore case when searching
 less -F file.txt                # auto-exit if file fits on one screen
 less -S file.txt                # disable line wrapping (horizontal scroll)
 less +F log.txt                 # follow file as it grows (log monitoring)
 ```
-**Navigation shortcuts inside** `less`:
-* arrows / `j` `k` -> scroll line by line
-* `space` -> next page
-* `b` -> previous page
-* `/text` -> search
-* `g` -> beginning of file
-* `G` -> end of file
-* `q` -> quit
-
+**`less` Commands**:
+|Command|Action|
+|---|---|
+|PAGE UP or `b`|Scroll back one page|
+|PAGE DOWB or space|Scroll forward one page|
+|Up arrow or `j`|Scroll up one line|
+|Down arrow or `k`|Scroll down one line|
+|`G`|Move to the end of the text file|
+|`1G` or `g`|Move to the beginning of the text file|
+|`/characters`|Search forward to the next occurrence of `characters`|
+|`n`|Search for the next occurrence of the previous search|
+|`h`|Display help screen|
+|`q`|Quit `less`|
+---
 ### 5.4 `diff` - compare files or directories line by line
 Used to see differences between files or directory trees.
 ```bash
@@ -585,3 +646,71 @@ sudo apt autoremove                        # remove unused dependencies
 dpkg -l | grep package_name                # check installed (Debian/Ubuntu)
 rpm -qa | grep package_name                # check installed (RHEL/Fedora)
 ```
+---
+## 9. Notes
+### 9.1 Directories Found on Linux Systems
+|Directory|Comments|
+|---|---|
+|`/`|The root directory, where everything begins.|
+|`/bin`|Contains binaries (programs) that must be present for the system to boot and run.|
+|`/boot`|Contains the Linux kernel, initial RAM disk image (for drivers needed at boot time), and the boot loader.|
+|`/dev`|This is a special directory that contains *device nodes*.
+|`/etc`|Contains all the system-wide configuration files, also contains a collection of shell scripts that start each of the system services at boot time.|
+|`/home`|In normal configurations, each user is given a directory in */home*.|
+|`/lib`|Contains shared library files used by the core system programs.|
+|`lost+found`|Each formatted partition or device using a Linux file system will have this directory. Used in the case of a partial recovery from a file system corruption event.|
+|`/media`|Contains the mount points for removable media.|
+|`/mnt`|Contains mount points for removable devices that have been mounted manually.|
+|`/opt`|The directory used to install "optional" software. Mainly used to hold commercial software products that might be installed on the system.|
+|`/proc`|A virtual file system maintained by the Linux kernel. Contains "files" that are peepholes into the kernel itself.|
+|`/root`|This is the home directory for the root account.|
+|`/sbin`|Contains "system" binaries, programs that perform vital system tasks that are generally reserved for the useruser.|
+|`/tmp`|Intended for the storage of temporary, transient files created by various programs. Some configurations cause this directory to be emptied each time the system is rebooted.|
+|`/usr`|Likely the largest one on a Linux system. Contains all the programs and support files used by regular users.|
+|`/usr/bin`|Contains the executable programs installed by the Linux distribution.|
+|`/usr/lib`|The shared libraries for the programs in */usr/bin*.|
+|`/usr/local`|Where programs that are not included with the distribution but are intended for system-wide use are installed.|
+|`/usr/sbin`|Contains more system administration programs.|
+|`/usr/share`|Contains all the shared data used by programs in */usr/bin*. this includes things such as default configuration files, icons, screen backgrounds, sound files, and so on.
+|`/usr/share/doc`|Most packages installed on the system will include some kind of documentation. Can find those documents organized by package here.|
+|`/var`|Where data that is likely to change is stored. Various databases, spool files, user mail, and so forth, are located here.|
+|`/var/log`|Contains *log files*, records of various system activity. Important and should be monitored from time to time.|
+---
+### 9.2 Symbolic Links (Symlinks)
+**Purpose**
+* A symbolic link is a special type of file that points to another file or directory.
+* It does not contain the actual data - it only stores a reference (path) to the target.
+---
+**Why Symbolic Links Exist**
+* Creating shortcuts to frequently accessed directories
+* Organizing files without duplicating data
+* Redirecting programs to new locations without modifying configuration
+* Managing versioned directories
+---
+**Examples**
+```bash
+ln -s TARGET LINK_NAME
+ln -s /var/log/syslog mylog     # mylog now points to /var/log/syslog
+ln -s /opt/myapp current        # current now behaves like /opt/myapp
+```
+---
+**How to Identify a Symbolic Link**
+```bash
+lrwxrwxrwx 1 user user 12 Feb 10 10:00 current -> /opt/myapp
+```
+* File type begins with `l`
+* Arrow `->` shows the target path
+---
+**Behavior**
+1. Deleting a Symblink: `rm link_name` only removes the link - not the target.
+2. Broken Symlink: If the target is deleted, the symlink becomes a dangling (broken) link. It still exists, but points to nothing.
+---
+**Symbolic Link vs Hard Link**
+|Feature|Symbolic Link|Hard Link|
+|---|---|---|
+|Points to|File path|Inode|
+|Works across filesystems|Yes|No|
+|Can link directories|Yes|No (normally)|
+|Breaks if target deleted|Yes|No|
+|Appears|Separate file|Same file (same inode)|
+---
