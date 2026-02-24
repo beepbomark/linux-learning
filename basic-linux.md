@@ -20,15 +20,15 @@ A personal reference guide based on Labex
 |`pwd`|print current directory|
 |`cd`|change directory|
 |`ls`|list files/directories|
+|`cp`|copy|
+|`mv`|move/rename|
+|`rm`|delete files/directories|
+|`mkdir`|create directories|
 |`touch`|create empty file / update timestamp|
 |`file`|show file type|
 |`cat`|display file content|
 |`less`|view file page-by-page|
 |`history`|show command history|
-|`cp`|copy|
-|`mv`|move/rename|
-|`mkdir`|create directories|
-|`rm`|delete files/directories|
 |`find`|search files/directories|
 |`help`|bash built-in help|
 |`man`|manual pages|
@@ -37,8 +37,7 @@ A personal reference guide based on Labex
 |`exit`|exit shell|
 
 ### 1.1 `echo`
-**Purpose**
-**Dispay text or variable values to standard output**
+**Purpose**: Dispay text or variable values to standard output
 ---
 **Syntax**
 ```bash
@@ -52,8 +51,7 @@ echo -e "Line 1\nLine2"     # enable escape sequences)
 ```
 ---
 ### 1.2 `pwd`
-**Purpose**
-**Display the current working directory.**
+**Purpose**: Display the current working directory.
 ---
 **Options**
 ```bash
@@ -62,8 +60,7 @@ echo -e "Line 1\nLine2"     # enable escape sequences)
 ```
 ---
 ### 1.3 `cd`
-**Purpose**
-**Change the current dictory to DIR. The default DIR is the value of the HOME shell variable.**
+**Purpose**: Change the current dictory to DIR. The default DIR is the value of the HOME shell variable.
 ---
 **Options**
 ```bash
@@ -88,8 +85,7 @@ cp -P /var/www  # Use physical path (ignore symlinks)
 ```
 ---
 ### 1.4 `ls`
-**Purpose**
-**List Directory Contents**
+**Purpose**: List Directory Contents
 ---
 **Options**
 ```bash
@@ -102,6 +98,51 @@ cp -P /var/www  # Use physical path (ignore symlinks)
 -r      # Display the results in reverse order. ls displays its results in ascending alphabetical order
 -S      # Sort results by file size
 -t      # Sort by modification time
+```
+---
+### 1.5 `cp`
+**Purpose**: Copies files or directories
+---
+**Example**
+```bash
+cp item1 item2          # copies the single file or directory item1 to the file or directory item2.
+cp item... directory    # copies multiple items (either files or directories) into a directory.
+```
+---
+**`cp` Options**
+```bash
+-a  # Copy the files and directories and all of their attributes, including ownerships and permissions.
+-i  # Prompt the user for confirmation.
+-r  # Recursively copy directories and their contents. Required for copying directories.
+-u  # When copying files from one directory to another, only copy files that either don't exist or are newer than the existing corresponding files in the destination directory.
+-v  # Display informative messages as the copy is performed.
+```
+---
+### 1.6 `mv`
+**Purpose**: Performs both file moving and file renaming, depending on how it is used.
+---
+**Example**
+```bash
+mv item1 item2          # To move or rename the file or directory item1 to item2.
+mv item... directory    # To move one or more items from one directory to another.
+```
+---
+**`mv` Options**
+```bash
+-i      # Before overwriting an existing file, prompt the user for confirmation
+-u      # When moving files from one directory to another, only move files that either don't exist or are newer than the existing corresponding files in the destination directory.
+-v      # Display informative messages as the move is performed.
+```
+---
+### 1.7 `rm`
+**Purpose**: Used to remove (delete) files and directories
+---
+**Options**
+```bash
+-i  # Before deleting an existing file, prompt the user for confirmation
+-r  # Recursively delete directories
+-f  # Ignore nonexistent files and do not prompt
+-v  # DIsplay informative messages as the delete is performed
 ```
 ---
 ## 2. Text Manipulation and Navigation
@@ -714,3 +755,41 @@ lrwxrwxrwx 1 user user 12 Feb 10 10:00 current -> /opt/myapp
 |Breaks if target deleted|Yes|No|
 |Appears|Separate file|Same file (same inode)|
 ---
+### 9.3 WIldcards
+**Purpose**
+* Wildcards are special characters used in the shell to match multiple files or directories based on patterns.
+* Allows operating on groups of files without typing every filename manually.
+---
+**Wildcards**
+|Wildcard|Meaning|
+|---|---|
+|`*`|Matches any characters|
+|`?`|Matches any single character|
+|`[characters]`|Matches any character that is a member of the set *characters*|
+|`[!characters]`|Matches any character that is not a member of the set *characters*|
+|`[[:class:]]`|Matches any character that is a member of the specified *class*|
+---
+**Commonly Used Character Classes**
+|Characterclass Meaning||
+|---|---|
+|`[:alnum:]`|Matches any alphanumeric character|
+|`[:alpha:]`|Matches any alphabetic character|
+|`[:digit:]`|Matches any numeral|
+|`[:lower:]`|Matches any lowercase letter|
+|`[:upper:]`|Matches any uppercase letter|
+---
+**Wildcard Examples**
+|Pattern|Matches|
+|---|---|
+|`*`|All files|
+|`g*`|Any file beginning with *g*|
+|`b*.txt`|Any file beginning with *b* followed by any characters and ending with `.txt`|
+|`Data???`|Any file beginning with *Data* followed by exactly three characters|
+|`[abc]*`|Any file beginning with either an *a*, a *b*, or a *c*|
+|`BACKUP.[0-9][0-9][0-9]`|Any file beginning with *BACKUP*. followed by exactly three numerals|
+|`[[:upper:]]*`|Any file beginning with an uppercase letter|
+|`[![:digit:]]*`|Any file not beginning with a numeral|
+|`*[[:lower:]123]`|Any file ending with a lowercase letter or the numerals 1, 2, or 3|
+---
+
+
