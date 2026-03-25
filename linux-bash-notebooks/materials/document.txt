@@ -1,3 +1,0 @@
-This is a sample document.
-It contains multiple lines of text.
-Each line will be written to the file.
