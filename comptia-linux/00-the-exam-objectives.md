@@ -1,5 +1,4 @@
 # 1.0 System Management
-
 ## 1.1 Explain Basic Linux Concepts
 
 ### Basic boot process
@@ -924,7 +923,7 @@ A hypervisor allows multiple virtual machiens to run on a single physical system
 #### VirtualBox
 - Type 2 hypervisor
 - Easy for learning environments
-### Key commands
+#### Key commands
 ```bash
 egrep -c '(vmx|svm)' /proc/cpuinfo      # check CPU virtualization support
 virsh list --all                        # list VMs
@@ -982,20 +981,200 @@ Testing environment:
 Tasks used to manage the lifecycle of virtual machines.
 #### Lifecycle
 ```bash
-virsh list --all
-virsh start vm-name
-virsh shutdown vm-name
-virsh destroy vm-name
-virsh reboot vm-name
+virsh list --all        # list VMs
+virsh start vm-name     # start VM
+virsh shutdown vm-name  # graceful shutdown
+virsh destroy vm-name   # force stop
+virsh reboot vm-name    # restart VM
 ```
+#### Creation
+```bash
+virsh-install ...       # create VM with CPU, RAM, disk, OS
+```
+#### Configuration
+```bash
+virsh edit vm-name      # modify VM config
+virsh dominfo vm-name   # view VM details
+virsh autostart vm-name # auto start on boot
+```
+#### Snapshots
+```bash
+virsh snapshot-create-as vm snapshot
+virsh snapshot-list vm
+virsh snapshot-revert vm snapshot
+```
+#### Storage
+```bash
+virsh pool-list         # list storage pools
+virsh vol-list default  # list disks
+```
+#### Networking
+```bash
+virsh net-list            # list networks
+virsh net-start default   # start network
+virsh domifaddr vm        # get VM IP
+```
+#### Notes
+- shutdown is safe, destroy is forceful
+- snapshots allow rollback
+- VM configs are XML-based
+#### Real-world scenario
+System update testing:
+1. Take snapshot
+2. Apply changes
+3. Rollback if needed
+---
 ### Bare metal vs. virtual machines
+#### What it is
+Comparison between running directly on hardware vs using virtualization.
+#### Bare Metal
+- OS runs directly on hardware
+- High performance
+- Limited flexibility
+#### Virtual Machines
+- OS runs on hypervisor
+- Multiple VMs per system
+- High flexibility and isolation
+#### Differences
+- Bare metal -> faster, less flexible
+- VM -> slightly slower, more flexible
+---
 ### Network types
+#### What it is
+Defines how a virtual machine connects to networks.
+#### NAT
+- VM uses host IP
+- Internet access available
+- Not accessible externally
+#### Bridged
+- VM gets its own IP
+- Acts like real machine
+- Accessible on network
+#### Host-only
+- VM communicates with host only
+- No internet access
+- Used for testing
+#### Real-world scenarios
+- VM communicates with host only
+- No internet access
+- USed for testing
+#### Internal
+- VM-to-VM communication only
+#### Comparison
+- NAT -> safe, default
+- Bridged -> full network access
+- Host-only -> isolated environment
+#### Key commands
+```bash
+virsh net-list        # list networks
+virsh domifaddr vm    # get VM IP
+ip addr               # view interfaces
+```
+#### Real-world scenarios
+- NAT -> normal usage
+- Bridged -> server testing
+- Host-only -> secure lab testing
+---
 ### Virtual machine tools
-
+#### What it is
+Tools used to create, manage, and interact with virtual machiens.
+#### Management tools
+```bash
+virsh list -all         # list VMs
+virsh start vm-name     # start VM
+virsh shutdown vm-name  # stop VM
+```
+#### GUI tool
+- virt-manager -> graphical VM management
+#### Creation tool
+```bash
+virt-install ...        # create VM
+```
+#### Backend tools
+- qemu -> emulator
+- qemu-kvm -> hardware-accelerated virtualization
+#### Guest tools
+- Guest Additions -> improved VM performance
+- QEMU Guest Agent -> better VM control
+#### Remote access
+```bash
+ssh user@vm-ip          # connect to VM
+scp file user@vm:/path  # transfer file
+```
+#### Monitoring
+```bash
+virt-top    # monitor VM usage
+top         # system processes
+```
+#### Notes
+- libvirt manages virtualization
+- virsh is primary CLI tool
+- guest tools improve usability
+#### Real-world scenario
+Managing VMs:
+1. List VMs
+2. Start VM
+3. Access via SSH
+4. Monitor performance
+---
 # 2.0 Services and User Management
 ## 2.1 Given a scenario, manage files and directories on a Linux system
 ### Utilities
+#### What it is
+Commands used to manage files and directories.
+#### Creation
+```bash
+touch file.txxt   # create file
+mkdir dir         # create directory
+mkdir -p a/b      # create nested directories
+```
+#### Copy & move
+```bash
+cp file1 file2    # copy file
+cp -r dir1 dir2   # copy directory
+mv file1 file2    # rename file
+mv file1 /tmp/    # move file
+```
+#### Deletion
+```bash
+rm file.txt       # delete file
+rm -r dir         # delete directory
+rm -rf dir        # force delete (danger)
+rmdir dir         # remove empty directory
+```
+#### Viewing
+```bash
+ls -la            # list files
+stat file         # file details
+file file         # file type
+```
+#### Searching
+```bash
+find . -name file   # search file
+locate file         # fast search (database)
+```
+#### Permissions
+```bash
+chmod 755 file          # change permissions
+chown user:group file   # change ownership
+```
+#### Links
+```bash
+ln file1 file2          # hard link
+ln -s file1 link1       # symbolic link
+```
+#### Disk usage
+```bash
+du -sh folder           # folder size
+df -h                   # disk usage
+```
+#### Notes
+- rm -rf is dangerous
+- cp -r required for directories
+- find is real-time, locate is faster
+---
 ### Links
+
 ### Device types in /dev
 ## 2.2 Given a scenario, perform local account management in a Linux environment
 ## Add
