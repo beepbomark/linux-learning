@@ -1174,19 +1174,200 @@ df -h                   # disk usage
 - find is real-time, locate is faster
 ---
 ### Links
-
+#### What it is
+A link is a reference to a file.
+#### Hard link
+```bash
+ln file1 file2      # create another name for same file
+```
+- same inode
+- same data
+- does not break if original is deleted
+#### Symbolic link
+```bash
+ln -s file1 link1   # create shortcut
+```
+- different inode
+- points to original file
+- breaks if original file is removed
+#### Check inode
+```bash
+ls -li              # display inode numbers
+```
+#### Notes
+- hard links cannot cross filesystems
+- symbolic links can link directories
+- removing a link does not delete original file
+#### Real-world scenarios
+- Hard link -> data safety
+- Symbolic link -> shortcuts and flexible paths
+---
 ### Device types in /dev
+#### What it is
+/dev contains special files representing hardware devices.
+#### Block devices
+- store data in blocks
+- support random access
+##### Examples:
+```bash
+/dev/sda
+/dev/sda1
+```
+#### Character devices
+- stream data
+- sequential access
+##### Examples:
+```bash
+/dev/tty
+/dev/null
+```
+#### Pseudo devices
+- not real hardware
+##### Examples:
+```bash
+/dev/null     # discard output
+/dev/zero     # continuous zeros
+/dev/random   # random data
+```
+#### Commands
+```bash
+lsblk         # list block devices
+ls -l /dev    # show device types
+df -h         # show mounted filesystems
+blkid         # show device info
+```
+#### Notes
+- b = block device
+- c = character device
+- devices are managed by kernel drivers
+#### Real-world scenario
+USB device:
+1. Use lsblk to identify device
+2. Mount device to directory
+3. Access files
+---
 ## 2.2 Given a scenario, perform local account management in a Linux environment
-## Add
-## Delete
-## Modify
-## Lock
-## Expiration
-## List
-## User profile templates
-## Account files
-## Attributes
-## User accounts vs system accounts vs service accounts
+### Add
+#### What it is
+Creating a new local user account on the system.
+#### Commands
+```bash
+sudo adduser username   # create user (recommended)
+sudo useradd username   # create user (manual)
+```
+#### Options
+```bash
+sudo useradd -m username          # create home directory
+sudo useradd -s /bin/bash user    # set shell
+sudo useradd -u 1001 user         # set UID
+sudo useradd -G sudo user         # add to group
+```
+##### Set password
+```bash
+sudo passwd username
+```
+#### Verification
+```bash
+grep username /etc/passwd         # check user entry
+id username                       # show user info
+```
+#### Notes
+- adduser is interactive and easier
+- useradd requires manual setup
+- default files copied from /etc/skel
+#### Real-world scenario
+Create admin user:
+1. adduser devuser
+2. add to sudo group
+3. verify with id
+---
+### Delete
+#### What it is
+Removing a user account from the system.
+#### Command
+```bash
+sudo userdel username     # delete user account
+```
+#### Remove home directory
+```bash
+sudo userdel -r username  # delete user + home directory
+```
+#### Force delete
+```bash
+sudo userdel -f username  # force removal
+```
+#### Verification
+```bash
+grep username /etc/passwd # confirm deletion
+ls /home                  # check home directory
+```
+#### Clean up files
+```bash
+find / -user username     # find leftover files
+chown user:group file     # reassign ownership
+```
+#### Notes
+- userdel does not remove home directory by default
+- -r removes home directory and mail spool
+- check for remaining files are deletion
+#### Real-world scenario
+Employee leaves:
+1. Delete account
+2. Remove home directory
+3. Reassign important files
+---
+### Modify
+#### What it is
+Changing properties of an existing user account.
+#### Command
+```bash
+sudo usermod username
+```
+#### Group management
+```bash
+sudo usermod -aG group user   # add to group (append)
+sudo usermod -g group user    # change primary group
+```
+#### User properties
+```bash
+sudo usermod -l new old         # rename user
+sudo usermod -d /home user      # change home directory
+sudo usermod -s /bin/bash user  # change shell
+```
+#### Account control
+```bash
+sudo usermod -L user          # lock account
+sudo usermod -U user          # unlock account
+```
+#### Password
+```bash
+sudo passwd user              # lock account
+sudo passwd -e user           # expire password
+```
+#### Notes
+- use -aG when adding to groups
+- locking disables login without deleting user
+- verify changes using id command
+#### Real-world scenario
+Grant admin access:
+1. Add user to sudo group
+2. Verify group membership
+3. Test sudo access
+---
+### Lock
+#### What it is
+Disabling a user account without deleting it.
+#### Lock account
+```bash
+sudo usermod -L username    # lock account
+sudo passwd -l username     # lock password
+```
+### Expiration
+### List
+### User profile templates
+### Account files
+### Attributes
+### User accounts vs system accounts vs service accounts
 ## 2.3 Given a scenario, manage processes and jobs in a Linux environment
 ### Process verification
 ### Process ID
