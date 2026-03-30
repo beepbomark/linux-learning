@@ -1362,20 +1362,464 @@ Disabling a user account without deleting it.
 sudo usermod -L username    # lock account
 sudo passwd -l username     # lock password
 ```
+#### Unlock account
+```bash
+sudo usermod -U username    # unlock account
+sudo passwd -u username     # unlock password
+```
+#### Verify
+```bash
+passwd -S username          # unlock account
+grep username /etc/shadow   # unlock password
+```
+#### Alternative method
+```bash
+sudo usermod -s /sbin/nologin username  # disable login shell
+```
+#### Notes
+- Locking adds "!" to password hash
+- User still exists in system
+- Used for temporary access restriction
+#### Real-world scenario
+Temporary disable:
+1. Lock user account
+2. Verify status
+3. Unlock when needed
+---
 ### Expiration
+#### What it is
+Setting a date after which a user account is disabled.
+#### Set expiration
+```bash
+sudo usermod -e 2025-12-31 username
+sudo chage -E 2025-12-31 username
+```
+#### Remove expiration
+```bash
+sudo usermod -e "" username
+```
+#### View expiration
+```bash
+chage -l username
+```
+#### Password aging
+```bash
+sudo chage -M 90 username   # max days
+sudo chage -m 7 username    # min days
+sudo chage -W 7 username    # warning days
+```
+#### Notes
+- expiration disables login automatically
+- stored in /etc/shadow
+- chage provides detailed control
+#### Real-world scenario
+Temporary account:
+1. Create user
+2. Set expiration date
+3. Account auto-disables after period
+---
 ### List
+#### What it is
+Viewing user accounts and their details.
+#### List all users
+```bash
+cat /etc/paswd            # list all users
+cut -d: -f1 /etc/passwd   # extract usernames only
+```
+#### Logged-in users
+```bash
+who     # current sessions
+w       # sessions + activity
+users   # usernames only
+```
+#### Current user
+```bash
+whoami  # current username
+id      # UID, GID, groups
+```
+#### Groups
+```bash
+cat /etc/group    # list groups
+groups username   # user groups
+```
+#### System vs normal users
+```bash
+awk -F: '$3 < 1000 {print $1}' /etc/passwd   # system users
+awk -F: '$3 >= 1000 {print $1}' /etc/passwd  # normal users
+```
+#### Notes
+- /etc/passwd stores user information
+- UID identifies user type
+- use id to check permissions
+#### Real-world scenario
+User audit:
+1. List all users
+2. Identify real users
+3. Check active sessions
+4. Verify permissions
+---
 ### User profile templates
+#### What it is
+Default files copied to a new user's home directory.
+#### Template directory
+```bash
+/etc/skel   # contains default user configuration files
+```
+##### Common files
+- .bashrc -> shell settings
+- .profile -> login settings
+- .bash_logout -> logout actions
+#### Customization
+```bash
+echo "alias ll='ls -la'" >> /etc/skel/.bashrc   # add default alias for all new users
+```
+#### Apply to existing users
+```bash
+cp /etc/skel/.bashrc /home/user/    # manually update user
+```
+#### Notes
+- only affects new users
+- requires home directory creation (-m)
+- used for standard environment setup
+#### Real-world scenario
+Standard developer setup:
+1. Modify /etc/skel
+2. Create new user
+3. User inherits configuration
+---
 ### Account files
+#### What it is
+System files that store user and group information.
+#### /etc/passwd
+```bash
+cat /etc/passwd
+```
+- stores user account details
+- readable by all users
+Format: username:x:UID:GID:comment:/home:/shell
+#### /etc/shadow
+```bash
+sudo cat /etc/shadow
+```
+- stores encrypted passwords
+- only root can access
+#### /etc/group
+```bash
+cat /etc/group
+```
+- stores group information
+Format: group:x:GID:user1,user2
+#### /etc/gshadow
+```bash
+sudo cat /etc/gshadow
+```
+- secure group information
+#### Notes
+- passwords stored in shadow file
+- passwd file does not contain passwords
+- group file controls access
+#### Real-world scenario
+Login troubleshooting:
+1. Check /etc/passwd
+2. Check /etc/shadow
+3. Verify group membership
+---
 ### Attributes
+#### What it is
+Special flags that control file behavior beyond permissions
+#### View attributes
+```bash
+lsattr file.txt   # show file attributes
+```
+#### Modify attributes
+```bash
+sudo chattr +i file.txt   # make file immutable
+sudo chattr -i file.txt   # remove immutable
+```
+#### Common attributes
+- i -> immutable (cannot modify/delete)
+- a -> append only (can only add data)
+#### Examples
+```bash
+sudo cattr +i config.txt      # protect file
+sudo chattr +a logfile.log    # secure logs
+```
+#### Notes
+- attributes override normal permissions
+- only root can change attributes
+- useful for security and protection
+#### Real-world scenario
+1. Protect config files using +i
+2. Secure logs using +a
+3. Troubleshoot using lsattr
+---
 ### User accounts vs system accounts vs service accounts
+#### User accounts
+- used by real users
+- UID >= 1000
+- interactive login
+- example: john, admin
+#### System accounts
+- used by OS
+- UID < 1000
+- no login shell
+- example: root, daemon
+#### Service accounts
+- used by applications
+- no login access
+- limited permissions
+- example: www-data, mysql
+#### Commands
+```bash
+id username                 # check UID
+grep username /etc/passwd   # check shell
+ps aux | grep service       # check running service user
+```
+#### Notes
+- UID determines account type
+- service accounts improve security
+- nologin shell prevents access
+#### Real-world scenario
+- user logs in -> user account
+- web server runs -> service account
+- system process -> system account
+---
 ## 2.3 Given a scenario, manage processes and jobs in a Linux environment
 ### Process verification
+#### What it is
+Monitoring and checking running processes.
+#### View processes
+```bash
+ps aux    # list all processes 
+ps -ef    # full format
+```
+#### Real-time monitoring
+```bash
+top       # live process view
+htop      # interactive (if installed)
+```
+#### Find process
+```bash
+ps aux | grep name    # search process
+pgrep name            # get PID
+pidof name            # get PID
+```
+#### Process details
+```bash
+ps -p PID             # specific process
+top -p PID            # monitor specific process
+```
+#### Process tree
+```bash
+pstree                # show hierarchy
+```
+#### Network processes
+```bash
+ss -tulnp             # check ports and processes
+```
+#### Notes
+- PID identifies process
+- ps is snapshot, top is live
+- use grep to filter results
+#### Real-world scenario
+1. Check if service is running
+2. Monitor CPU usage
+3. Identify process using a port
+---
 ### Process ID
+#### What it is
+A unique number assigned to each running process.
+#### Key concepts
+- assigned by kernel
+- unique per process
+- reused after process ends
+#### Special PIDs
+- PID 1 -> system init process
+- PPID -> parent process ID
+#### View PID
+```bash
+ps aux        # list processes with PID
+pgrep name    # get PID
+pidof name    # get PID
+```
+#### Use PID
+```bash
+kill 1234     # terminate process
+kill -9 1234  # force terminate
+top -p 1234   # monitor process
+```
+#### Notes
+- PID identifies process
+- PPID shows parent-child relationship
+- used for process control
+#### Real-world scenario
+1. Find process PID
+2. Monitor or kill process
+3. Investigate parent process
+---
 ### Process states
+#### What it is
+Represents the current condition of a process.
+#### Main states
+- R -> Running (executing or ready)
+- S -> Sleeping (waiting for event)
+- D -> Uninterruptible sleep (waiting for I/O)
+- T -> Stopped (paused)
+- Z -> Zombie (terminated but not cleaned)
+#### View states
+```bash
+ps aux  # STAT column
+top     # real-time monitoring
+```
+#### Notes
+- S is most common
+- D cannot be easily killed
+- Z indicates improper cleanup
+- R means running or ready
+#### Real-world scenarios
+- High CPU -> check R
+- System hang -> check D
+- Zombie processes -> check Z
+- Paused jobs -> check T
+---
 ### Priority
+#### What it is
+Controls how much CPU time a process receives.
+#### Nice values
+- Range: -20 (high priority) to 19 (low priority)
+- Default: 0
+#### View priority
+```bash
+ps -eo pid,ni,comm  # show nice value
+top                 # view PR and NI
+```
+#### Start process with priority
+```bash
+nice -n 10 command  # start with lower priority
+```
+#### Change priority
+```bash
+sudo renice 10 -p PID   # lower priority
+sudo renice -5 -p PID   # higher priority
+```
+#### Notes
+- lower nice value = higher priority
+- only root can incraese priority (negative nice)
+- nice = new process, renice = existing process
+#### Real-world scenario
+1. Run background job with low priority
+2. Adjust priority of heavy process
+3. Monitor using top
+---
 ### Process limits
+#### What it is
+Restrictions on system resources per user or process.
+#### Types
+- soft -> current limit
+- hard -> maximum limit
+#### View limits
+```bash
+ulimit -a   # show all limits
+ulimit -n   # max open files
+ulimit -u   # max processes
+```
+#### Set temporary limits
+```bash
+ulimit -n 1024  # set open file limit
+```
+#### Set permanent limits
+File: /etc/security/limits.conf
+Example:
+> user soft nofile 1024  
+> user hard nofile 2048  
+#### Common limits
+- nofile -> open files
+- nproc -> processes
+- cpu -> CPU time
+- fsize -> file size
+#### Notes
+- ulimit applies to current session
+- limits.conf applies system-wide
+- PAM must enable limits
+#### Real-world scenario
+- prevent too many open files
+- limit number of processes
+- control resource usage
+---
 ### Job and process management
+#### What it is
+Controlling how processes run and interact with the terminal.
+#### Foreground vs background
+```bash
+command     # foreground
+command &   # background
+```
+#### Job control
+```bash
+jobs        # list jobs
+bg %1       # resume in background
+fg %1       # bring to foreground
+```
+#### Signals
+```bash
+kill PID      # terminate process
+kill -9 PID   # force kill
+pkill name    # kill by name
+```
+#### Pause and resume
+- Ctrl + Z -> pause
+- bg -> resume background
+- fg -> resume foreground
+#### Real-world scenario
+1. Run long task in background
+2. Pause/resume jobs
+3. Kill stuck processes
+4. Run persistent tasks
+---
 ### Scheduling
+#### What it is
+Running tasks automatically at scheduled times.
+#### Cron (recurring)
+```bash
+crontab -e    # edit jobs
+crontab -l    # list jobs
+crontab -r    # remove jobs
+```
+#### Cron format
+```
+* * * * * command  
+│ │ │ │ │  
+│ │ │ │ └─ day of week  
+│ │ │ └── month  
+│ │ └──── day of month  
+│ └────── hour  
+└──────── minute  
+```
+#### Examples
+```bash
+0 2 * * * backup.sh     # daily at 2 AM
+*/5 * * * * script.sh   # every 5 min
+```
+#### System cron
+```bash
+/etc/crontab
+/etc/cron.daily/
+```
+#### At (one-time)
+```bash
+echo "command" | at 14:00
+atq                         # list jobs
+atrm 1                      # remove job
+```
+#### Notes
+- use full paths in cron
+- cron = recurring, at = one-time
+- check logs for errors
+#### Real-world scenario
+1. Schedule backups
+2. Clean temp files
+3. Monitor system automatically
+---
 ## 2.4 Given a scenario, configure and manage software in a Linux environment
 ### Installation, update, and removal
 ### Repository management
