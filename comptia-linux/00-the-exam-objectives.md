@@ -1822,7 +1822,83 @@ atrm 1                      # remove job
 ---
 ## 2.4 Given a scenario, configure and manage software in a Linux environment
 ### Installation, update, and removal
+#### What it is
+Managing software using package managers.
+#### Install
+```bash
+sudo apt update       # refresh package list
+sudo apt install pkg  # install package
+```
+#### Update
+```bash
+sudo apt upgrade      # upgrade packages
+sudo apt full-upgrade # full upgrade
+```
+#### Remove
+```bash
+sudo apt remove pkg   # remove package
+sudo apt purge pkg    # remove + config
+sudo apt autoremove   # remove unused dependencies
+```
+#### Search
+```bash
+apt search pkg      
+apt show pkg
+```
+#### Low-level tools
+```bash
+sudo dpkg -i file.deb
+sudo rpm -ivh file.rpm 
+```
+#### Notes
+- apt handles dependencies
+- update refreshes package list
+- purge removes config files
+#### Real-world scenario
+1. Install software
+2. Update system
+3. Remove unused packages
+---
 ### Repository management
+#### What it is
+Managing software sources used for package installation
+#### APT repository files
+```bash
+/etc/apt/sources.list
+/etc/apt/sources.list.d/
+```
+#### Add repository
+```bash
+sudo add-apt-repository ppa:example/repo
+sudo apt update
+```
+#### Remove repository
+```bash
+sudo add-apt-repository --remove ppa:example/repo
+```
+#### Disable repository
+```bash
+# comment line in sources.list
+```
+#### Check repository
+```bash
+apt-cache policy pkg
+```
+#### DNF repositories
+```bash
+/etc/yum.repos.d/
+dnf repolist
+```
+#### Notes
+- repositories provide software packages
+- always run apt update after changes
+- GPG keys ensure security
+#### Real-world scenario
+1. Add repository
+2. Update package list
+3. Install software
+4. Remove or disable if needed
+---
 ### Package and repository exclusions
 ### Update alternatives
 ### Software configuration
