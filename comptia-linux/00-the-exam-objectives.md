@@ -2045,17 +2045,410 @@ flatpak list
 3. Restrict application access
 ---
 ### Basic configurations of common services
+#### What it is
+Managing and configuring system services.
+#### Service Management
+```bash
+sudo systemctl start service    # start service
+sudo systemctl stop service     # stop service
+sudo systemctl restart service  # restart service
+sudo systemctl enable service   # start at boot
+systemctl status service        # check status
+```
+#### SSH configuration
+```bash
+/etc/ssh/sshd_config
+```
+##### Example
+```
+Port 22
+PermitRootLogin no
+```
+#### Web server (nginx)
+```bash
+/etc/nginx/nginx.conf
+nginx -t
+sudo systemctl reload nginx
+```
+#### Firewall (ufw)
+```bash
+sudo ufw allow 22
+sudo ufw enable
+```
+#### Notes
+- restart service after config change
+- use systemctl for management
+- check logs if service fails
+#### Real-world scenario
+1. Install service
+2. Configure settings
+3. Start and enable service
+4. Verify service is running
+---
 ## 2.5 Given a scenario, manage Linux using systemd
 ### Systemd units
+#### What it is
+A unit is a configuration file used by systemd to manage system resources.
+#### Common unit types
+- service -> background services
+- target -> system state (runlevel)
+- timer -> scheduled tasks
+- mount -> filesystem mount
+#### Unit locations
+```bash
+/etc/systemd/system/    # custom units
+/lib/systemd/system/    # default units
+```
+#### Unit structure
+```INI
+[Unit]
+Description=Service description
+
+[Service]
+ExecStart=/path/to/app
+
+[Install]
+WantedBy=multi-user.target
+```
+#### Manage units
+```bash
+sudo systemctl start service
+sudo systemctl stop service
+sudo systemctl restart service
+sudo systemctl enable service
+systemctl status service
+```
+#### Reload systemd
+```bash
+sudo systemctl daemon-reload
+```
+#### Targets
+```bash
+multi-user.target   # CLI mode
+graphical.target    # GUI mode
+```
+#### Notes
+- systemd manages services and boot process
+- enable = start at boot
+- daemon-reload required after changes
+#### Real-world scenario
+1. Start service
+2. Enable at boot
+3. Check status
+4. Troubleshoot with logs
+---
 ### Utilities
+#### systemctl (service management)
+```bash
+systemctl start service
+systemctl stop service
+systemctl restart service
+systemctl enable service
+systemctl status service
+```
+#### journalctl (logs)
+```bash
+journalctl              # view logs
+journalctl -u service   # logs for service
+journalctl -f           # follow logs
+```
+#### systemd-analyze (boot)
+```bash
+systemd-analyze
+systemd-analyze blame
+```
+#### hostnamectl
+```bash
+hostnamectl
+hostnamectl set-hostname name
+```
+#### timedatectl
+```bash
+timedatectl
+timedatectl set-timezone region
+```
+#### loginctl
+```bash
+loginctl
+```
+#### Notes
+- systemctl manages services
+- journalctl is used for troubleshooting
+- systemd utilities control system behavior
+#### Real-world scenario
+1. Check service status
+2. View logs
+3. Fix configuration issues
+---
 ### Managing unit states
+#### Runtime states
+- active -> running
+- inactive -> stopped
+- failed -> error
+
+```bash
+systemctl status service      # full status
+systemctl is-active service   # quick check
+```
+#### Enable states
+- enabled -> start at boot
+- disabled -> not at boot
+- masked -> cannot be started
+```bash
+systemctl is-enabled service
+```
+#### Change state
+```bash
+sudo systemctl start service
+sudo systemctl stop service
+sudo systemctl restart service
+sudo systemctl reload service
+```
+#### Boot control
+```bash
+sudo systemctl enable service
+sudo systemctl disable service
+```
+#### Masking
+```bash
+sudo systemctl mask service
+sudo systemctl unmask service
+```
+#### Reset failed state
+```bash
+sudo systemctl reset-failed service
+```
+#### Notes
+- active != enabled
+- mask prevents any start
+- use status for troubleshooting
+#### Real-world scenario
+1. Check service status
+2. Start or restart service
+3. Enable at boot
+4. Troubleshoot failures
+---
 ## 2.6 Given a scenario, manage applications in a container on a Linux server
 ### Runtimes
+#### What it is
+Software used to run and manage containers.
+#### Common runtimes
+- Docker -> most popular
+- containerd -> lightweight backend
+- CRI-O -> Kubernetes runtime
+- Podman -> daemonless, rootless
+#### Docker basics
+```bash
+docker run nginx    # run container
+docker ps           # list running containers
+docker stop <id>    # stop container
+docker rm <id>      # remove container 
+```
+#### Image vs Container
+- image -> blueprint
+- container -> running instance
+#### Lifecycle
+> pull -> run -> stop -> remove
+#### Notes 
+- containers share host kernel
+- faster than virtual machines
+- isolated environment
+#### Real-world scenario
+1. Run application in container
+2. Test software safely
+3. Deploy services quickly
+---
 ### Image operations
+#### What it is
+Managing container images (download, build, remove).
+#### Pull image
+```bash
+docker pull nginx         # download image
+docker pull nginx:1.25    # specific version
+```
+#### List images
+```bash
+docker images
+```
+#### Remove image
+```bash
+docker rmi nginx
+```
+#### Build image
+```bash
+docker build -t myapp .
+```
+#### Tag image
+```bash
+docker tag nginx myrepo/nginx:v1
+```
+#### Push image
+```bash
+docker push myrepo/nginx:v1
+```
+#### Inspect image
+```bash
+docker inspect nginx
+```
+#### Cleanup
+```bash
+docker image prune
+docker system prune
+```
+#### Notes
+- image is a blueprint
+- layers improve efficiency
+- must remove containers before deleting image
+#### Real-world scenario
+1. Pull image
+2. Run container
+3. Build custom image
+4. Push to registry
+---
 ### Container operations
+#### What it is
+Managing running containers.
+#### Run container
+```bash
+docker run nginx              
+docker run -d nginx           # background
+docker run -p 80:80 nginx     # port mapping
+```
+#### List containers
+```bash
+docker ps
+docker ps -a
+```
+#### Start/stop
+```bash
+docker start container
+docker stop container
+docker restart container
+```
+#### Remove
+```bash
+docker rm container
+docker rm -f container
+```
+#### Execute inside container
+```bash
+docker exec -it container bash
+```
+#### Logs
+```bash
+docker logs container
+docker logs -f container
+```
+#### Notes
+- containers are temporary
+- use exec to access container
+- use logs for troubleshooting
+#### Real-world scenario
+1. Run application
+2. Access container
+3. Check logs
+4. Restart or remove container
+---
 ### Volume operations
+#### Create volume
+```bash
+docker volume create myvol
+docker volume ls
+docker volume inspect myvol
+```
+#### Use volume
+```bash
+docker run -v myvol:/app nginx
+```
+#### Bind mount
+```bash
+docker run -v /host/path:/container/path nginx
+```
+#### Remove volume
+```bash
+docker volume rm myvol
+docker volume prune
+```
+#### Types
+- named volume -> managed by Docker
+- bind mount -> host directory
+- anonymous volume -> auto-created
+#### Notes
+- containers lose data without volumes
+- volumes persist after container removal
+- stored in /var/lib/docker/volumes/
+#### Real-world scenario
+1. Store database data
+2. Share files between host and container
+3. Persist applicaiton data
+---
 ### Container networks
+#### Network types
+- bridge -> default
+- host -> use host network
+- none -> no network
+- custom bridge -> recommended
+#### Create network
+```bash
+docker network create mynet
+docker network ls
+docker network inspect mynet
+```
+#### Run container in network
+```bash
+docker run --network mynet nginx
+```
+#### Port mapping
+```bash
+docker run -p 8080:80 nginx
+```
+#### communication
+- containers communicate via name
+- must be on same network
+#### Notes
+- bridge is default
+- custom network enables DNS
+- host removes isolation
+#### Real-world scenario
+1. Create network
+2. Run web + database containers
+3. Connect using container names
+4. Expose service to host
+---
 ### Privileges vs unprivileged
+#### What it is
+Defines how much access a container has to the host system.
+#### Unprivileged (default)
+```bash
+docker run nginx
+```
+- restricted access
+- secure
+- recommended
+#### Privileged
+```bash
+docker run --privileged nginx
+```
+- full system access
+- high risk
+#### Capabilities
+```bash
+docker run --cap-add=NET_ADMIN nginx
+docker run --cap-drop=ALL nginx
+```
+#### Rootless containers
+```bash
+podman run nginx
+```
+#### Notes
+- avoid privileged containers
+- use least privilege
+- capabilities provide fine-grained control
+#### Real-world scenario
+1. Run normal app (unprivileged)
+2. Add specific capability if needed
+3. Avoid full privileged mode
+---
 # 3.0 Security 
 ## 3.1 Summarize authorization, authentication, and accounting methods
 ### Polkit
