@@ -1900,9 +1900,150 @@ dnf repolist
 4. Remove or disable if needed
 ---
 ### Package and repository exclusions
+#### What it is
+Preventing certain packages or repositories from being installed or updated.
+#### APT package hold
+```bash
+sudo apt-mark hold pkg      # prevent updates
+apt-mark showhold           # list held packages
+sudo apt-mark unhold pkg    # allow updates
+```
+#### APT repository exclusion
+```bash
+# comment repository in /etc/apt/sources.list
+sudo apt update
+```
+#### APT pinning (advanced)
+```
+Package: pkg
+Pin: version 1.0*
+Pin-Priority: 1001
+```
+#### DNF exclusion
+```bash
+sudo dnf update --exclude=pkg
+```
+#### Permanent exclusion
+```
+# /etc/dnf/dnf.conf
+exclude=pkg*
+```
+#### Notes
+- used to prevent unwanted updates
+- important for system stability
+- apt-mark hold is commonly tested
+#### Real-world scenario
+1. Hold critical package
+2. Exclude problematic updates
+3. Disable unstable repository
+---
 ### Update alternatives
+#### What it is
+Manages multiple versions of a program using symbolic links.
+#### View alternatives
+```bash
+update-alternatives --list name
+update-alternatives --display name
+```
+#### Configure
+```bash
+sudo update -alternatives --config name   # choose version interactively
+```
+#### Add alternative
+```bash
+sudo update-alternatives --install /path name program priority
+```
+#### Remove alternative
+```bash
+sudo update-alternatives --remove name program
+```
+#### Modes
+- auto -> system chooses highest priority
+- manual -> user selects version
+#### Notes 
+- uses symbolic links
+- allows multiple versions of software
+- commonly used for python, java, editor
+#### Real-world scenario
+1. Install multiple versions
+2. Use update-alternatives to switch
+3. Set default version
+---
 ### Software configuration
+#### What it is
+Modifying software settings to control behavior.
+#### Configuration files
+```bash
+/etc/         # system-wide configs
+~/.config/    # user configs
+```
+#### Editing
+```bash
+nano file.conf  # edit config
+vim file.conf
+```
+#### Apply changes
+```bash
+sudo systemctl restart service
+sudo systemctl reload service
+```
+#### Validate config
+```bash
+nginx -t    # test config
+```
+#### Backup
+```bash
+cp file.conf file.conf.bak
+```
+#### Methods
+- config files
+- command-line options
+- environment variables
+#### Notes
+- always test config before restart
+- syntax errors can break services
+- /etc is main config directory
+#### Real-world scenario
+1. Edit config file
+2. Validate configuration
+3. Restart or reload service
+---
 ### Sandboxed applications
+#### What it is
+Applications that run in an isolated environment with restricted access.
+#### Technologies
+- Snap
+- Flatpak
+- AppImage
+#### Snap commands
+```bash
+sudo snap install app   # install
+snap list               # list apps
+sudo snap remove app    # remove
+snap connections        # check permissions
+```
+#### Flatpak commands
+```bash
+flatpak install app
+flatpak list
+```
+#### AppImage
+```bash
+./appimage    # run portable app
+```
+#### Concepts
+- isolation from system
+- restricted permissions
+- bundled dependencies
+#### Notes
+- improves security
+- prevents system conflicts
+- similar to containers
+#### Real-world scenario
+1. Install untrusted app safely
+2. Run apps without dependency issues
+3. Restrict application access
+---
 ### Basic configurations of common services
 ## 2.5 Given a scenario, manage Linux using systemd
 ### Systemd units
