@@ -2451,30 +2451,750 @@ podman run nginx
 ---
 # 3.0 Security 
 ## 3.1 Summarize authorization, authentication, and accounting methods
-### Polkit
+### Polkit (PolicyKit)
+#### What it is 
+Framework for controlling access to privileged operations.
+#### How it works
+```text
+User -> request -> Polkit -> policy check -> allow/deny
+```
+#### Components
+- actions -> operations (e.g. manage services)
+- policies -> rules defining access
+- authentication agent -> password prompt
+#### File locations
+```bash
+/usr/share/polkit-1/actions/    # policy definitions
+/etc/polkit-1/rules.d/          # custom rules
+```
+#### Example rule
+```JavaScript
+polkit.addRule(function(action, subject) {
+    if (subject.isInGroup("sudo")) {
+        return polkit.Result.YES;
+    }
+});
+```
+#### Polkit vs sudo
+- Polkit -> fine-grained control
+- sudo -> full command execution
+#### Notes
+- used in desktop and system services
+- allows limited privileged escalation
+#### Real-world scenario
+1. User performs privileged action
+2. Polkit checks policy
+3. User is allowed or prompted for authentication
+---
 ### Pluggable Authentication Modules (PAM)
+#### What it is
+Framework for managing authentication and access control.
+#### Config location
+```bash
+/etc/pam.d/
+```
+#### Structure
+> type control module arguments
+#### Types
+- auth -> authentication
+- account -> account checks
+- password -> password changes
+- session -> session setup
+#### Control flags
+- required -> must pass
+- requiste -> fail immediately
+- sufficient -> success skips rest
+- optional -> not critical
+#### Example
+```
+auth required pam_unix.so
+session required pam_limits.so
+```
+#### Notes
+- PAM centralizes authentication
+- used by SSH, sudo, login
+- modular and flexible
+#### Real-world scenario
+1. User logs in
+2. PAM checks authentication
+3. Applies policies
+4. Grants or denies access
+---
 ### System Security Services Daemon ((SSSD)/winbind)
+#### What it is
+Services that allow Linux to authenticate users from centralized directories (AD/LDAP).
+#### SSSD
+- modern solution
+- supports LDAP and Active Directory
+- caching for offline login
+```bash
+/etc/sssd/sssd.conf
+systemctl status sssd
+```
+#### winbind
+- part of Samba
+- used for Active Directory integration
+```bash
+/etc/sambda/smb.conf
+systemctl status winbind
+```
+#### Integration
+- PAM -> authentcation
+- NSS -> user lookup
+```bash
+/etc/nsswitch.conf
+```
+##### Example
+```
+passwd: files sss
+group: files sss
+```
+#### Commands
+```bash
+id username
+getent passwd
+```
+#### Notes
+- SSSD is preferred
+- allows centralized authentication
+- supports offline login
+#### Real-world scenario
+1. User logs in using domain credentials
+2. SSSSD contacts AD/LDAP
+3. Authentication succeeds
+---
 ### realm
+#### What it is
+Tool used to join Linux systems to identity domains (AD/LDAP).
+#### Install
+```bash
+sudo apt install realmd sssd adcli
+```
+#### Discover domain
+```bash
+realm discover example.com
+```
+#### Join domain
+```bash
+sudo realm join example.com -U admin
+```
+#### Verify
+```bash
+realm list
+id user@example.com
+```
+#### Leave domain
+```bash
+sudo realm leave example.com
+```
+#### Access control
+```bash
+realm permit user@example.com
+realm permit -g group
+realm deny user@example.com
+```
+#### Notes
+- simplifies SSSD and Kerberos setup
+- used for Active Directory integration
+- enables centralized authentication
+#### Real-world scenario
+1. Join Linux server to AD
+2. Users log in using domain accounts
+3. Admin controls access centrally
+---
 ### Lightweight Directory Access Protocol (LDAP)
+#### What it is
+Protocol used to access directory services storing user and system data.
+#### Structure
+```text
+dc=example,dc=com
+  |--- ou=users
+  |     |-- uid=john
+```
+#### Distinguished Name (DN)
+> uid=john,ou=users,dc=example,dc=com
+#### Operations
+- bind -> authenticate
+- search -> find entries
+- add -> create entry
+- modify -> update entry
+- delete -> remove entry
+#### Tools
+```bash
+ldapsearch
+ldapadd
+ldapmodify
+```
+#### Security 
+- LDAP -> port 389
+- LDAPs -> port 636 (secure)
+#### Integration
+- works with PAM, SSSD, NSS
+- used for centralized authentication
+#### Notes
+- hierarchical structure
+- similar to DNS tree
+- AD uses LDAP internally
+#### Real-world scenario
+1. User logs in
+2. System queries LDAP
+3. Authentication succeeds
+---
 ### Kerberos
+#### What it is
+Network authentication protocol using tickets.
+#### Key concept
+```text
+User -> ticket -> access granted
+```
+#### Components
+- KDC -> ticket server
+- client -> user
+- service -> server
+#### Flow
+```
+1. User requests TGT
+2. KDC issues TGT
+3. User requests service ticket
+4. Access granted
+```
+#### Commands
+```bash
+kinit user@REALM
+klist
+kdestroy
+```
+#### Config
+```bash
+/etc/krb5.conf
+```
+#### Notes
+- uses encryption
+- enables single sign-on
+- avoids sending passwords repeatedly
+#### Real-world scenario
+1. User logs in
+2. Gets Kerberos ticket
+3. Accesses multiple services securely
+---
 ### Samba
+#### What it is
+Allows Linux to share files and printers using SMB/CIFS (Windows protocol).
+#### Install
+```bash
+sudo apt install samba
+```
+#### Config file
+```bash
+/etc/samba/smb.conf
+```
+#### Example share
+```INI
+[shared]
+path = /srv/samba/share
+browseable = yes
+read only = no
+guest ok = yes
+```
+#### Commands
+```bash
+systemctl restart smbd
+testparm
+smbclient -L localhost
+```
+#### User setup
+```bash
+smbpasswd -a username
+```
+#### Notes
+- uses SMB protocol (port 445)
+- allows Windows-Linux file sharing
+- integrates with AD
+#### Real-world scenario
+1. Create shared folder
+2. Configure smb.conf
+3. Restart service
+4. Access from Windows or Linux
+---
 ### Logging
+#### What it is
+Recording system events for troubleshooting, monitoring, and security.
+#### Log systems
+```bash
+systemctl status rsyslog
+journalctl
+```
+#### Log location
+```bash
+/var/log/
+```
+#### Important logs
+- syslog -> system logs
+- auth.log -> authenticaiton
+- kern.log -> kernel
+#### View logs
+```bash
+journalctl
+journalctl -f
+journalctl -u ssh
+tail -f /var/log/syslog
+```
+#### Log levels
+- emerg, alert, crit, err, warning, notice, info, debug
+#### Log rotation
+```bash
+/etc/logrotate.conf
+```
+#### Notes
+- logs help troubleshooting and security
+- use journalctl for systemd systems
+- log rotation prevents disk full
+#### Real-world scenario
+1. Check logs for errors
+2. Identify issue
+3. Take corrective action
+---
 ### System audit
+#### What it is
+Tracks user actions and system events for security and compliance.
+#### Service
+```bash
+systemctl status auditd
+```
+#### Log location
+```bash
+/var/log/audit/audit.log
+```
+#### Add rule
+```bash
+auditctl -w /etc/passwd -p wa -k passwd_changes
+```
+#### View logs
+```bash
+ausearch -k passwd_changes
+aureport
+```
+#### Config 
+```bash
+/etc/audit/rules.d/
+```
+#### Note
+- more detailed than normal logs
+- used for security monitoring
+- tracks user actions
+#### Real-world scenario
+1. Monitor sensitive file
+2. Detect unauthorized changes
+3. Identify responsible user
+--- 
 ## 3.2 Given a scenario, configure and implement firewalls on a Linux system
 ### firewalld
+#### What it is
+Dynamic firewall management tool for controlling network traffic.
+#### Zones
+- public -> default
+- home, work -> trusted
+- trusted -> allow all
+- drop -> block all
+#### Commands
+```bash
+systemctl start firewalld
+systemctl enable firewalld
+firewall-cmd --get-active-zones
+```
+#### Allow service
+```bash
+firewall-cmd --add-service=http
+```
+#### Allow port
+```bash
+firewall-cmd --add-port=8080/tcp
+```
+#### Permanent rules
+```bash
+firewall-cmd --add-service=http --permanent
+firewall-cmd --reload
+```
+#### Check rules
+```bash
+firewall-cmd --list-all
+```
+#### Notes
+- zones define trust level
+- runtime vs permanent rules
+- reload required for permanent changes
+#### Real-world scenario
+1. Enable firewall
+2. Allow required services (SSH, HTTP)
+3. Block all others
+---
 ### Uncomplicated Firewall (ufw)
+#### What it is
+Simple firewall management tool built on iptables/nftables.
+#### Enable / disable
+```bash
+ufw enable
+ufw disable
+ufw status
+```
+#### Default rules
+```bash
+ufw default deny incoming
+ufw default allow outgoing
+```
+#### Allow / deny
+```bash
+ufw allow ssh
+ufw allow 80/tcp
+ufw deny 23
+```
+#### Delete rule
+```bash
+ufw delete allow 80
+```
+#### Allow by IP
+```bash
+ufw allow from 192.168.1.10
+```
+#### Logging
+```bash
+ufw logging on
+```
+#### Notes
+- simple firewall interface
+- deny incoming by default
+- allow only necessary services
+#### Real-world scenario
+1. Enable firewall
+2. Allow SSH + HTTP
+3. Block all other incoming traffic
+---
 ### nftables
+#### What it is
+Modern Linux firewall framework replacing iptables
+#### Structure
+- table -> container
+- chain -> rule list
+- rule -> condition + action
+#### Commands
+```bash
+nft list ruleset
+nft add table inet filter
+nft add chain inet filter input { type filter hook input priority 0 \; }
+nft add rule inet filter input tcp dport 22 accept
+```
+#### Example
+```bash
+nft add rule inet filter input tcp dport 80 accept
+```
+#### Save config
+```bash
+nft list ruleset > /etc/nftables.conf
+```
+#### Notes
+- replaces iptables
+- supports IPv4 and IPv6
+- used by firewalld
+#### Real-world scenario
+1. Create firewall rules
+2. Allow required ports (SSH, HTTP)
+3. Block all other traffic
+---
 ### iptables
+#### What it is
+Legacy Linux firewall tool for packet filtering.
+#### Structure
+- table -> container
+- chain -> rule list
+- rule -> condition + action
+#### Commands
+```bash
+iptables -L
+iptables -A INPUT -p tcp --dport 22 -j ACCEPT
+iptables -P INPUT DROP
+```
+#### Notes
+- rules processed top to bottom
+- default policy important
+- replaced by nftables but still used
+#### Example
+```bash
+iptables -A INPUT -p tcp --dport 80 -j ACCEPT
+```
+#### Real-world scenario
+1. Set default drop
+2. ALlow SSH + HTTP
+3. Block all other traffic
+---
 ### ipset
+#### What it is
+Tool for grouping IPs/networks for efficient firewall matching.
+#### Create set
+```bash
+ipset create blacklist hash:ip
+```
+#### Add / remove
+```bash
+ipset add blacklist 192.168.1.10
+ipset del blacklist 192.168.1.10
+```
+#### View
+```bash
+ipset list
+```
+#### Use with iptables
+```bash
+iptables -A INPUT -m set --match-set blacklist src -j DROP
+```
+#### Save / restore
+```bash
+ipset save > /etc/ipset.conf
+ipset restore < /etc/ipset.conf
+```
+#### Notes
+- improves performance
+- reduces number of firewall rules
+- used for blacklist/whitelist
+#### Real-world scenario
+1. Create blacklist
+2. Add malicious IPs
+3. Apply single firewall rule
+---
 ### Netfilter module
+#### What it is
+Kernel framework for packet filtering and network processing.
+#### Hooks
+- PREROUTING -> before routing
+- INPUT -> incoming traffic
+- FORWARD -> routed traffic
+- OUTPUT -> outgoing traffic
+- POSTROUTING -> after routing
+#### Tables
+- filter -> allow/block
+- nat -> address translation
+- mangle -> modify packets
+#### Connection tracking
+- NEW -> new connection
+- ESTABLISHED -> ongoing
+- RELATED -> related traffic
+#### Commands
+```bash
+lsmod | grep nf
+modprobe nf_conntrack
+```
+#### Notes
+- kernel-level (fast)
+- used by iptables and nftables
+- controls packet flow
+#### Real-world scenario
+1. Packet enters system
+2. Netfilter processes via hooks
+3. Rules determine outcome
+---
 ### Address translation
+#### What it is
+Modifies IP addresses/ports in packets.
+#### Types
+- SNAT -> change source IP (outgoing)
+- DNAT -> change destination IP (incoming)
+- MASQUERADE -> dynamic SNAT
+#### Examples
+```bash
+iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+iptables -t nat -A PREROUTING -p tcp --dport 80 -j DNAT --to 192.168.1.10:80
+```
+#### Hooks
+- PREROUTING -> DNAT
+- POSTROUTING -> SNAT
+#### Enable forwarding
+```bash
+echo 1 > /proc/sys/net/ipv4/ip_forward
+```
+#### Notes
+- used for internet access
+- allows multiple devices to share one IP
+- used in routers and firewalls
+#### Real-world scenario
+1. Internal network sends traffic
+2. NAT converts to public IP
+3. Response routed back correctly
+---
 ### Stateful vs stateless
+#### Stateless
+- evaluates each packet independently
+- no memory
+- faster but less secure
+#### Stateful
+- tracks connection state
+- allows ESTABLISHED and RELATED traffic
+- more secure
+#### States
+- NEW -> new connection
+- ESTABLISHED -> ongoing
+- RELATED -> related traffic
+- INVALID -> invalid packet
+#### Example
+```bash
+iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+```
+#### Notes
+- modern firewalls are stateful
+- improves security and usability
+- reduces need for multiple rules
+#### Real-world scenario
+1. User sends request
+2. Firewall tracks connection
+3. Response allowed automatically
+---
 ### Internet Protocol (IP) forwarding
+#### What it is
+Allows Linux to route packets between networks.
+#### Check status
+```bash
+cat /proc/sys/net/ipv4/ip_forward
+```
+#### Enable (temporary)
+```bash
+echo 1 > /proc/sys/net/ipv4/ip_forward
+```
+#### Enable (permanent)
+```bash
+net.ipv4.ip_forward=1
+```
+#### Apply config
+```bash
+sysctl -p
+```
+#### Notes
+- required for routing and NAT
+- disabled by default
+- used in routers and gateways
+#### Real-world scenario
+1. Enable IP forwarding
+2. Configure NAT
+3. Linux acts as router between networks
+---
 ## 3.3 Given a scenario, apply operating system (OS) hardening techniques on a Linux system
 ### Privilege escalation
+#### What it is
+Gaining higher-level permissions.
+#### Types
+- vertical -> user to root
+- horizontal -> user to another user
+#### Legitimate methods
+```bash
+sudo command
+su -
+```
+#### Risks
+- misconfigured sudo
+- SUID binaries
+- weak permissions
+#### Find SUID files
+```bash
+find / -perm -4000 2>/dev/null
+```
+#### Prevention
+- least privilege
+- secure sudo config
+- proper file permissions
+- regular updates
+#### Monitoring
+```bash
+journalctl | grep sudo
+```
+#### Real-world scenario
+1. User gains elevated access
+2. Performs restricted actions
+3. System must enforce security controls
+---
 ### File attributes
+#### What it is
+Special flags controlling file behavior.
+#### View attributes
+```bash
+lsattr file
+```
+#### Set / remove
+```bash
+chattr +i file
+chattr -i file
+```
+#### Important attributes
+- i -> immutable (cannot modify/delete)
+- a -> append-only (logs)
+#### Notes
+- adds security beyond permissions
+- useful for protecting critical files
+- root cannot modify immutable files
+#### Real-world scenario
+1. Protect system file with immutable flag
+2. Secure logs with append-only
+3. Prevent unauthorized changes
+---
 ### Permissions
+#### What it is
+Defines who can read, write, or execute files.
+#### Types
+- r -> read
+- w -> write
+- x -> execute
+#### Structure
+```text
+-rwxr-xr--
+```
+#### Change permissions
+```bash
+chmod 755 file
+chmod u+x file
+```
+#### Ownership
+```bash
+chown user file
+chgrp group file
+```
+#### Special permissions
+```bash
+chmod u+s file    # SUID
+chmod g+s dir     # SGID
+chmod +t dir      # sticky bit
+```
+#### Notes
+- user/group/others model
+- numeric and symbolic modes
+- important for security
+#### Real-world scenario
+1. Secure sensitive files
+2. Control access to directories
+3. Prevent unauthorized actions
+---
 ### Access control
+#### What it is
+Controls who can access resources and what actions they can perform.
+#### Models
+- DAC -> owner controls access (chmod)
+- MAC -> system enforces policies (SELinux, AppArmor)
+- RBAC -> access based on roles
+#### Components (AAA)
+- Authentication -> identity
+- Authorization -> permissions
+- Accounting -> logging
+#### Tools
+```bash
+chmod 755 file
+setfacl -m u:user:rwx file
+sudo command
+```
+#### Notes
+- ACL provides fine-grained control
+- MAC adds strong security
+- least privilege is critical
+#### Real-world scenario
+1. Authenticate user
+2. Check permissions/policies
+3. Grant or deny access
+4. Log activity
+---
 ### Secure remote access
 ### Avoid the use of unsecure access services
 ### Disable unused file systems
