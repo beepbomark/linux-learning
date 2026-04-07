@@ -3196,21 +3196,820 @@ sudo command
 4. Log activity
 ---
 ### Secure remote access
+#### What it is
+Provides a secure way to access systems over a network while ensuring confidentialiy, integrity, and authentication of the connection.
+#### Protocols
+- SSH (Secure Shell) -> encrypted remote login and command execution
+- SCP (Secure Copy) -> secure file transfer over SSH
+- SFTP (SSH File Transfer Protocol) -> interactive secure file transfer
+- RDP (Remote Desktop Protocol) -> GUI remote access (less common on Linux servers)
+- VNC (Virtual Network Computing) -> remote desktop sharing (should be tunneled via SSH)
+#### Authentication methods
+- Password-based -> simple but less secure
+- Key-based (SSH keys) -> preferred, uses public/private key pair
+- Multi-factor authentication (MFA) -> adds extra verification layer
+- Kerberos -> centralized authentication in enterprise environments
+#### Components
+- SSH client -> initiates connection (`ssh user@host`)
+- SSH server (sshd) -> listens for incoming connections
+- Key pairs ->
+  - Public key (stored on server)
+  - Private key (kept securely on client)
+#### Tools
+```bash
+ssh user@host
+ssh -i key.pem user@host
+scp file.txt user@host:/path
+sftp user@host
+
+# generate SSH key pair
+ssh-keygen -t rsa -b 4096
+
+# copy public key to server
+ssh-copy-id user@host
+
+# restart ssh service
+systemctl restart ssh
+```
+#### Configuration files
+- `/etc/ssh/sshd_config` -> server configuration
+- `~/.ssh/authorized_keys` -> stores allowed public keys
+- `~/.ssh/config` -> client-side configuration
+#### Hardening techniques
+- Disable root login (`PermitRootLogin no`)
+- Disable password authentication (`PasswordAuthentiction no`)
+- Change default SSH port (optional security by obscurity)
+- Use key-based authentication only
+- Limit users/groups (`AllowUsers`, `AllowGroups`)
+- Configure idle timeout (`ClientAliveInterval`)
+- Use fail2ban to block brute-force attempts
+- Keep SSH updated
+#### Notes
+- SSH encrypts all traffic -> protects against sniffing
+- Key-based authentication is significantly more secure than passwords
+- Private keys must be protected (permissions: `chmod 600`)
+- Always verify host keys to prevent MITM attacks
+#### Real-world scenario
+1. Admin generates SSH key pair on local machine
+2. Public key is added to server's `authorized_keys`
+3. Admin connects using private key (`ssh -i key user@server`)
+4. Server authenticates key and grants access
+5. Session is encrypted and logged
+---
 ### Avoid the use of unsecure access services
+#### What it is
+The practice of disabling or replacing insecure remote access protocols that transmit data (especially credentials in plaintext, making them vulnerable to interception).
+#### Common insecure protocols
+- Telnet -> sends all data (including passwords) in plaintext
+- FTP -> unencrypted file transfer, credentials easily captured
+- rlogin /rsh -> legacy remote access tools with weak authentication
+- HTTP -> unencrypted web traffic
+- SNMPv1/v2 -> lacks strong authentication and encryption
+#### Secure alternatives
+- SSH -> replaces Telnet, rlogin, rsh
+- SFTP / SCP -> replaces FTP
+- HTTPS -> replaces HTTP
+- SNMPv3 -> secure version with encryption and authentication
+- VPN (e.g., IPsec, OpenVPN) -> encrypts entire network traffic
+#### Risks of insecure services
+- Packet sniffing -> attacks capture usernames/passwords
+- Man-in-the-middle (MITM) attacks -> traffic interception/modification
+- Credential reuse attacks -> compromised passwords used elsewhere
+- Data leakage -> sensitive information exposed
+#### Tools
+```bash
+# check open ports/services
+ss -tuln
+netstat -tuln
+
+# disable insecure services
+systemctl stop telnet.socket
+systemctl disable telnet.socket
+
+# install secure alternative 
+apt install openssh-server
+systemctl enable ssh
+systemctl start ssh
+
+# verify running services
+systemctl status ssh
+```
+#### Hardening techniques
+- Remove or disable unused services
+- Repalce legacy protocols with secure equivalents
+- Enforce encryption for all remote connections
+- Use firewalls to block insecure ports
+- Regulary audit open ports and services
+- Apply patches and updates to prevent vulnerabilities
+#### Notes
+- "If it's not encrypted, assume it can be read"
+- Many legacy systems still use insecure protocols -> must be phased out
+- Security is not just enabling SSH, but ensuring insecure services are fully removed
+- Defense-in-depth; combine secure protocols with firewalls and monitoring
+#### Real-world scenario
+1. Admin scans server and finds Telnet (port 23) open
+2. Disables Telnet service and removes package
+3. Installs and configures SSH for remote access
+4. Updates firewall to allow only SSH (port 22)
+5. Verifies connections are encrypted and logs access
+---
 ### Disable unused file systems
+#### What it is
+THe practice of disabling support for unnecessary or unused filesystem types in the Linux kernel to reduce the system's attack surface.
+#### Why it matters
+- Unused filesystems can be exploited by attackers
+- Some legacy filesystems have known vulnerabilities
+- Reduces risk of mounting malicious or unauthorized media
+- Improves overall system hardening
+#### Common unused filesystems
+- cramfs -> compressed read-only filesystem (legacy)
+- squashfs -> often used in live CDs (not needed on servers)
+- udf -> optical media (DVD/CD)
+- vfat -> USB/external drives (may not be needed in servers)
+- hfs /fhsplus -> macOS filesystems
+- freevxfs -> legacy UNIX filesystem
+- jffs2 -> embedded systems
+#### Methods to disable
+1. Using modprobe
+```bash
+# disable a filesystem module
+echo "install cramfs /bin/true" >> /etc/modprobe.d/disable-filesystems.conf
+echo "install squashfs /bin/true" >> /etc/modprobe.d/disable-filesystems.conf
+echo "install udf /bin/true" >> /etc/modprobe.d/disable-filesystems.conf
+```
+2. Unload existing module 
+```bash
+lsmod | grep cramfs
+modprobe -r cramfs
+```
+3. Blacklist module 
+```bash
+echo "blacklist cramfs" >> /etc/modprobe.d/blacklist.conf
+```
+4. Verification
+```bash
+# attempt to load module (should fail)
+modprobe cramfs
+
+# check loaded modules
+lsmod | grep cramfs
+```
+#### Notes
+- `install <module> /bin/true` prevents the module from being loaded entirely
+- Blacklisting alone may not fully prevent loading in all cases
+- Always verify that disabling a filesystem does not impact required operations
+- Servers typically only need a few filesystems (e.g., ext4, xfs)
+#### Hardening considerations
+- Disable removable media filesystems if not required (USB/CD usage)
+- Combine with mount restrictions (e.g., noexec, nosuid, nodev)
+- Apply principle of least functionality -> only enable what is needed
+#### Real-world scenario
+1. Security audit identifies unnecessary filesystem modules enabled
+2. Admin disables cramfs, udf, and squashfs via modprobe configuration
+3. Existing modules are unloaded from the kernel
+4. System is rebooted and verified that modules cannot be loaded
+5. Attack surface is reduced and compliance requirements are met
+---
 ### Removal of unnecessary Set User ID (SUID) permissions
+#### What it is
+The process of identifying and removing unnecessary SUID permissions on files to prevent escalation risks.
+#### What is SUID
+- Special file permission that allows a user to execute a file with the privileges of the file owner (usually root)
+- Represented as `s` in permissions (e.g., `-rwsr-xr-x`)
+- Commonly used for system utilities that required elevated privileges
+#### Risks
+- Privilege escalation -> attackers can gain root access if exploited
+- Misconfigured SUID binaries can be abused
+- Outdated or vulnerable programs with SUID are high-risk targets
+#### Common SUID files (legitimate examples)
+- `/usr/bin/passwd` -> allows users to change passwords
+- `/usr/bin/sudo` -> execute commands as another user
+- `/bin/mount` / `/bin/umount` -> mount operations
+#### How to find SUID files
+```bash
+# find all SUID files
+find / -perm -4000 -type f 2>/dev/null
+```
+#### How to remove SUID 
+```bash
+# remove SUID permission
+chmod u-s /path/to/file
+
+# example
+chmod u-s /usr/bin/example
+```
+#### Verification
+```bash
+# confirm SUID removed
+ls -l /path/to/file
+```
+#### Hardening techniques
+- Regularly audit SUID files on the system
+- Remove SUID from non-essential binaries
+- Restrict execution of sensitive binaries
+- Keep system updated to patch vulnerabilities
+- Monitor changes to SUID files (e.g., via auditd)
+#### Notes
+- Not all SUID files should be removed -> some are required for system functionality
+- Always validate before removing SUID to avoid breaking critical services
+- Principle of least privilege -> only allow elevated execution where necessary
+- SUID on scripts is generally ignored for security reasons
+#### Real-world scenario
+1. Admin scans system for SUID files using `find`
+2. Reviews list and identifies unnecessary or suspicious binaries
+3. Removes SUID bit from non-essential files
+4. Tests system to ensure functionality is not impacted
+5. Implements periodic audits to maintain security posture
+---
 ### Secure boot
+#### What it is
+A security feature that ensures a system boots only using trusted and digitally signed software, preventing unauthorized or malicious code (e.g., rootkits) from loading during startup.
+#### How it works
+- Firmware (UEFI) verifies bootloader signature
+- Bootloader verifies kernel signature
+- Kernel verifies drivers/modules (if configured)
+- Chain of trust is maintained from firmwar -> OS
+#### Components
+- UEFI firmware -> replaces legacy BIOS, supports Secure Boot
+- Bootloader (e.g., GRUB) -> must be signed
+- Shin -> intermediary loader used in Linux to support signed boot
+- Kernel -> must be signed to be trusted
+- Key databases ->
+  - PK (Platform key) -> owner of system
+  - KEK (Key Exchange Key) -> manages updates to keys
+  - DB (Allowed signatures) -> trusted binaries
+  - DBX (Revoked signatures) -> blocked binaries
+#### Modes
+- Setup mode -> keys cna be configured
+- User mode -> Secure Boot enforced
+- Custom mode -> user managers their own keys
+#### Tools
+```bash
+# check Secure Boot status
+mokutil --sb-state
+
+# list enrolled keys
+mkutil --list-enrolled
+
+# disable/enable (via firmware, not CLI)
+reboot
+# enter UEFI settings
+```
+#### Requirements
+- UEFI-based system (not legacy BIOS)
+- Signed bootloader and kernel
+- Proper key management
+#### Benefits
+- Prevents bootkits and rootkits
+- Ensures system integrity at startup
+- Establishes hardware-based trust
+#### Limitations
+- Can restrict custom kernel/module usage
+- May require manual key enrollment (MOK)
+- Not a complete security solution (only protects boot process)
+#### Notes
+- Secure Boot is commonly enabled by default on modern systems
+- Linux distributions use shim to maintain compatibility with Secure Boot
+- Disabling Secure Boot may be required for certain drivers or custom kernels
+- Always verify compatibility before enforcing in production systems
+#### Real-world scenario
+1. System powers on and UEFI firmware starts
+2. Firmware checks signature of bootloader (GRUB)
+3. Bootloader loads and verifies signed Linux kernel
+4. Kernel initializes only trusted components
+5. System boots securely, preventing unauthorized code execution
+---
 ## 3.4 Explain account hardening techniques and best practices
 ### Passwords
+#### What it is
+Policies and controls applied to user passwords to ensure strong authentication and reduce the risk of unauthorized access.
+#### Key principles
+- Complexity -> mix of uppercase, lowercase, numbers, symbols
+- Length -> longer passwords are significantly stronger 
+- Unpredictability -> avoid common words, patterns, or personal info
+- Uniqueness -> different passwords for different systems
+#### Password policies
+- Minimum length enforcement
+- Complexity requirements
+- Password expiration (rotation)
+- Password history (prevent reuse)
+- Account lockout after failed attempts
+- Aging controls (min/max days between changes)
+#### Components (PAM integration)
+- PAM (Pluggable Authentication Modules) -> enforces password policies
+- `pam_pwquality.so` -> complexity requirements
+- `pam_unix.so` -> password hashing and authentication
+- `/etc/login.defs` -> default password aging settings
+#### Tools
+```bash
+# set password
+passwd user
+
+# enforce aging policy
+chage -M 90 -m 7 -W 7 user
+
+# view password aging info
+chage -l user
+
+# lock/unlock account
+passwd -l user
+passwd -u user
+
+# configure login defaults
+vi /etc/login.defs
+```
+#### Configuration examples
+```bash
+# /etc/login.defs
+PASS_MAX_DAYS 90
+PASS_MIN_DAYS 7
+PASS_WARN_AGE 7
+```
+```bash
+# /etc/security/pwquality.conf
+minlen = 12
+dcredit = -1    # at least 1 digit
+ucredit = -1    # at least 1 uppercase
+lcredit = -1    # at least 1 lowercase
+ocredit = -1    # at least 1 special character
+```
+#### Hardening techniques
+- Enforce strong password policies via PAM
+- Implement account lockout (e.g., `pam_faillock`)
+- Disable password login for privileged accounts (use SSH keys instead)
+- Use password hashing algorithms (e.g., SHA-152)
+- Regularly audit password policies and compliance
+#### Notes
+- Longer passwords are more effective than overly complex short ones
+- Avoid frequent forced changes unless necessary (can lead to weak patterns)
+- Use passphrases (e.g., multiple random words) for better security
+- Combine with MFA for stronger authentication
+#### Real-world scenario
+1. Admin defines password policy in `/etc/login.defs` and PAM configs
+2. User creates password that meets complexity and length requirements
+3. System enforces aging and history rules
+4. Multiple failed login attempts trigger account lockout
+5. Passwords are securely hashed and stored in `/etc/shadow`.
+---
 ### Multifactor authentication (MFA)
+#### What it is
+A security mechanism that requires users to provide two or more independent authentication factors to verify their identity.
+#### Authentication factors
+- Something you know -> password, PIN
+- Something you have -> OTP token, mobile device, smart card
+- Something you are -> biometrics (fingerprint, face recognition)
+#### Common MFA methods
+- One-Time Password (OTP) -> time-based codes (TOTP)
+- Push notifications -> approve login via mobile app
+- Hardware tokens -> physical devices generating codes
+- Smart cards -> used in enterprise environments
+- Biometrics -> fingerprint or facial recognition
+#### Components
+- Authentication server -> validates credentials and MFA factors
+- PAM integration -> enforces MFA at login
+- Token generation -> app (e.g., Google Authenticator) or hardware device
+- User device -> receives or generates second factor
+#### Tools
+```bash
+# install Google Authenticator PAM module
+apt install libpam-google-authenticator
+
+# configure for user
+google-authenticator
+
+# enable MFA in SSH
+vi /etc/pam.d/sshd
+# add:
+auth required pam_google_authenticator.so
+
+# update SSH config
+vi /etc/ssh/sshd_config
+ChallengeResponseAuthentication yes
+
+# restart SSH
+systemctl restart sshd
+```
+#### Configuration flow
+1. Install MFA module (e.g., Google Authenticator PAM)
+2. Initialize MFA for user (`google-authenticator`)
+3. Update PAM configuration to require MFA
+4. Configure SSH to support challenge-response
+5. Restart service and test login
+#### Benefits
+- Stronger security than passwords alone
+- Protects against stolen or leaked credentials
+- Reduces risk of brute-force and phishing attacks
+#### Limitations
+- Requires additional setup and user training
+- Dependency on external device (e.g., phone)
+- Potential lockout if second factor is lost
+#### Hardening techniques
+- Enforce MFA for privileged accounts (root, sudo users)
+- Combine MFA with SSH key-based authentication
+- Use time-based OTP (TOTP) instead of SMS (more secure)
+- Implement backup/recovery codes
+- Monitor authentication logs for suspicious activity
+#### Notes
+- MFA is one of the most effective security controls
+- Should be mandatory for remote access (e.g., SSH, VPN)
+- Avoid SMS-based MFA where possible (susceptible to SIM swapping)
+- Works best as part of layered security (defense-in-depth)
+#### Real-world scenario
+1. User enters username and password
+2. System prompts for OTP from authentication app
+3. User provides valid time-based code
+4. Authentication server verifies both factors
+5. Access is granted and logged securely
+---
 ### Checking existing breach lists
+#### What it is
+The process of verifying whether user passwords or credentials have been exposed in known data breaches, and preventing the use of compromsied passwords.
+#### Why it matters
+- Users often reuse passwords across systems
+- Breached passwords are publicly available to attackers
+- Using compromised credentials increases risk of account takeover
+- Helps enforce stronger password hygiene
+#### Common sources
+- Public breach databases (e.g., Have I Been Pwned)
+- Organization-specific breach intelligence feeds
+- Security tools integrating breach datasets
+#### Methods
+- Check passwords against known compromised lists during creation/change
+- Use APIs for automated validation
+- Compare password hashes instead of plaintext (k-anonymity model)
+- Periodically audit existing user credentials
+#### Components
+- Password validation system -> checks against breach database
+- Hashing mechanism -> protects password during lookup
+- Policy enforcement -> blocks weak or breached passwords
+- User notification -> prompts password reset if compromised
+#### Tools
+```bash
+# example: using curl to query Have I Been Pwned API (hash-based)
+# (k-anonymity model: only first 5 chars of SHA1 hash sent)
+
+# generate SHA1 hash of password
+echo -n "password123" | sha1sum
+
+# query API using first 5 characters of bash
+curl https://api.pwnedpasswords.com/range/5BAA6
+```
+#### Hardening techniques
+- Integrate breach checking into password policy enforcement
+- Prevent users from setting known compromised passwords
+- Force password reset if breach is detected
+- Combine with MFA for stronger protection
+- Educate users on password reuse risks
+#### Notes
+- Never send plaintext passwords to external services
+- Use hash-based querying (k-anonymity) to preserve privacy
+- Breach databases are continuously updated -> checks should be ongoing
+- Works best alongside strong password policies and MFA
+#### Real-world scenario
+1. User attempts to set a new password
+2. System hases password and checks against breach database
+3. Match found -> password rejected
+4. User is prompted to choose a stronger, unique password
+5. System logs event and enforces compliance
+---
 ### Restricted shells
+#### What it is
+A limited shell environment that restricts a user's ability to execute commands, access directories, or modify the system, typically used to enforce tight control over user actions.
+#### Purpose
+- Limit user capabilities on shared systems
+- Prevent unauthorized command execution
+- Restrict access to sensitive files and directories
+- Enforce least privilege for specific roles (e.g., SFTP-only users)
+#### Common restricted shells
+- `rbash` -> restricted version of Bash
+- `rksh` -> restricted Korn shell
+- `rsh` -> restricted shell (not to be confused with remote shell)
+- Custom shells/scripts -> tailored restricted environments
+#### Restrictions enforced
+- Cannot change directories (`cd` disabled)
+- Cannot modify `$PATH`
+- Cannot execute commands with `/` (absolute paths)
+- Cannot redirect output (`>`, `>>`, etc.)
+- Limited command set available
+#### Configuration
+1. Assign restricted shell to user
+```bash
+usermod -s /bin/rbash username
+```
+2. Create limited command environment
+```bash
+mkdir /home/username/bin
+ln -s /bin/ls /home/username/bin/
+ln -s /bin/cat /home/username/bin/
+```
+3. Set PATH for restricted user
+```bash
+echo 'export PATH=$HOME/bin' >> /home/username/.bash_profile
+```
+#### Tools
+```bash
+# check current shell
+echo $SHELL
+
+# list available shells
+cat /etc/shells
+
+# change user shell
+chsh -s /bin/rbash username
+```
+#### Use cases
+- SFTP-only access for file transfers
+- Applicaiton-specific users (limited commands only)
+- Guest or temporary accounts
+- Kiosk or controlled environments
+#### Hardening techniques
+- Combine with chroot jail for filesystem isolation
+- Restrict file permissions and ownership
+- Disable interactive login where not required
+- Limit available binaries strictly
+- Monitor user activity via logs
+#### Limitations
+- Not foolproof -> skilled users may bypass restrictions
+- Misconfiguration can allow escape to full shell
+- Should not be the only security control
+#### Notes
+- Often used together with SSH restrictions (e.g., `ForceCommand internal-sftp`)
+- Principle of least privilege applies -> only allow necessary commands
+- Regularly test restricted environments for escape vectors
+#### Real-world scenario
+1. Admin creates user for file transfer only
+2. Assigns restricted shell (`rbash`) to the user
+3. Limits available commands to a small set in user's `bin` directory
+4. User logs in and can only perform allowed operations
+5. System prevents access to broader system functions
+---
 ### pam_tally2
+#### What it is
+A PAM (Pluggable Authentication Module) used to track failed login attempts and lock user accounts after a defined number of failures to prevent brute-force attacks.
+#### Purpose
+- Protect against password brute-force attacks
+- Enforce account lockout policies
+- Track authentication failures per user
+- Enhance overall account security
+#### How it works
+- Counts failed login attempts for each suer
+- Once threshold is reached -> account is locked
+- Counter resets after successful login or manual reset
+#### Components
+- PAM module -> `pam_tally2.so`
+- Counter database -> stores failed login attempts
+- PAM configuration files -> `/etc/pam.d/*`
+#### Configuration
+1. Enable in PAM (example: SSH/login)
+```bash
+# /etc/pam.d/sshd or /etc/pam.d/login
+auth required pam_tally2.so deny=5 onerr=fail unlock_time=900
+account required pam_tally2.so
+```
+##### Parameters explained
+- `deny=5` -> lock account after 5 failed attempts
+- `unlock_time=900` -> unlock after 900 seconds (15 mins)
+- `onerr=fail` -> deny access if module fails
+#### Tools
+```bash
+# check failed login attempts
+pam_tally2
+
+# check specific user
+pam_tally2 -u username
+
+# reset counter for user
+pam_tally2 -u username -r
+```
+#### Behavior
+- Failed attempts increment counter
+- Successful login resets counter (unless configured otherwise)
+- Locked users cannot authenticate until reset or timeout expires
+#### Hardening techniques
+- Set reasonable deny threshold (e.g., 3-5 attempts)
+- Configure unlock time to balance security and usability
+- Apply to all remote access services (SSH, console login)
+- Monitor logs for repeated lockouts (possible attack)
+- Combine with MFA and strong password policies
+#### Limitations
+- Can lead to denial-of-service (DoS) if attackers intentionally lock accounts
+- Older tool -> replaced by `pam_faillock` in newer systems
+- Requires careful tuning to avoid user disruption
+#### Notes
+- Prefer `pam_faillock` on modern distributions (more flexible and secure)
+- Ensure root account handling is configured properly (to avoid lockout)
+- Logs typically recorded in `/var/log/auth.log` or `/var/log/secure`
+#### Real-world scenario
+1. User attempts login with wrong password multiple times
+2. `pam_tally2` counts failed attempts
+3. After 5 failures, account is locked 
+4. User must wait for timeout or admin resets counter
+5. Attack is mitigated by preventing further login attempts
+---
 ### Avoid running as root
+#### What it is
+A best practice of minimizing or completely avoiding direct use of the root account, instead using controlled privilege escalation for administrative tasks.
+#### Why it matters
+- Root has unrestricted access -> any mistake can cause system-wide damange
+- Compromise of root account = full system compromise
+- Lack of accountability when multiple users share root access
+- Increases attack surface if root login is exposed
+#### Key principles
+- Least privilege -> users should only have permissions they need
+- Separation of duties -> administrative tasks are controlled and auditable
+- Accountability -> actions should be traceable to individual users
+#### Methods
+1. Use sudo instead of root login
+  - Grant specific users permission to run commands as root
+  - Logs all executed commands for auditing
+2. Disable direct root login
+  - Prevent login via SSH or console (where applicable)
+3. Use role-based access
+  - Assign privileges based on job roles rather than full root access
+#### Tools
+```bash
+# run command as root
+sudo command
+
+# edit sudo configuration safely
+visudo
+
+# switch to root (temporary, not recommended for long sessions)
+sudo -i
+
+# disable root SSH login
+vi /etc/ssh/sshd_config
+PermitRootLogin no
+
+# restart SSH
+systemctl restart sshd
+```
+#### Sudo configuration example
+```bash
+# allow user to run specific command
+username ALL=(ALL) /usr/bin/systemctl restart apache2
+
+# allow full sudo (use cautiously)
+username ALL=(ALL) ALL
+```
+#### Hardening techniques
+- Restrict sudo access to only required users
+- Limit commands users can execute with sudo
+- Require password for sudo usage
+- Enable logging of sudo activities
+- Combine with MFA for privileged operations
+#### Notes
+- ROot should only be used when absolutely necessary
+- Avoid long-lived root sessions
+- Always use `visudo` to prevent syntax errors in sudoers file
+- Monitor `/var/log/auth.log` or `/var/log/secure` for sudo activity
+#### Real-world scenario
+1. Admin logs in using a regular user account
+2. Uses `sudo` to execute a privileged command
+3. System prompts for password and logs the action
+4. COmmand executes with root privileges temporarily
+5. Admin returns to normal suer context, reducing risk
+---
 ## 3.5 Explain cryptographic concepts and techniques in a Linux environment
 ### Data at rest
+#### What it is
+Protection of stored data (on disks, databases, backups) using encryption to prevent unauthorized access if storage medium is compromised.
+#### Why it matters
+- Protects sensitive data from theft or unauthorized access
+- Ensures confidentiality even if physical device is lost or stolen
+- Required for compliance (e.g., personal data, financial data)
+#### Types of encryption
+- Full Disk Encryption (FDE) -> encrypts entire disk
+- Partition encryption -> encrypts specific partitions
+- File-level encryption -> encrypts individual files/directories
+#### Common technologies
+- LUKS (Linux Unified Key Setup) -> standard for disk encryption
+- dm-crypt -> kernel subsystem used by LUKS
+- eCryptfs -> file-level encryption (less common now)
+- fscrypt -> modern file-based encryption for ext4/f2fs
+#### Components
+- Encryption algorithm -> e.g., AES (Advanced Encryption Standard)
+- Key/passphrase -> used to unlock encrypted data
+- Key slots (LUKS) -> allows multiple keys for same volume
+- Header metadata -> stores encryption configuration
+#### Tools
+```bash
+# encrypt a partition with LUKS
+cryptsetup luksFormat /dev/sdb1
+
+# open encrypted partition
+cryptsetup luksOpen /dev/sdb1 secure_data
+
+# create filesystem
+mkfs.ext4 /dev/mapper/secure_data
+
+# mount encrypted volume
+mount /dev/mapper/secure_data /mnt
+
+# close encrypted volume
+cryptsetup luksClose secure_data
+```
+#### Verification
+```bash
+# check LUKS details
+cryptsetup luksDump /dev/sdb1
+
+# view mapped devices
+lsblk
+```
+#### Hardening techniques
+- Use strong passphrases for encryption keys
+- Store keys securely (avoid plain text storage)
+- Enable automatic locking when system is powered off
+- Backup LUKS headers to prevent data loss
+- Restrict physical access to storage devices
+#### Notes
+- Encryption protects data only when locked (powered off/unmounted)
+- If system is running and unlocked -> data is accessible
+- Losing encryption keys = permanent data loss
+- Performance overhead is minimal with modern hardware
+#### Real-world scenario
+1. Admin encrypts a server disk using LUKS
+2. On boot, system prompts for passphrase
+3. Disk is unlocked and mounted for us
+4. If disk is stolen, data remains unreadble without key
+5. Sensitive data is protected at rest
+---
 ### Data in transit
+#### What it is
+Protection of data as it travels across networks using encryption to prevent interception, eavesdropping, or tampering.
+#### Why it matters
+- Prevents attackers from reading sensitive data (e.g., credentials, files)
+- Protects against man-in-the-middle (MITM) attacks
+- Ensures data integrity during transmission
+- Critical for remote access and network communications
+#### Common protocols
+- SSH -> secure remote login and command execution
+- HTTPS (TLS/SSL) -> secure web communication
+- SFTP / SCP -> secure file transfer
+- VPN (IPsec, OpenVPN, WireGuard) -> encrypted network tunnels
+- FTPS -> FTP over TLS (secure alternative to FTP)
+#### Components
+- Encryption algorithms -> e.g., AES
+- Key exchange -> e.g., Diffie-Hellman
+- Certificates -> verify identity (used in TLS)
+- Session keys -> temporary keys for each session
+#### How it works
+1. Client initiates connection to server
+2. Secure handshake occurs (e.g., TLS/SSH handshake)
+3. Keys are exchanged securely
+4. Encrypted session is established
+5. Data is transmitted securely
+#### Tools
+```bash
+# SSH secure connection
+ssh user@host
+
+# copy file securely
+scp file.txt user@host:/path
+
+# test HTTPS connection
+curl -I https://example.com
+
+# check certificate details
+openssl s_client -connect example.com:443
+```
+#### Hardening techniques
+- Enforce use of secure protocols only (disable HTTP, Telnet, FTP)
+- Use strong encryption ciphers and protocols (e.g., TLS 1.2/1.3)
+- Implement certificate validation and management
+- Use VPN for sensitive or internal communications
+- Regularly update cryptographic libraries and services
+#### Risks without protection
+- Packet sniffing -> attackers capture data
+- Session hijacking -> unauthorized access
+- Data tampering -> integrity compromised
+- Credential theft -> passwords exposed
+#### Notes
+- Encryption ensures confidentiality, but must be paired with authentication
+- Certificates must be trusted and valid to prevent MITM attacks
+- Data is only protected while in transit -> not when stored or processed
+- Always verify secure connections (e.g., HTTPS lock icon, SSH host key)
+#### Real-world scenario
+1. User accesses a website via HTTPS
+2. Browser and server perform TLS handshake
+3. Server presents valid certificate
+4. Encrypted session is established
+5. Data (e.g., login credentials) is transmitted securely
+---
 ### Hashing
+#### What it is
+A one-way cryptographic process that converts data (e.g., passwords) into a fixed-length string (hash), which cannot be reversed to retrieve the original input.
+#### Purpose
+- Securely store passwords
+- Verify data integrity
+- Detect changes in files or messages
+#### Characteristics
+- One-way -> cannot be reversed
+- Determininstic -> same input produces same hash
+- Fixed length -> output size is constant
+- Collision-resistant -> difficult to find two inputs with same hash
+- Fast computation -> efficient for verification
 ### Removal of weak algorithms
 ### Certificate management
 ### Avoiding self-signed certificates
