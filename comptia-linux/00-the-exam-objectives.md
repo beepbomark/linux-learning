@@ -8328,4 +8328,88 @@ vmstat 5
 6. System performance improves significantly
 ---
 ### Network performance issues
+#### What it is
+Problems affecting the speed, latency, or reliability of network communication on a Linux system.
+#### Purpose
+- Identify network bottlenecks
+- Improve data transfer performance
+- Ensure stable and responsive connectivity
+#### Common network performance issues
+- High latency -> slow response times
+- Packet loss -> dropped network packets
+- Low bandwidth -> limited throughput
+- Network congestion -> overloaded network
+- DNS delays -> slow name resolution
+- Duplex/speed mismatch -> degraded performance
+#### Symptoms
+- Slow internet or application response
+- Timeouts or delays in connections
+- Intermittent connectivity
+- High ping times
+- Slow file transfers
+#### Diagnostic tools
+##### Test connectivity and latency
+```bash
+ping -c 4 google.com
+```
+##### Trace network path
+```bash
+traceroute google.com
+```
+##### Check bandwidth usage
+```bash
+iftop
+nload
+```
+##### Check socket statistics
+```bash
+ss -s
+```
+##### Check interface statistics
+```bash
+ip -s link
+```
+##### DNS lookup test
+```bash
+nslookup google.com
+dig google.com
+```
+#### Troubleshooting approach
+1. Test basic connectivity (`ping`)
+2. Identify latency or packet loss
+3. Use `traceroute` to locate bottleneck
+4. Check network interface stats
+5. Verify DNS resolution
+6. Analyze bandwidth usage
+#### Common fixes
+- Restart network interface
+> systemctl restart networking
+- Fix DNS configuration
+- Replace faulty cables or hardware
+- Adjust network settings (speed/duplex)
+- Reduce network load or congestion
+- Upgrade bandwidth if needed
+#### Best practices
+- Monitor network performance regularly
+- Use reliable DNS servers
+- Ensure proper network configuration
+- Implement QoS for critical traffic
+- Maintain network infrastructure
+#### Notes
+- Network issues may originate outside the system (ISP, upstream network)
+- High latency and packet loss are key indicators of problems
+- DNS issues often appear as slow connectivity
+#### Common pitfalls
+- Blaming network without checking local system
+- Ignorning DNS as root cause
+- Not isolating where issue occurs (local vs remote)
+- Overlooking physical layer issues
+#### Real-world scenario
+1. Users report slow access to web application
+2. Admin runs `ping` -> high latency observed
+3. Uses `traceroute` -> delay at upstream router
+4. Confirms network congestion issue
+5. Adjusts routing or contacts provider
+6. Performance improves after resolution
+---
 ### Storage performance issues
