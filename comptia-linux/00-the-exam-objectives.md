@@ -8084,15 +8084,175 @@ systemctl restart networking
 ---
 ## 5.4 Given a scenario, analyze and troubleshoot security issues on a Linux system
 ### SELinux issues
+#### What it is
+Problems caused by Security-Enhanced Linux enforcing policies that restrict access to resources.
+#### Symptoms
+- "Permission denied" despite correct file permissions
+- Services fail to start without clear reason
+#### Tools
+```bash
+getenforce
+sestatus
+ausearch -m avc
+```
+#### FIxes
+```bash
+setenforce 0        # temporary disable (testing)
+setenforce 1        # enable enforcing
+```
+#### Notes
+- Use permissive mode for troubleshooting
+- Always fix policies instead of disabling SELinux permanently
+---
 ### File and directory permission issues
+#### What it is 
+Incorrect ownership or permissions preventing access.
+#### Symptoms
+- Access denied errors
+- Servics unable to read/write files
+#### Tools
+```bash
+ls -l
+```
+#### Fixes
+```bash
+chmod 755 file
+chown user:group file
+```
+#### Notes
+- Apply least privilege
+- Check both permissions and ownership
+---
 ### Account access
+#### What it is
+Issues preventing users from logging in or accessing systems.
+#### Symptoms
+- Login failures
+- Locked accounts
+#### Tools
+```bash
+passwd -S user
+faillog
+```
+#### Fixes
+```bash
+passwd -u user
+```
+#### Notes
+- Check PAM, password policies, and account lockouts
+---
 ### Unpatched vulnerable systems
+#### What it is
+Systems missing security updates.
+#### Symptoms
+- Known vulnerabilities exploitable
+- Compliance failures
+#### Tools
+```bash
+apt update
+apt list --upgradeable
+```
+#### Fixes
+```bash
+apt upgrade
+```
+#### Notes Regular patching is critical
+---
 ### Exposed or misconfigured services
+#### What it is
+Services running unnecessarily or with insecure settings.
+#### Symptoms
+- Unexpected open ports
+- Unauthorized access
+#### Tools
+```bash
+ss -tulnp
+systemctl list-units --type=service
+```
+#### Fixes
+- Disable unused services
+> systemctl disable service
+#### Notes
+- FOllow principle of least exposure
+---
 ### Remote access issues
+#### What it is
+Problems with SSH or remote connectivity.
+#### Symptoms
+- Cannot connect remotely
+- Authentication failures
+#### Tools
+```bash
+systemctl status ssh
+ss -tulnp | grep 22
+```
+#### Fixes
+- Check SSH config
+> vi /etc/ssh/sshd_config
+#### Notes
+- Verify firewall, SSH config, and authentication methods
+---
 ### Certificate issues
+#### What it is 
+Problems with SSL/TLS certificates.
+#### Symptoms
+- Browser warnings
+- Connection failures
+#### Tools
+```bash
+openssl x509 -in cert.crt -text -noout
+```
+#### Fixes
+- Renew or replace certificate
+#### Notes
+- Check expiry and trust chain
+---
 ### Misconfigured package repository
+#### What it is
+Incorrect or insecure package source configuration
+#### Symptoms
+- Failed updates
+- GPG errors
+#### Tools
+```bash
+apt update
+cat /etc/apt/sources.list
+```
+#### Fixes
+- Correct repository URLs
+- Update keys
+#### Notes
+- Use trusted repositories only
+---
 ### Use of obsolete or insecure protocols and ciphers
+#### What it is
+Use of outdated cryptographic standards.
+#### Symptoms
+- Security vulnerabilities
+- Compliance issues
+#### Fixes
+- Disable weak protocols (e.g., SSLv3, TLS 1.0)
+- Enable strong ciphers
+#### Notes
+- Always use modern standards (TLS 1.2/1.3)
+---
 ### Cipher negotiation issues
+#### What it is 
+Client and server cannot agree on encryption method.
+#### Symptoms
+- Connection failure during handshake
+- "No matching cipher" errors
+#### Tools
+```bash
+ssh -vv user@host
+openssl s_client -connect host:443
+```
+#### Fixes
+- Align supported ciphers on both client and server
+- Update configurations
+#### Notes
+- Often occurs with legacy systems
+---
 ## 5.5 Given a scenario, analyze and troubleshoot performance issues
 ### Memory issues
 #### What it is
@@ -8413,3 +8573,82 @@ dig google.com
 6. Performance improves after resolution
 ---
 ### Storage performance issues
+#### What it is 
+Problems that affect the speed and efficiency of disk operations (read/write), impacting overall system performance.
+#### Purpose
+- Identify disk I/O bottlenecks
+- Improve system responsiveness
+- Prevent performance degradation
+#### Common storage performance issues
+- High disk I/O wait -> CPU waiting on disk operations
+- Slow read/write speeds -> degraded disk performance
+- Disk contention -> multiple processes competing for I/O
+- Fragmentation (less common in Linux) -> inefficient file access
+- Failing disks -> hardware degradation
+- Improper filesystem or mount options -> suboptimal performance
+#### Symptoms
+- Slow application performance
+- High system load with low CPU usage
+- Delayed file operations
+- System lag during disk-intensive tasks
+- High I/O wait percentage
+#### Diagnostic tools
+##### Check I/O statistics
+```bash
+iostat
+```
+##### Monitor real-time disk usage
+```bash
+iotop
+```
+##### Check disk usage
+```bash
+df -h
+```
+##### Check system activity
+```bash
+vmstat 5
+```
+##### Disk health (SMART)
+```bash
+smartctl -a /dev/sda
+```
+#### Key indicators
+- High `%iowait` in `top` or `vmstat`
+- High disk utilization (`%util` in `iostat`)
+- Long I/O wait times
+- Queue buildup for disk operations
+#### Troubleshooting approach
+1. Check I/O usage (`iostat`, `iotop`)
+2. Identify processes causing heavy disk usage
+3. Verify disk health (`smartctl`)
+4. Check filesystem and mount options
+5. Optimize or reschedule disk-intensive tasks
+#### Common fixes
+- Stop or optimize heavy I/O processes
+- Schedule backups/cron jobs during off-peak hours
+- Use faster storage (SSD instead of HDD)
+- Adjust filesystem mount options (e.g., `noatime`)
+- Replace failing disks
+#### Best practices
+- Monitor disk performance regularly
+- Use appropriate storage type for workload
+- Implement RAID for performance and redundancy
+- Optimize filesystem configuration
+- Maintain sufficient free disk space
+#### Notes
+- Disk I/O is often a hidden bottleneck
+- High I/O wait means CPU is idle waiting for disk
+- SSDs significantly improve performance over HDDs
+#### Common pitfalls
+- Ignoring disk as performance bottleneck
+- Misinterpreting CPU usage without checking I/O wait
+- Running heavy disks tasks during peak hours
+- Not monitoring disk health
+#### Real-world scenario
+1. System becomes slow despite low CPU usage
+2. Admin checks `iostat` -> high disk utilization
+3. Uses `iotop` -> identifies backup process
+4. Reschedules backup to off-peak hours
+5. System performance improves slightly
+--- 
