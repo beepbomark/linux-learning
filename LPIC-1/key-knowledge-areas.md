@@ -868,7 +868,7 @@ eject /dev/sdb
 
 ### Conceptual understanding of sysfs, udev and dbus
 
-Modern Linux systems use several components to manage hardware dynamically. Three important concepts are:
+These three components help Linux detect hardware, manage devices, and allow system programs to communicate.
 
 - `sysfs` – kernel hardware information interface  
 - `udev` – user-space device manager  
@@ -888,8 +888,161 @@ When you plug in a USB drive:
 
 ---
 
+#### 1. `sysfs` 
+
+`sysfs` is a virtual filesystem that shows live hardware and kernel information.
+
+Mounted at:
+
+```bash id="sys1"
+/sys
+```
+
+Common Uses:
+
+- View devices
+- View drivers
+- Check network interfaces
+- Inspect system hardware
+
+Example:
+
+```bash
+ls /sys/class/net
+```
+
+Shows network interfaces.
+
+---
+
+#### 2. `udev`
+
+`udev` is the device manager for Linux.
+
+It automatically creates files in `/dev` when hardware is connected or removed.
+
+Examples:
+
+- USB drive inserted -> `/dev/sdb`
+- Webcam connected -> `/dev/video0`
+
+Useful command:
+
+```bash
+udevadm monitor
+```
+
+`udev` manages devices and creates entries in `/dev`
+
+---
+
+#### 3. `dbus`
+
+`dbus` is a messaging system that lets programs talk to each other.
+
+Examples:
+
+- File manager detects USB drive
+- NetworkManager updates Wi-Fi list
+- Bluetooth tools communicate with system services
+
+`dbus` helps applications and services communicate.
+
+---
+
+#### How they work together
+
+When a USB drive is plugged in:
+
+1. kernel detects device
+2. `sysfs` shows device info
+3. `udev` creates `/dev/sdb1`
+4. `dbus` notifies desktop apps 
+
+---
+
 ## 101.2 Boot the system
 ### Provide common commands to the boot loader and options to the kernel at boot time
+
+The boot loader starts Linux and allows temporary changes during boot. 
+
+You can edit boot options at startup to troubleshoot, recover, or change system behavior.
+
+---
+
+#### Accessing GRUB Menu
+
+During startup:
+
+- BIOS systems: hold **Shift**
+- UEFI systems: press **Esc**
+
+To edit boot entry:
+
+- Highlight kernel entry
+- Press **e**
+
+To boot edited entry:
+
+- Press **Ctrl + X** or **F10**
+
+---
+
+#### Common Kernel Boot Options
+
+##### `single`
+
+Boot into single-user mode (minimal maintenance mode).
+
+Used for:
+
+- password recovery
+- maintenance
+- troubleshooting
+
+##### `init=/bin/bash`
+
+Boot directly into Bash shell.
+
+Used for advanced recovery.
+
+##### `quiet`
+
+Hide most boot messages.
+
+Common on desktop systems.
+
+##### `ro`
+
+Mount root filesystem as read-only
+
+Usually default during early boot.
+
+##### `rw`
+
+Mount root filesystem as read-write
+
+Useful during repairs
+
+##### `nomodeset`
+
+Disable graphics mode setting.
+
+Used when display has black screen issues.
+
+##### `systemd.unit=rescue.target`
+
+Boot into rescue mode.
+
+---
+
+#### Common GRUB Commands
+
+- `set` - Set GRUB variables
+- `ls` - List disks and partitions.
+- `linux` - load Linux kernel manually.
+- `initrd` - Load initial RAM disk
+- `boot` - start boot process.
 ### Demonstrate knowledge of the boot sequence from BIOS/UEFI to boot completion
 ### Understanding of SysVinit and systemd
 ### Awareness of Upstart
