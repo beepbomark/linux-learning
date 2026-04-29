@@ -1,4 +1,5 @@
 # Topic 101: System Architecture
+
 ## 101.1 Determine and configure hardware settings
 ### Enable and disable integrated peripherals
 
@@ -1043,22 +1044,445 @@ Boot into rescue mode.
 - `linux` - load Linux kernel manually.
 - `initrd` - Load initial RAM disk
 - `boot` - start boot process.
+
+---
+
 ### Demonstrate knowledge of the boot sequence from BIOS/UEFI to boot completion
 ### Understanding of SysVinit and systemd
+
+`SysVinit` and `systemd` are **init systems used to start and manage services when Linux boots.
+
+The init system is the first process started by the kernel and usually has **PID 1**.
+
+---
+
+#### `SysVinit`
+
+Traditional Linux init system based on shell scripts.
+
+Uses runlevels to control system state.
+
+Common runlevels:
+
+|Runlevel|Meaning|
+|---|---|
+|0|Shutdown|
+|1|Single-user mode|
+|3|Multi-user text mode|
+|5|Multi-user with GUI|
+|6|Reboot|
+
+Service scripts are stored in:
+
+```bash
+/etc/init.d/
+```
+
+Example commands:
+
+```bash
+service ssh start
+service ssh stop
+```
+
+Older boot system using scripts and runlevels.
+
+---
+
+#### `systemd`
+
+Modern init system used by most Linux distributions.
+
+Uses **units** instead of runlevels.
+
+Common targets:
+
+|Target|Purpose|
+|---|---|
+|poweroff.target|Shutdown|
+|rescue.target|Rescue mode|
+|multi-user.target|Text mode|
+|graphical.target|GUI mode|
+|reboot.target|Reboot|
+
+Main commands:
+
+```bash
+systemctl status ssh
+systemctl start ssh
+systemctl enable ssh
+```
+
+Faster and more advanced boot/service manager.
+
+---
+
+#### Key Differences
+
+|Feature|SysVinit|systemd|
+|---|---|
+|Startup Method|Shell scripts|Unit files|
+|Boot Speed|Sequential|Parallel|
+|Service Control|`service`|`systemctl`|
+|Logs|Syslog files|`journalctl`|
+|Current Usage|Older systems|Most modern Linux|
+
+---
+
+#### How to Check Current Init System
+
+```bash
+ps -p 1
+```
+
+If PID1 shows:
+
+- `systemd` -> system uses systemd
+- `init` -> older SysVinit style system
+
+---
+
 ### Awareness of Upstart
+
+`Upstart` is an init system developed by Canonical for Linux systems. It was designed to replace older `SysVinit` by using an **event-based** startup model.
+
+It was used mainly in older versions of **Ubuntu** before Ubuntu moved to `systemd`.
+
+---
+
+#### Why Upstart was Created
+
+`SysVinit` started services one by one in sequence, which could be slower.
+`Upstart` improved this by starting services when specific events happened, such as:
+
+- system booting
+- network available
+- filesystem mounted
+- hardware connected
+
+Start services when needed instead of waiting in order.
+
+---
+
+#### Common Uses
+
+Used in older systems such as:
+
+- Ubuntu 9.10 to 14.10
+- Some older Linux distributions
+
+Modern systems mostly use `systemd`.
+
+---
+
+##### Service Management Commands
+
+```bash id="u1"
+initctl list
+initctl start ssh
+initctl stop ssh
+```
+
+---
+
+#### Configuration Files
+
+Stored in:
+
+```bash
+/etc/init/
+```
+
+Example:
+
+```bash
+/etc/init/ssh.conf
+```
+
+---
+
+#### Difference from Other Init Systems
+
+|Init System|Method|
+|---|---|
+|SysVinit|Script + runlevels|
+|Upstart|Event-based|
+|systemd|Units + parallel startup|
+
+---
+
 ### Check boot events in the log files
+
+Linux stores boot messages and startup events in log files. These logs help troubleshoot boot failures, slow startup, missing services, and hardware problems.
+
+---
+
+#### Why Check Boot Logs
+
+Use boot logs to find:
+
+- Service startup failures
+- Kernel errors
+- Hardware detection issues
+- Filesystem problems
+- Slow boot processes
+
+---
+
+#### Common Commands
+
+##### `journalctl`
+
+Used on `systemd` systems.
+
+Example:
+
+```bash
+journalctl -b       # show current boot log
+journalctl -b -1    # show previous boot
+journalctl -k       # show kernel messages only
+```
+
+---
+
+##### `dmesg`
+
+Shows kernel boot messages.
+
+Useful for:
+
+- USB detection
+- Disk errors
+- Driver issues
+
+---
+
+#### Traditional Log Files
+
+Older systems may use:
+
+```bash
+/var/log/boot.log
+/var/log/messages
+/var/log/syslog
+```
+
+View logs:
+
+```bash
+cat /var/log/boot.log
+less /var/log/syslog
+```
+
+---
+
+#### Practical Examples
+
+```bash
+journalctl -b | grep failed     # check why service failed during boot
+dmesg | grep -i error           # check disk errors
+journalctl -b -1                # check previous failed boot
+```
+
+---
+
 ## 101.3 Change runlevels / boot targets and shutdown or reboot the system
 ### Set the default runlevel or boot target
+
+Modern Linux systems mainly use `systemd` boot targets, while older systems used SysVinit runlevels.
+
+---
+
+#### Runlevels vs Boot Targets
+
+|SysVinit Runlevel|systemd Target|Purpose|
+|---|---|---|
+|0|`poweroff.target`|Shutdown|
+|1|`rescue.target`|Single-user / rescue mode|
+|3|`multi-user.target`|Multi-user text mode|
+|5|`graphical.target`|Multi-user with GUI|
+|6|`reboot.target`|Reboot|
+
+---
+
+#### Set the Default Runlevel or Boot target
+
+```bash
+systemctl get-default           # check current default target
+sudo systemctl set-default multi-user.target    # set text mode
+sudo systemctl set-default graphical.target     # set GUI mode
+```
+
+Defines how the system boots next time.
+
+---
+
 ### Change between runlevels / boot targets including single user mode
+
+```bash
+sudo systemctl isolate multi-user.target    # switch to text mode now
+sudo systemctl isolate graphical.target     # switch to GUI now
+sudo systemctl isolate rescue.target        # enter rescue mode
+```
+
+`isolate` changes target immediately.
+
+---
+
 ### Shutdown and reboot from the command line
+
+```bash
+sudo shutdown now   # shutdown now
+sudo reboot         # reboot now
+sudo poweroff       # power off
+sudo shutdown +10   # shutdown after 10 minutes
+```
+
+---
+
 ### Alert users before switching runlevels / boot targets or other major system events
+
+```bash
+sudo shutdown +5 "System will reboot in 5 minutes"          # send warning message before shutdown
+wall "System maintenance starting soon. Please log out."    # send broadcast message
+```
+
+Warn logged-in users before reboot or shutdown.
+
+---
+
 ### Properly terminate processes
+
+```bash
+kill PID        # graceful terminate process
+kill -9 PID     # force kill process
+pkill firefox   # kill by name
+ps aux          # list processes
+```
+
+Stop programs cleanly before force killing.
+
+---
+
 ### Awareness of acpid
+
+`acpid` = Advanced Configuration and Power Interface daemon.
+
+It handles power-related events such as:
+
+- Power button pressed
+- Laptop lid closed
+- Battery events
+- Sleep / suspend actions
+
+Check service:
+
+```bash
+systemctl status acpid
+```
+
+Helps Linux respond to hardware power events.
+
+---
+
 # Topic 102: Linux Installation and Package Management
+
 ## 102.1 Design hard disk layout
+
+Good disk layout improves performance, security, recovery, and future expansion.
+
+Linux systems can use separate partitions, separate disks, or LVM depending on the system purpose.
+
+---
+
 ### Allocate filesystems and swap space to separate partitions or disks
+
+Common partitions:
+
+|Mount Point|Purpose|
+|---|---|
+|`/`|Root filesystem|
+|`/boot`|Boot files and kernel|
+|`/home`|User files|
+|`/var`|Logs, mail, databases|
+|`/tmp`|Temporary files|
+|`swap`|Virtual memory|
+
+#### Why separate partitions?
+
+- Prevent one filesystem from filling entire disk
+- Easier backup/reinstall
+- Better security and management
+
+---
+
 ### Tailor the design to the intended use of the system
+
+Choose the layout based on system role.
+
+#### Desktop System
+
+- Larger `/home`
+- Moderate `/`
+- Small `var`
+
+#### Web Server
+
+- Larger `/var`
+- Separate logs
+- Smaller `/home`
+
+#### Database Server
+
+- Separate disk for database data
+- Separate logs
+- Fast storage (SSD/NVMe)
+
+#### File Server
+
+- Large storage partition
+- RAID may be used
+
+Design storage for the workload
+
+---
+
 ### Ensure the /boot partition conforms to the hardware architecture requirements for booting
+
+`/boot` stores:
+
+- kernel
+- initramfs
+- boot loader files
+
+---
+
+#### BIOS Systems
+
+Can boot from normal partition.
+
+#### UEFI Systems
+
+Need EFI System Partition (ESP), usually:
+```
+/boot/efi
+```
+
+Formatted as:
+```
+FAT32
+```
+
+Typical size:
+```
+100 MB - 512 MB
+```
+
+UEFI systems need an EFI partition
+
+---
+
+
 ### Knowledge of basic features of LVM
 ## 102.2 Install a boot manager
 ### Providing alternative boot locations and backup boot options
