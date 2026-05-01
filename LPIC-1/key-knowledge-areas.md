@@ -963,6 +963,7 @@ When a USB drive is plugged in:
 ---
 
 ## 101.2 Boot the system
+
 ### Provide common commands to the boot loader and options to the kernel at boot time
 
 The boot loader starts Linux and allows temporary changes during boot. 
@@ -1048,6 +1049,7 @@ Boot into rescue mode.
 ---
 
 ### Demonstrate knowledge of the boot sequence from BIOS/UEFI to boot completion
+
 ### Understanding of SysVinit and systemd
 
 `SysVinit` and `systemd` are **init systems used to start and manage services when Linux boots.
@@ -1482,76 +1484,768 @@ UEFI systems need an EFI partition
 
 ---
 
-
 ### Knowledge of basic features of LVM
+
+LVM = Logical Volume Manager
+
+Allows flexible disk management.
+
+Main parts:
+
+|Term|Meaning|
+|---|---|
+|PV|Physical Volume|
+|VG|Volume Group|
+|LV|Logical Volume|
+
+Flow:
+```
+Disk -> PV -> VG -> LV -> Filesystem
+```
+
+Benefits:
+
+- Resize partitions easily
+- Combine multiple disks
+- Snapshots
+- Easier storage expansion
+
+Example
+
+```bash
+lvextend
+lvreduce
+vgcreate
+lvcreate
+```
+
+LVM is flexible storage management.
+
+---
+
 ## 102.2 Install a boot manager
+
+A boot manager (boot loader) loads the Linux kernel at startup.
+
+Common ones:
+
+- GRUB Legacy (older)
+- GRUB 2 (modern standard)
+
+---
+
 ### Providing alternative boot locations and backup boot options
+
+Boot loaders can be installed in different locations:
+
+- MBR (Master Boot Record) - traditional BIOS
+- EFI System Partition (UEFI systems)
+- Specific disk (e.g., `/dev/sda`, `/dev/sdb`)
+
+Install GRUB to another disk (backup):
+
+```bash
+sudo grub-install /dev/sdb
+```
+
+#### Why?
+
+- Recovery if main disk fails
+- Multi-boot setups
+- Redundant boot paths
+
+---
+
 ### Install and configure a boot loader such as GRUB Legacy
+
+GRUB Legacy is older and mostly replaced by GRUB 2.
+
+Config file:
+```bash
+/boot/grub/menu.lst
+```
+
+Example entry:
+
+```
+title Linux
+root (hd0,0)
+kernel /vmlinuz root=/dev/sda1 ro
+initrd /initrd.img
+```
+
+Manual boot entries using disk/partition numbers.
+
+---
+
+
 ### Perform basic configuration changes for GRUB 2
+
+GRUB 2 is used on most modern systems.
+
+Main config file (auto-generated):
+```bash
+/boot/grub/grub.cfg
+```
+
+Do not edit directly.
+
+Edit defaults instead:
+```bash
+/etc/default/grub
+```
+
+Common settings:
+```bash
+GRUB_TIMEOUT=5
+GRUB_DEFAULT=0
+GRUB_CMDLINE_LINUX="quiet"
+```
+
+Apply changes:
+```bash
+sudo update-grub
+# or
+grub-mkconfig -o /boot/grub/grub.cfg
+```
+
 ### Interact with the boot loader
+
+At boot:
+
+- Press Shift or Esc -> open GRUB menu
+- Press e -> edit boot entry
+- Press Ctrl + X / F10 -> boot
+
+---
+
 ## 102.3 Manage shared libraries
+
+Shared libraries are reusable code files used by multiple programs.  
+They reduce duplication and save memory.
+
+File format:
+
+```text
+.so     (shared object)
+```
+
 ### Identify shared libraries
+
+Check which libraries a program uses:
+
+```bash
+ldd /bin/ls
+```
+
+Example output:
+```
+libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6
+```
+
+List cached libraries:
+
+```bash
+ldconfig -p
+```
+
+---
+
 ### Identify the typical locations of system libraries
+
+Common directories:
+
+```bash
+/lib
+/lib64
+/usr/lib
+/usr/lib64
+```
+
+Additional paths:
+
+```bash
+/etc/ld.so.conf
+/etc/ld.so.conf.d/
+```
+
+---
+
 ### Load shared libraries
+
+Linux uses a dynamic linker to load libraries at runtime.
+
+Main linker:
+
+```bash
+/lib/ld-linux.so.*
+
+sudo ldconfig                           # update library cache
+export LD_LIBRARY_PATH=/custom/lib      # temporary library path
+
+```
+
+---
+
 ## 102.4 Use Debian package management
+
+Debian-based systems (e.g. Ubuntu) use `.deb` packages and tools like `dpkg` and `apt` to manage software.
+
+---
+
 ### Install, upgrade and uninstall Debian binary packages
+
+#### Using `dpkg` (low-level)
+
+```bash
+sudo dpkg -i package.deb    # install package
+sudo dpkg -r package        # remove package
+sudo dpkg -P package        # remove with config files
+```
+
+#### Using `apt` (recommended)
+
+```bash
+sudo apt install nginx      # install package
+sudo apt upgrade            # upgrade all packages
+sudo apt remove nginx       # remove package
+sudo apt purge nginx        # remove with config files
+```
+
+---
+
 ### Find packages containing specific files or libraries which may or may not be installed
+
+```bash
+dpkg -S /bin/ls             # search installed packages
+apt-file search filename    # search available packages
+```
+
+---
+
 ### Obtain package information like version, content, dependencies, package integrity and installation status (whether or not the packge is installed)
+
+```bash
+apt show nginx          # check package details
+dpkg -l nginx           # check installed status
+dpkg -L nginx           # list files in package
+apt depends nginx       # check dependencies
+debsums nginx           # verify package integrity
+```
+
+---
+
 ### Awareness of apt
+
+`apt` is a high-level tool that manages:
+
+- package installation
+- dependency resolution
+- repositories
+- updates
+
+```bash
+sudo apt update         # update package list
+sudo apt upgrade        # upgrade system
+/etc/apt/sources.list   # repository config
+```
+
+---
+
 ## 102.5 Use RPM and YUM package management
+
+RPM-based systems (e.g. RHEL, CentOS, Fedora, openSUSE) use `.rpm` packages.    
+Tools include `rpm` (low-level) and `yum` / `dnf` / `zypper` (high-level).  
+
+---
+
 ### Install, re-install, upgrade and remove packages using RPM, YUM and Zypper
+
+#### Using `rpm` (low-level)
+
+```bash
+sudo rpm -ivh package.rpm                   # install
+sudo rpm -Uvh package.rpm                   # upgrade
+sudo rpm -ivh --replacepkgs package.rpm     # reinstall
+sudo rpm -e package                         # remove
+```
+
+#### Using `yum (RHEL/CentOS)
+
+```bash
+sudo yum install nginx      # install
+sudo yum update             # update
+sudo yum rmeove nginx       # remove
+```
+
+#### Usig `zypper` (openSUSE)
+
+```bash
+sudo zypper install nginx   # install
+sudo zypper update          # update
+sudo zypper remove nginx    # remove
+```
+
+---
+
 ### Obtain information on RPM packages such as version, status, dependencies, integrity and signatures
+
+```bash
+rpm -qi nginx           # check package info
+rpm -qa                 # check installed packages
+rpm -qR nginx           # check dependencies
+rpm -V nginx            # verify package integrity
+rpm -K package.rpm      # check signature
+```
+
+---
+
 ### Determine what files a package provides, as well as find which package a specific file comes from
+
+```bash
+rpm -ql nginx               # list files in package
+rpm -qf /usr/sbin/nginx     # find which package owns a file
+```
+
+---
+
 ### Awareness of dnf
+
+`dnf` is the modern replacement for `yum`.
+
+Used in:
+
+- Fedora
+- RHEL 8+
+- CentOS Stream
+
+```bash
+sudo dnf install nginx
+sudo dnf update
+sudo dnf remove nginx
+```
+
+`dnf` = newer, faster, better dependency handling
+
+---
+
 ## 102.6 Linux as a virtualization guest
+
+Linux can run inside virtual machines (VMs) or containers, especially in cloud environments.
+
+---
 ### Understand the general concept of virtual machines and containers
+
+#### Virtual Machines (VMs)
+
+- Full OS running on virtual hardware
+- Uses hypervisor (e.g., VirtualBox, VMware, KVM)
+- Each VM has its own kernel
+
+Example: Ubuntu VM on VirtualBox
+
+---
+
+#### Containers
+
+- Lightweight, share host kernel
+- Faster and less resource usage
+- Isolated at application level
+
+Example: DOcker container
+
+---
+
 ### Understand common elements virtual machines in an IaaS cloud, such as computing instances, block storage and networking
+
+Typical cloud components:
+
+|Component|Purpose|
+|---|---|
+|Compute (VM)|Virtual server|
+|Block storage|Virtual disk|
+|Networking|Virtual network, IP|
+
+Examples:
+
+- AWS EC2 instance
+- Azure VM
+- Google Compute Engine
+
+---
+
 ### Understand unique properties of a Linux system which have to changed when a system is cloned or used as a template
+
+When cloning or templating Linux systems, ensure uniqueness:
+
+- Hostname
+- IP address
+- SSH host keys
+- Machine ID
+- Network configs
+
+Why?: Avoid duplicate identities and network conflicts.
+
+---
+
 ### Understand how system images are used to deploy virtual machines, cloud instances and containers
+
+System images are pre-configured OS templates used to deploy systems.
+
+Used for:
+
+- Virtual machines
+- Cloud instances
+- Containers
+
+Examples:
+
+- `.qcow2`, `.vmdk`, `.iso`
+- Docker images
+
+Image = ready-to-use OS snapshot
+
+---
+
 ### Understand Linux extensions which integrate Linux with a virtualization product
+
+Enhance integration with host system.
+
+Examples:
+
+- VirtualBox Guest Additions
+- VMware Tools
+- QEMU Guest Agent
+
+Features:
+
+- Better display
+- Shared clipboard
+- File sharing
+- Improved performance
+
+---
+
 ### Awareness of cloud-init
+
+`cloud-init` automates system setup when a VM is created.
+
+Common tasks:
+
+- Set hostname
+- Configure users/passwords
+- Inject SSH keys
+- COnfigure networking
+- Run startup scripts
+
+Config files:
+
+```bash
+/etc/cloud/
+/var/lib/cloud/
+```
+
+Auto-configures VM on first boot.
+
+---
+
 # Topic 103: GNU and Unix Commands
+
 ## 103.1 Work on the command line
+
+---
+
 ### Use single shell commands and one line command sequences to perform basic tasks on the command line
+
+Run basic commands:
+
+```bash
+ls
+cp file1 file2
+mv file1 dir/
+rm file
+```
+
+Chain commands:
+
+```bash
+command1 && command2    # run if previous succeeds
+command1 ; command2     # run regardless
+command1 | command2     # pipe output
+```
+
+---
+
 ### Use and modify the shell environment including defining, referencing and exporting environment variables
+
+#### Variables
+
+```bash
+VAR=value           # set variable
+echo $VAR           # echo $VAR
+export VAR=value    # export VAR=value
+```
+
+---
+
+#### Common Environment Variables
+
+```bash
+echo $PATH
+echo $HOME
+echo $USER
+```
+
+---
+
 ### Use and edit command history
+
+```bash
+history         # view history
+!!              # run previous command
+!5              # run specific command
+# Ctrl + R      # search history
+history -c      # clear history
+```
+
+---
+
 ### Invoke commands inside and outside the defined path
+
+#### Inside PATH
+
+```bash
+ls          # run command directly
+echo $PATH  # check PATH
+```
+
+---
+
+#### Outside PATH
+
+```bash
+/bin/ls         # run with full path
+./script.sh     # run from current directory
+```
+
+---
+
+#### Add Directory to PATH
+
+```bash
+export PATH=$PATH:/new/path
+```
+
+---
+
 ## 103.2 Process text streams using filters
+
+Text filters read input (from files or commands), process it, and output the result.  
+They are commonly chained using pipes '|'.
+
+---
+
 ### Send text files and output streams through text utility filters to modify the uoutput using standard UNIX commands found in the GNU textutils package
+
+#### Common Text Filters
+
+```bash
+cat file.txt                                    # display file
+less file.txt                                   # view file page by page
+more file.txt                                   # view file page by page
+grep "error" file.txt                           # search text
+cut -d ":" -f1 /etc/passwd                      # extract columns
+sort file.txt                                   # sort lines
+sort file.txt | uniq                            # remove duplicates
+wc -l file.txt                                  # count lines/words
+echo "hello" | tr a-z A-Z                       # translate characters
+head -n 5 file.txt                              # first n lines
+tail -n 5 file.txt                              # last n lines
+nl file.txt                                     # number lines
+cat file.txt | grep "error" | sort | uniq       # using pipes to combine commands
+command > file.txt                              # save output
+command >> file.txt                             # append
+```
+
+---
+
 ## 103.3 Perform basic file management
+
+---
+
 ### Copy, move and remove files and directories individually
+
+```bash
+cp file1 file2  # copy file
+mv file1 file2  # move / rename
+rm file1        # remove file
+mkdir dir1      # create directory
+rmdir dir1      # remove empty directory
+```
+
+---
+
 ### Copy multiple files and directories recursively
+
+```bash
+cp -r dir1 dir2         # copy directory
+cp file1 file2 dir/     # copy multiple files
+```
+
+---
+
 ### Remove files and directories recursively
+
+```bash
+rm -r dir1      # remove directory and contents
+rm -rf dir1     # force remove
+```
+
+---
+
 ### Use simple and advanced wildcard specifications in commands
+
+```bash
+# Basic wildcards
+*       # all files
+?       # single character
+
+rm *.txt
+ls file?.txt
+
+# Advanced wildcards
+[a-z]   # range
+[!a-z]  # not in range
+
+ls file[1-3].txt
+```
+
+---
+
 ### Using find to locate and act on files based on type, size or time
+
+```bash
+# search by name
+find /home -name "file.txt"
+
+# search by type
+find . -type f      # files
+find . -type d      # directories
+
+# search by size
+find . -size +10M
+
+# search by time
+find . -mtime -1
+
+# execute command on results
+find . -name "*.log" -exec rm {}\;
+```
+
+---
+
 ### Usage of tar, cpio and dd
+
+```bash
+# tar - archive files
+tar -cvf archive.tar dir/           # create archive
+tar -xvf archive.tar                # extract archive
+tar -czvf archive.tar.gz dir/       # compressed archive
+
+# cpio - archive
+find . | cpio -o > archive.cpio     # create archive
+cpio -id < archive.cpio             # extract
+
+# dd - low level copy   
+dd if=/dev/sda of=/dev/sdb          # copy disk
+dd if=/dev/sda of=disk.img          # create image
+```
+
+---
+
 ## 103.4 Use streams, pipes and redirects
+
+Linux commands use three standard streams:
+
+|Stream|Number|Purpose|
+|---|---|---|
+|stdin|0|Input|
+|stdout|1|Normal output|
+|stderr|2|Error output|
+
+---
+
 ### Redirecting standard input, standard output and standard error
+
+```bash
+command > file.txt              # redirect output (overwrite)
+command >> file.txt             # append output
+command < file.txt              # redirect input
+command 2> error.txt            # redirect error
+command > output.txt 2>&1       # redirect both stdout and stderr
+```
+
 ### Pipe the output of one command to the input of another command
+
+```bash
+# use | to pass output to another command
+command1 | command2
+
+# example
+ls -l | grep ".txt"
+```
+
+---
+
 ### Use the output of one command as arguments to another command
+
+```bash
+# convert output into arguments
+ls *.txt | xargs rm
+
+# example
+find . -name "*.log" | xargs rm
+```
+
+---
+
 ### Send output to both stdout and a file
+
+```bash
+command | tee file.txt
+
+# append instead of overwrite
+command | tee -a file.txt
+```
+
+---
+
 ## 103.5 Create, monitor and kill processes
 ### Run jobs in the foreground and background
 ### Signal a program to continue running after logout
 ### Monitor active processes
 ### Select and sort processes for display
 ### Send signals to processes
+
 ## 103.6 Modify process execution priorities
 ### Know the default priority of a job that is created
 ### Run a program with higher or lower priority than the default
 ### Change the priority of a running process
+
 ## 103.7 Search text files using regular expression
 ### Create simple regular expressions containing several notational elements
 ### Understand the differences between basic and extended regular expressions
 ### Understand the concepts of special characters, character classes, quantifiers and anchors
 ### Use regular expression tools to perform searches through a filesystem or file content
 ### Use regular expressions to delete, change and substitute text
+
 ## 103.8 Basic file editing
 ### Navigate a document using vi
 ### Understand and use vi modes
 ### Insert, edit, delete, copy and find text in vi
 ### Awareness of Emacs, nano, and vim
 ### Configure the standard editor
+
 # Topic 104: Devices, Linux Filesystems, Filesystem Hierarchy Standard
 ## 104.1 Create partitions and filesystems
 ### Manage MBR and GPT partition tables
@@ -1561,29 +2255,35 @@ UEFI systems need an EFI partition
     - VFAT
     - exFAT
 ### Basic feature knowledge of Btrfs, including multi-device filesystems, compression and subvolumes
+
 ## 104.2 Maintain the integrity of filesystems
 ### Verify the integrity of filesystems
 ### Monitor free space and inodes
 ### Repair simple filesystem problems
+
 ## 104.3 Control mounting and unmounting of filesystems
 ### Manually mount and unmount filesystems
 ### Configure filesystem mounting on bootup
 ### Configure user mountable removable filesystems
 ### Use of labels and UUIDs for identifying and mounting file systems
 ### Awareness of systemd mount units
+
 ## 104.5 Manage file permissions and ownership 
 ### Manage access permissions on regular and special files as well as directories
 ### Use access modes such as suid, sgid, and the sticky bit to maintain security
 ### Know how to change the file creation mask
 ### Use the group field to grant file access to group members
+
 ## 104.6 Create and change hard and symbolic links
 ### Create links
 ### Identify hard and/or soft links
 ### Use links to support system administration tasks
+
 ## 104.7 Find system files and place files in the correct location
 ### Understand the correct locations of files under the FHS
 ### Find files and commands on a Linux system
 ### Know the location and purpose of important file and directories as defined in the FHS
+
 # Topic 105: Shells and Shell Scripting
 ## 105.1 Customize and use the shell environment
 ## 105.2 Customize or write simple scripts
