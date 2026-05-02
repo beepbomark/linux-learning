@@ -2221,23 +2221,236 @@ command | tee -a file.txt
 ---
 
 ## 103.5 Create, monitor and kill processes
+
 ### Run jobs in the foreground and background
+
+```bash
+# Run in foreground (default)
+command
+
+# Run in backgorund
+command &
+
+# Move running job to background
+Ctrl + Z
+bg
+
+# Bring job to foreground
+fg
+
+# List jobs
+jobs
+```
+
+---
+
 ### Signal a program to continue running after logout
+
+```bash
+nohup command &     # use nohup
+nohup.out           # output saved 
+disown              # alternative
+```
+
+Prevent process from stopping when terminal closes.
+
+---
+
 ### Monitor active processes
+
+```bash
+ps aux      # list process
+top         # interactive view
+htop        # better view
+```
+
+---
+
 ### Select and sort processes for display
+
+```bash
+ps aux | grep nginx     # filter by name
+ps aux --sort=%cpu      # sort by cpu
+ps aux --sort=%mem      # sort by memory
+```
+
+---
+
 ### Send signals to processes
 
+```bash
+kill PID        # terminate process
+kill -9 PID     # force kill
+pkill nginx     # kill by name
+killall nginx   # killall nginx
+```
+
+---
+
+#### Common Signals
+
+|Signal|Meaning|
+|---|---|
+|`-15` (default)|Grace terminate|
+|`-9`|Force kill|
+|`-1`|Reload process|
+|`-STOP`|Pause process|
+|`-CONT`|Resume process|
+
+---
+
 ## 103.6 Modify process execution priorities
+
+Linux uses **nice values** to control process priority.
+
+- Range: `-20` (highest priority) -> `19` (lowest priority)
+- Default: `0`
+
+Lower nicer value = higher priority.
+
+---
+
 ### Know the default priority of a job that is created
+
+Normal processes start with:
+
+```
+nice = 0
+```
+
+```bash
+ps -o pid,ni.cmd    # check process priority
+```
+
+---
+
 ### Run a program with higher or lower priority than the default
+
+```bash
+nice -n 10 command # lower priority (less CPU usage)
+sudo nice -n -10 command # higher priority (needs root)
+```
+
+---
+
 ### Change the priority of a running process
 
+```bash
+renice 10 -p PID
+sudo renice -10 -p PID  # increase priority (requires root)
+```
+
+---
+
 ## 103.7 Search text files using regular expression
+
+Regular expressions (regex) are patterns used to search, match, and manipulate text.
+
+Common tools:
+
+- `grep` -> search
+- `sed` -> modify text
+- `awk` -> process text
+
+---
+
 ### Create simple regular expressions containing several notational elements
+
+```bash
+grep "error" file.txt   # match exact word
+grep "e.or" file.txt    # match any character
+```
+
+---
+
 ### Understand the differences between basic and extended regular expressions
+
+|Type|Command|Features|
+|---|---|---|
+|Basic (BRE)|`grep`|limited symbols|
+|Extended (ERE)|`grep -E`|more powerful|
+
+```bash
+grep -E "cat|dog" file.txt
+```
+
+---
+
 ### Understand the concepts of special characters, character classes, quantifiers and anchors
+
+#### Special Characters
+|Symbol|Meaning|
+|---|---|
+|`.`|any character|
+|`^`|start of line|
+|`$`|end of line|
+|`*`|zero or more|
+|`+`|one or more (ERE)|
+|`?`|optional (ERE)|
+
+#### Character Classes
+
+```bash
+grep "[abc]" file.txt       # match specific sets
+grep "[a-z]" file.txt       # ranges
+grep "[[:digit:]]" file.txt # predefined
+grep "[[:alpha:]]" file.txt # predefined
+```
+
+#### Quantifiers
+
+|Pattern|Meaning|
+|---|---|
+|`a*`|zero or more `a`|
+|`a+`|one or more `a`|
+|`a?`|optional `a`|
+|`{n}`|exactly n times|
+
+```bash
+grep -E "a{3}" file.txt
+```
+
+---
+
+#### Anchors
+|Symbol|Meaning|
+|---|---|
+|`^text`|line starts with text|
+|`text$`|line ends with text|
+
+```bash
+grep "^root" /etc/passwd
+```
+
+---
+
 ### Use regular expression tools to perform searches through a filesystem or file content
+
+```bash
+grep "error" file.txt       # search in file
+grep -r "error" /var/log    # search recursively
+find . -name "*.log"        # use `find` with regex 
+```
+
 ### Use regular expressions to delete, change and substitute text
+
+#### Using `sed`
+
+```bash
+sed 's/error/warning/' file.txt     # replace text
+sed 's/error/warning/g' file.txt    # replace all occurrences
+sed '/error/d' file.txt             # delete lines
+```
+
+---
+
+#### Using `awk`
+
+```bash
+awk '/error/ {print}' file.txt
+```
+
+---
 
 ## 103.8 Basic file editing
 ### Navigate a document using vi
@@ -2246,42 +2459,538 @@ command | tee -a file.txt
 ### Awareness of Emacs, nano, and vim
 ### Configure the standard editor
 
+---
+
 # Topic 104: Devices, Linux Filesystems, Filesystem Hierarchy Standard
+
 ## 104.1 Create partitions and filesystems
+
+---
+
 ### Manage MBR and GPT partition tables
+
+#### MBR (Master Boot Record)
+
+- Older partitioning scheme
+- Supports up to **2TB disks**
+- Maximum **4 primary partitions**
+
+#### GPT (GUID Partition Table)
+
+- Modern standard (used with UEFI)
+- Supports large disks (>2TB)
+- Many partitions (typically 128)
+
+---
+
+#### Tools
+
+Create/manage partitions:
+
+```bash
+fdisk /dev/sda      # MBR (also supports GPT)
+gdisk /dev/sda      # GPT
+parted /dev/sda     # both MBR and GPT
+
+# View partitions
+lsblk
+fdisk -l
+```
+
+---
+
 ### Use various `mkfs` commands to create various filesystems such as:
-    - ext2/ext3/ext4
-    - XFS
-    - VFAT
-    - exFAT
+
+#### ext Filesystems
+
+```bash
+mkfs.ext2 /dev/sda1
+mkfs.ext3 /dev/sda1
+mkfs.ext4 /dev/sda1
+```
+
+- `ext4` = most common
+- journaling supported (ext3/ext4)
+
+---
+
+#### XFS Filesystem
+
+```bash
+mkfs.xfs /dev/sda1
+```
+
+- high performance
+- good for large file
+
+---
+
+#### VFAT (FAT32)
+
+```bash
+mkfs.vfat /dev/sda1
+```
+
+- used for USB drives
+- compatible with Windows
+
+---
+
+#### Verify Filesystem
+
+```bash
+lsblk -f
+blkid
+```
+
+---
+
 ### Basic feature knowledge of Btrfs, including multi-device filesystems, compression and subvolumes
 
+Btrfs (B-tree filesystem) is a modern Linux filesystem with advanced features for flexibility, reliability, and scalability.
+
+---
+
+#### Key Features
+
+##### Multi-Device Filesystem
+
+Btrfs can use multiple disks as one filesystem.
+
+- Combine disks (like RAID)
+- Built-in RAID support (RAID 0, 1, 10, etc.)
+- No separate RAID tool needed
+
+One filesystem across multiple disks.
+
+---
+
+##### Compression
+
+Btrfs supports transparent compression.
+
+- Saves disk space
+- Improves performance (less data to read/write)
+
+Enable compression:
+
+```bash
+mount -o compress /dev/sda1 /mnt
+```
+
+Common algorithms:
+
+- `zlib`
+- `lzo`
+- `zstd`
+
+---
+
+##### Subvolumes
+
+Subvolumes act like separate filesystems inside Btrfs.
+
+- Can be managed independently
+- Useful for snapshots and backups
+
+Create subvolume:
+
+```bash
+btrfs subvolume create /mnt/data
+```
+
+---
+
+#### Additional Features (Awareness)
+
+- Snapshots (quick backups)
+- Copy-on-write (COW)
+- Online resizing
+- Data integrity checks (checksums)
+
+---
+
 ## 104.2 Maintain the integrity of filesystems
+
+---
+
 ### Verify the integrity of filesystems
+
+```bash
+fsck /dev/sda1  # check filesystem consistency
+fsck -y /dev/sda1   # auto-fix issues
+```
+
+Run on unmounted filesystem (or in rescue mode).
+
+---
+
 ### Monitor free space and inodes
+
+```bash
+df -h           # check disk space
+df -i           # check inode usage
+du -sh /var/log # check directory size
+```
+
+---
+
 ### Repair simple filesystem problems
 
+```bash
+fsck /dev/sda1          # fix errors
+mount -o remount,rw /   # remount filesystem
+
+dmesg | grep -i error   # check logs (identify disk issues)
+```
+
+---
+
 ## 104.3 Control mounting and unmounting of filesystems
+
+---
+
 ### Manually mount and unmount filesystems
+
+```bash
+sudo mount /dev/sdb1 /mnt   # mount a filesystem
+sudo umount /mnt            # unmount
+# or
+sudo umount /dev/sdb1       # unmount
+
+# check mounted filesystems
+mount
+lsblk
+```
+
+---
+
 ### Configure filesystem mounting on bootup
+
+Use `/etc/fstab`.
+
+Example entry:
+```bash
+/dev/sdb1   /data   ext4   defaults   0  2
+```
+
+Apply changes:
+```bash
+sudo mount -a
+```
+
+---
+
 ### Configure user mountable removable filesystems
+
+Allow normal users to mount:
+
+```bash
+/dev/sdb1   /media/usb   vfat   user,noauto   0  0
+```
+
+Options:
+
+- `user` -> allow user mount
+- `noauto` -> do not mount at boot
+
+---
+
 ### Use of labels and UUIDs for identifying and mounting file systems
+
+#### Using UUID
+
+```bash
+blkid       # find UUID
+
+# example
+UUID=xxxx-xxxx   /data   ext4   defaults   0  2
+```
+
+---
+
+#### Using Label
+
+```bash
+e2label /dev/sdb1 mydisk                        # set label
+LABEL=mydisk   /data   ext4   defaults   0  2   # mount with label
+```
+
+---
+
 ### Awareness of systemd mount units
 
+`systemd` can manage mounts using unit files.
+
+```bash
+# example
+/etc/systemd/system/data.mount
+
+# control with
+systemctl start data.mount
+systemctl enable data.mount
+```
+
+Alternative to `/etc/fstab`.
+
+---
+
 ## 104.5 Manage file permissions and ownership 
+
+---
+
 ### Manage access permissions on regular and special files as well as directories
+
+Permissions:
+|Symbol|Meaning|
+|---|---|
+|`r`|read|
+|`w`|write|
+|`x`|execute|
+
+Check permissions:
+
+```bash
+ls -l
+```
+
+Example:
+```
+-rwxr-xr-- 1 user group file.txt
+```
+
+Format:
+```
+owner | group | others
+```
+
+---
+
+#### Change permissions
+
+```bash
+# using symbols
+chmod u+x file.sh
+chmod g-w file.txt
+chmod o=r file.txt
+
+# using numbers
+chmod 755 file.sh
+```
+
+---
+
+#### Change ownership
+
+```bash
+chown user file.txt
+chown user:group file.txt
+
+# change group
+chgrp group file.txt
+```
+
+---
+
 ### Use access modes such as suid, sgid, and the sticky bit to maintain security
+
+```bash
+# SUID (Set User ID)
+chmod u+s file      # runs file as owner (usually root)
+
+# SGID (Set Group ID)
+chmod g+s dir       # new files inherit group
+
+# Sticky Bit
+chmod +t /shared    # only owner can delete files (used in `/tmp`)
+```
+
+---
+
 ### Know how to change the file creation mask
+
+Controls default permissions.
+
+```bash
+umask       # check
+umask 022   # set
+```
+
+---
+
 ### Use the group field to grant file access to group members
 
+```bash
+# assign group
+chown :developers file.txt
+
+# set permissions
+chmod 770 file.txt
+```
+
+---
+
 ## 104.6 Create and change hard and symbolic links
+
+Links allow multiple references to files.
+
+Types of Links
+|Type|Description|
+|---|---|
+|Hard Link|Points to same inode (same file data)|
+|Symbolic Link (Soft Link)|Points to file path|
+
+---
+
 ### Create links
+
+```bash
+ln file1 file2      # hard link, file2 points to same data as file1
+ln -s file1 link1   # symbolic link, link1 points to file1
+```
+
+---
+
 ### Identify hard and/or soft links
+
+Check with:
+```bash
+ls -l
+```
+
+Example:
+```
+lrwxrwxrwx  link1 -> file1   # symbolic link
+-rw-r--r--  file1
+```
+Check inode:
+```bash
+ls -i
+```
+- Hard links share same inode
+- Symbolic links have different inode
+
+---
+
 ### Use links to support system administration tasks
 
+Links are commonly used to simplify management, maintain compatibility, and organize systems.
+
+---
+
+#### Common Use Cases
+
+##### Create Shortcuts
+
+Create easy access to long paths:
+
+```bash
+ln -s /var/log/syslog ~/syslog
+```
+
+---
+
+##### Maintain Compatibility (Version Linking)
+
+Point a generic name to a specific version:
+```bash
+ln -s /opt/app/v2/app /usr/bin/app
+```
+
+- Allows switching versions without changing scripts.
+
+---
+
+##### Share Files Across Locations
+
+Access same file from multiple paths (hard link):
+
+```bash
+ln file1 /backup/file1
+```
+
+- Same data, different location
+
+---
+
+##### Save Disk Space (Hard links)
+
+Multiple filenames pointing to same data:
+
+```bash
+ln file1 file2
+```
+
+- No extra disk usage
+
+---
+
+##### Manage Configuration Files
+
+Point config file to central location:
+
+```bash
+ln -s /etc/app/config /home/user/config
+```
+
+---
+
+##### Redirect Logs or Data
+
+Store logs in another location:
+
+```bash
+ln -s /data/logs /var/log/app
+```
+
+---
+
 ## 104.7 Find system files and place files in the correct location
+
+FHS defines where files should be stored in Linux.
+
+---
+
 ### Understand the correct locations of files under the FHS
+
+| Directory | Purpose |
+|---|---|
+| `/` | Root of filesystem |
+| `/bin` | Essential user commands |
+| `/sbin` | System/admin commands |
+| `/etc` | Configuration files |
+| `/home` | User directories |
+| `/root` | Root user home |
+| `/var` | Variable data (logs, mail) |
+| `/tmp` | Temporary files |
+| `/usr` | User programs and libraries |
+| `/usr/bin` | Non-essential user commands |
+| `/usr/sbin` | Non-essential admin commands |
+| `/lib` | Essential libraries |
+| `/boot` | Boot loader and kernel |
+| `/dev` | Device files |
+| `/proc` | Process/kernel info (virtual) |
+| `/sys` | Hardware/system info (virtual) |
+| `/opt` | Optional software |
+| `/mnt` | Temporary mount point |
+| `/media` | Removable media |
+
+---
+
 ### Find files and commands on a Linux system
+
+```bash
+which ls                    # locate files and commands
+whereis ls                  # search in PATH
+find / -name "file.txt"     # search files in filesystem
+
+# use database search
+locate file.txt
+sudo updatedb       # update database
+```
+
+---
+
 ### Know the location and purpose of important file and directories as defined in the FHS
 
 # Topic 105: Shells and Shell Scripting
