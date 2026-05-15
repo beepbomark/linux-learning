@@ -19,10 +19,10 @@ Hardware troubleshooting generally follows these layers:
 
 1. Hardware detection
 2. Kernel detection
-3. Driver/module loading
+3. Kernel module loading
 4. Firmware initialization
 5. Service interaction
-6. User-space functionality
+6. Operational functionality
 
 Issues found in lower layers commonly affect higher layers.
 
@@ -223,7 +223,7 @@ Look for:
 
 ---
 
-### Step 4 - Check Kernel Logs
+### Step 4 - Check Kernel Modules
 
 Verify whether the required kernel modules are loaded.
 
@@ -279,6 +279,323 @@ If lower layers function correctly but operations fail:
 - configuration issue
 - service misconfiguration
 - application-level issue
+
+---
+
+## Hardware Troubleshooting Examples
+
+### Network Interface Not Detected
+
+Common Symptoms:
+- No network connectivity
+- Interface missing from `ip a`
+- Unable to obtain IP address
+
+Common Checks:
+```bash
+lspci | grep -i ethernet
+ip a
+dmesg | grep -i ethernet
+lsmod
+```
+
+Common Causes:
+- NIC disabled in BIOS
+- Loose cable
+- Missing kernel module
+- Hardware failure
+
+Key Lesson:  
+If the NIC is missing from `lspci`, Linux cannot detect the hardware.
+
+---
+
+### NVMe Drive Not Detected
+
+Common Symptoms:
+- Storage device missing
+- Filesystem unavailable
+- Mount failures
+
+Common Checks:
+```bash
+lsblk
+lspci | grep -i nvme
+dmesg | grep -i nvme
+```
+
+Common Causes:
+- Loose NVMe connection
+- BIOS storage configuration issue
+- NVMe initialization failure
+- Hardware failure
+
+Key Lesson:  
+Storage controllers may appear in `lspci` even if the disk itself is unusable.
+
+---
+
+### Hard Disk Drive Not Detected
+
+Common Symptoms:
+- Disk missing from Linux
+- Boot failures
+- Filesystem unavailable
+
+Common Checks
+```bash
+lsblk
+fdisk -l
+dmesg | grep -i sata
+```
+
+Common Causes:
+- Loose SATA cable
+- Power issue
+- Failed disk
+- Disabled SATA controller
+
+Key Lesson:  
+Always verify both data and power connections during storage troubleshooting.
+
+---
+
+### USB Device Not Recognized
+
+Common Symptoms
+- USB device unavailable
+- Device disconnects repeatedly
+- Hardware missing after insertion
+
+Common Checks:
+```bash
+lsusb
+dmesg -w
+lsblk
+```
+
+Common Causes:
+- Faulty USB port
+- Insufficient power
+- Faulty device
+- Hardware initialization failure
+
+Key Lesson:  
+`dmesg -w` is useful for monitoring live USB events.
+
+---
+
+### Required Kernel Module Not Loaded
+
+Common Symptoms:
+- Hardware detected but unusable
+- Expected functionality missing
+- Device initialization incomplete
+
+Common Checks:
+```bash
+lsmod
+lspci -k
+modprobe
+```
+
+Common Causes:
+- Module not loaded
+- Incorrect module
+- Missing dependencies
+- Blacklisted module
+
+Key Lesson:  
+Hardware may exist but remain unusable without the required kernel module.
+
+---
+
+### Firmware Initialization Failure
+
+Common Symptoms:
+- Hardware instability
+- Device partially working
+- Initialization errors during boot
+
+Common Checks:
+```bash
+dmesg | grep -i firmware
+journalctl -k
+```
+
+Common Causes:
+- Missing firmware package
+- Corrupted firmware
+- Unsupported hardware
+
+Key Lesson:  
+Some hardware requires firmware before becoming fully operational.
+
+---
+
+### Virtualization Unavailable in BIOS
+
+Common Symptoms
+- Virtual machines fail to start
+- KVM unavailable
+- Virtualization errors
+
+Common Checks:
+```bash
+lscpu
+lsmod | grep kvm
+dmesg | grep -i kvm
+```
+
+Common Causes
+- Intel VT-x disabled
+- AMD-V disabled
+- BIOS configuration issue
+
+Key Lesson:  
+Virtualization requires both hardware and BIOS support.
+
+---
+
+### RAID Controller Unavailable
+
+Common Symptoms:
+- RAID volumes missing
+- Storage inaccessible
+- Boot failures
+
+Common Checks:
+```bash
+lspci
+lsblk
+dmesg | grep -i raid
+```
+
+Common Causes
+- RAID controller failure
+- Missing RAID module
+- RAID configuration corruption
+
+Key Lesson:  
+RAID problems can affect multiple disks simultaneously.
+
+---
+
+### PCIe Device Not Detected
+
+Common Symptoms:
+- Hardware unavailable
+- Device missing from Linux
+- Functionality unavailable
+
+Common Checks:
+```bash
+lspci
+dmesg | grep -i pci
+```
+
+Common Causes:
+- Hardware not seated properly
+- PCIe slot issue
+- BIOS disabled device
+- Hardware failure
+
+Key Lesson:  
+If a PCIe device is missing from `lspci`, detection failed at hardware level.
+
+---
+
+### Hardware Intermittently Disconnecting
+
+Common Symptoms:
+- Random disconnects
+- Device reconnects automatically
+- Unstable hardware behavior
+
+Common Checks:
+```bash
+dmesg -w
+journalctl -f
+```
+
+Common Causes:
+- Faulty cable
+- Power instability
+- Overheating
+- Hardware degradation
+
+Key Lesson:  
+Intermittent issues commonly appear in live system logs.
+
+---
+
+### Filesystem Mounted Read-Only
+
+Common Symptoms:
+- Unable to write files
+- Filesystem errors
+- Applications failing to save data
+
+Common Checks:
+```bash
+mount
+dmesg
+journalctl -k
+```
+
+Common Causes:
+- Filesystem corruption
+- Disk I/O errors
+- Storage instability
+
+Key Lesson:  
+Linux may remount filesystems as read-only to protect data integrity.
+
+---
+
+### SMART Disk Failure Detected
+
+Common Symptoms:
+- Slow disk performance
+- I/O errors
+- Disk warnings during boot
+
+Common Checks:
+```bash
+smartctl -a /dev/sda
+dmesg
+```
+
+Common Causes:
+- Aging disk
+- Bad sectors
+- Hardware degradation
+
+Key Lesson:  
+SMART warnings commonly indicate impending disk failure.
+
+---
+
+### Fan/Sensor Monitoring Failure
+
+Common Symptoms:
+- Missing temperature readings
+- Fan speed unavailable
+- Unexpected overheating
+
+Common Checks:
+```bash
+sensors
+dmesg
+```
+
+Common Causes:
+- Missing sensor modules
+- Unsupported motherboard
+- Hardware monitoring failure
+
+Key Lesson:  
+Hardware monitoring is important for system stability and thermal management.
 
 ---
 
@@ -499,6 +816,7 @@ Output meaning:
 
 Common options
 |Command|Purpose|
+|---|---|
 |`lsmod`|List modules|
 |`lsmod | grep kvm`||
 
