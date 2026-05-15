@@ -205,4 +205,451 @@ If hardware is missing:
 
 ---
 
-### Testing
+### Step 3 - Check Kernel Logs
+
+Verify whether the Linux kernel detected errors during initialization.
+
+Common tools
+```bash
+dmesg
+journalctl -k
+```
+
+Look for:
+- initialization failures
+- PCIe errors
+- firmware loading failures
+- device resets
+
+---
+
+### Step 4 - Check Kernel Logs
+
+Verify whether the required kernel modules are loaded.
+
+Common tools:
+```bash
+lsmod
+modprobe
+lspci -k
+```
+
+Examples:
+- `ixgbe`
+- `nvme`
+- `kvm`
+
+If modules are missing:
+- hardware may appear detected
+- functionality may remain unavailable
+
+---
+
+### Step 5 - Check Services
+
+Verify whether required services are operational.
+
+Common tools:
+```bash
+systemctl status
+```
+
+Examples:
+- `NetworkManager`
+- `sshd`
+- `libvirtd`
+
+If services fail:
+- hardware may exist but remain unusable
+
+---
+
+### Step 6 - Test Operational Functionality
+
+Verify whether the system can use the hardware successfully.
+
+Examples:
+- SSH connection successful
+- storage mounted correctly
+- network communication operational
+- virtual machines starting normally
+
+If lower layers function correctly but operations fail:
+- permissions issue
+- configuration issue
+- service misconfiguration
+- application-level issue
+
+---
+
+## Common Diagnostic Commands
+
+### Hardware Detection
+
+Commands used to verify whether Linux can physically detect hardware devices.
+
+---
+
+#### `lspci`
+
+List PCI/PCIe devices detected by the system.
+
+Commonly used for :
+- network interfaces
+- GPUs
+- RAID controllers
+- NVMe controllers
+
+Basic usage:
+```bash
+lspci
+```
+
+Example output:
+```
+04:00.0 Ethernet controller: Intel Corporation Ethernet Controller I225-V
+06:00.0 VGA compatible controller: NVIDIA Corporation TU116 [GeForce GTX 1660 SUPER]
+```
+
+Output meaning:
+|Section|Meaning|
+|---|---|
+|`04:00.0`|PCI device address|
+|`Ethernet controller|Device type|
+|`Intel Corporation`|Vendor|
+|`I225-V`|Device model|
+
+Common options:
+|Command|Purpose|
+|---|---|
+|`lspci`|List PCI devices|
+|`lspci -k`|Show kernel modules|
+|`lspci -v`|Verbose information|
+|`lspci | grep -i ethernet`||
+
+---
+
+#### `lsusb`
+
+List USB devices detected by the system.
+
+Commonly used for:
+- USB storage
+- wireless adapters
+- keyboards/mice
+- USB peripherals
+
+Basic usage:
+```bash
+lsusb
+```
+
+Example output:
+```
+Bus 001 Device 002: ID 17ef:60a9 Lenovo Wireless Keyboard and Mouse Combo
+```
+
+Output meaning:
+|Section|Meaning|
+|---|---|
+|`Bus 001`|USB bus number|
+|`Device 002`|USB device ID|
+|`17ef:60a9`|Vendor/device identifier|
+|`Lenovo`|Vendor/device name|
+
+Common options:
+|Command|Purpose|
+|---|---|
+|`lsusb`|List USB devices|
+|`lsusb -v`|Verbose information|
+|`lsusb -t`|USB topology tree|
+
+---
+
+#### `lsblk`
+
+List block storage devices.
+
+Commonly used for:
+- disks
+- partitions
+- mount points
+
+Basic usage:
+```bash
+lsblk
+```
+
+Example output:
+```
+NAME        SIZE TYPE MOUNTPOINT
+nvme0n1       1T disk
+├─nvme0n1p1 512M part /boot/efi
+└─nvme0n1p2 300G part /
+```
+
+Output meaning:
+|Section|Meaning|
+|---|---|
+|`nvme0n1`|Physical disk|
+|`part`|Partition|
+|`/`|Mounted filesystem|
+
+Common options:
+|Commond|Purpose|
+|---|---|
+|`lsblk -f`|Show filesystem info|
+|`lsblk -p`|Full device paths|
+|`lsblk -o NAME,SIZE,MOUNTPOINT`|Custom columns|
+
+---
+
+### Kernel & System Logs
+
+Commands used to investigate hardware initialization and kernel events.
+
+---
+
+#### `dmesg`
+
+Display Linux kernel messages.
+
+Commonly used for:
+- hardware initialization
+- firmware errors
+- device failures
+- boot troubleshooting
+
+Basic usage:
+```bash
+dmesg
+```
+
+Example output:
+```
+[    2.184221] nvme nvme0: pci function 0000:01:00.0
+[    2.193441] EXT4-fs (nvme0n1p2): mounted filesystem
+```
+
+Output meaning:
+|Section|Meaning|
+|---|---|
+|`[2.184221]`|Seconds since boot|
+|`nvme0`|Device name|
+|`mounted filesystem`|Successful mount|
+
+Common options
+|Command|Purpose|
+|---|---|
+|`dmesg -T`|Human-readable timestamps|
+|`dmesg -W`|Monitor logs live|
+|`dmesg | grep -i error`||
+
+---
+
+#### `journalctl`
+Query logs from the systemd journal.
+
+Commonly used for:
+- kernel logs
+- service logs
+- boot investigation
+
+Basic usage:
+```bash
+journalctl
+```
+
+Common options:
+|Command|Purpose|
+|---|---|
+|`journalctl -k`|Kernel logs|
+|`journalctl -xe`|Recend detailed logs|
+|`journalctl -f`|Live log monitoring|
+|`journalctl -u ssh`|Logs for specific service|
+
+---
+
+### Kernel Modules
+
+Commands used to troubleshoot Linux kernel modules.
+
+---
+
+#### `lsmod`
+Display loaded kernel modules.
+
+Basic usage:
+```bash
+lsmod
+```
+
+Example output:
+```
+kvm_intel             409600  0
+kvm                  1343488  1 kvm_intel
+```
+
+Output meaning:
+|Section|Meaning|
+|---|---|
+|`kvm_intel`|Module name|
+|`409600`|Module size|
+|`0`|Usage count|
+
+Common options
+|Command|Purpose|
+|`lsmod`|List modules|
+|`lsmod | grep kvm`||
+
+---
+
+#### `modprobe`
+
+Load or remove kernel modules
+
+Basic usage:
+```bash
+sudo modprobe kvm
+```
+
+Common options:
+|Command|Purpose|
+|---|---|
+|`modprobe kvm`|Load module|
+|`modprobe -r kvm`|Remove module|
+|`modprobe -c`|Show module config|
+
+---
+
+### Services
+
+Commands used to troubleshoot Linux services.
+
+---
+
+#### `systemctl`
+
+Manage systemd services.
+
+Basic usage:
+```bash
+systemctl status ssh
+```
+
+Example output:
+```
+Loaded: loaded
+Active: active (running)
+```
+
+Output meaning:
+|Section|Meaning|
+|---|---|
+|`Loaded`|Service configuration loaded|
+|`active (running)`|Service operational|
+
+Common options
+|Command|Purpose|
+|---|---|
+|`systemctl status ssh`|Service status|
+|`systemctl restart ssh`|Restart service|
+|`systemctl enable ssh`|Start at boot|
+|`systemctl --failed`|Failed services|
+
+---
+
+### Network Diagnostics
+
+Commands used to troubleshoot networking issues.
+
+---
+
+#### `ip`
+
+DIsplay and manage networking information.
+
+Basic usage:
+```bash
+ip a
+```
+
+Example output:
+```
+2: enp5s0: <BROADCAST,MULTICAST,UP,LOWER_UP>
+    inet 192.168.1.100/24
+```
+
+Output meaning:
+|Section|Meaning|
+|---|---|
+|`enp5s0`|Interface name|
+|`UP`|Interface enabled|
+|`LOWER_UP`|Physical link active|
+|`192.168.1.100/24`|IP address|
+
+Common options:
+|Command|Purpose|
+|---|---|
+|`ip a`|Show interfaces|
+|`ip route`|Routing table|
+|`ip link`|Interface status|
+|`ip neigh`|ARP table|
+
+---
+
+#### `ping`
+
+Test network connectivity.
+
+Basic usage:
+```bash
+ping 8.8.8.8
+```
+
+Common options:
+|Command|Purpose|
+|---|---|
+|`ping 8.8.8.8`|Connectivity test|
+|`ping -c 4 host`|Limited packet count|
+|`ping google.com`|Test DNS resolution|
+
+---
+
+### Storage DIagnostics
+
+Commands used to troubleshoot storage and filesystem issues.
+
+---
+
+#### `df`
+
+Display filesystem disk usage.
+
+Basic usage:
+```bash
+df -h
+```
+
+Example output:
+```
+Filesystem      Size  Used Avail Use%
+/dev/nvme0n1p2  300G   40G  245G  15%
+```
+
+Output meaning:
+|Section|Meaning|
+|---|---|
+|`Size`|Total filesystem size|
+|`Used`|Used storage|
+|`Avail`|Available storage|
+|`Use%`|Usage percentage|
+
+Common options:
+|Command|Purpose|
+|---|---|
+|`df -h`|Human-readable sizes|
+|`df -T`|Filesystem type|
+|`df -i`|Inode usage|
+
+---
