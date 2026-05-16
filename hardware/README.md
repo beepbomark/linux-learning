@@ -818,7 +818,7 @@ Common options
 |Command|Purpose|
 |---|---|
 |`lsmod`|List modules|
-|`lsmod | grep kvm`|Search for KVM modules|
+|`lsmod \| grep kvm`|Search for KVM modules|
 
 ---
 
