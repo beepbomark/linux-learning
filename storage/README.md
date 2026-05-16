@@ -220,3 +220,144 @@ LVM separates physical storage from logical storage management.
   
 ---
 
+
+## Common Storage Troubleshooting Examples
+
+### Disk Not Detected
+
+Common Symptoms:
+- storage device missing
+- filesystem unavailable
+- mount failures
+
+Common Checks:
+```bash
+lsblk 
+fdisk -l
+dmesg
+```
+
+Common Causes:
+- loose cable
+- failed disk
+- BIOS issue
+- storage controller issue
+
+Key lesson:  
+Linux cannot use storage devices that are not detected at hardware level.
+
+---
+
+### Filesystem Mounted Read-Only
+
+Common Symptoms:
+- unable to write files
+- filesystem errors
+- applications unable to save data
+
+Common Checks:
+```bash
+mount
+dmesg
+journalctl -k
+```
+
+Common Causes:
+- filesystem corruption
+- disk I/O errors
+- unstable storage device
+
+Key lesson:  
+Linux may remount filesystems as read-only to protect data integrity.
+
+---
+
+### Invalid fstab Entry
+
+Common Symptoms:
+- boot hangs
+- emergency mode during startup
+- filesystem mount failures
+
+Common Checks:
+```bash
+cat /etc/fstab
+blkid
+mount -a
+```
+
+Common Causes:
+- incorrect UUID
+- invalid mount point
+- unsupported filesystem
+
+Key lesson:  
+Incorrect fstab entries commonly prevent successful boot.
+
+---
+
+### Disk Full Under Root Filesystem
+
+Common Symptoms:
+- applications failing
+- unable to create files
+- system instability
+
+Common Checks:
+```bash
+df -h
+du -sh /*
+```
+
+Common Causes:
+- excessive logs
+- large temporary files
+- uncontrolled storage growth
+
+Key lesson:  
+Filesystem exhaustion can affect overall system stability.
+
+---
+
+### LVM Volume Not Available
+
+Common Symptoms:
+- logical volume missing
+- filesystem unavailable
+- mount failures
+
+Common Checks:
+```bash
+pvs
+vhs
+lvs
+lsblk
+```
+
+Common Causes:
+- inactive volume group
+- missing physical volume
+- storage initialization issue
+
+Key lesson:  
+LVM depends on proper detection of underlying storage devices.
+
+---
+
+## Common Storage Commands
+|Command|Purpose|
+|`lsblk`|List block devices|
+|`fdisk -l`|Display partition tables|
+|`blkid`|Show filesystem UUIDs|
+|`df -h`|Show filesystem usage|
+|`du -sh`|Show directory usage|
+|`mount`|Show/mount filesystems|
+|`umount`|Unmount filesystem|
+|`findmnt`|Show mounted filesystems|
+|`swapon --show`|Display active swap|
+|`pvs`|Show physical volumes|
+|`vgs`|Show volume groups|
+|`lvs`|Show logical volumes|
+
+---
+

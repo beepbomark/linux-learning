@@ -1,295 +1,170 @@
 # Hardware troubleshooting
 
-This section contains Linux hardware troubleshooting workflows and issue investigations.
-
-## Common Areas
-- Network interfaces
-- Storage devices
-- RAID controllers
-- NVMe drives
-- USB devices
-- PCIe devices
-- Hardware sensors
-- Virtualization support
-- Firmware issues
-
-## Core Troubleshooting Philosophy
-
-Hardware troubleshooting generally follows these layers:
-
-1. Hardware detection
-2. Kernel detection
-3. Kernel module loading
-4. Firmware initialization
-5. Service interaction
-6. Operational functionality
-
-Issues found in lower layers commonly affect higher layers.
-
-For example:
-- If hardware is not detected, services depending on the hardware will fail.
-- If a kernel module is missing, the device may appear but remain unusable.
-- If services fail, the hardware may exist but functionality becomes unavailable.
-
-Troubleshooting should move systematically from lower layers upward.
+This section contains Linux hardware troubleshooting concepts, workflos, and operational examples.
 
 ---
 
-### 1. Hardware Detection
+## Hardware Basics
 
-Determine whether the system can physically see the hardware.
+Linux hardware troubleshooting generally follows this flow:
+```text
+Hardware
+→ Kernel detection
+→ Kernel modules
+→ Firmware initialization
+→ Services
+→ Operational functionality
+```
 
-Common tools:
+Problems in lower layers commonly affect higher layers.
+
+Examples:
+- Undetected hardware cannot function in Linux
+- Missing kernel modules may cause devices to remain unusable
+- Failed services may prevent hardware functionality
+
+---
+
+## Hardware Detection
+
+Hardware detection determines whether Linux can physicall see the device.
+
+Common Tools:
 ```bash
 lspci
 lsusb
 lsblk
 ```
 
-Examples:
-
-- Network interface detected in `lspci`
-- NVMe drive appears in `lsblk`
-- USB installer detected in `lsusb`
-
-If hardware is not detected here:
-
-- BIOS/UEFI issue
+Common Troubleshooting Areas:
+- missing devices
+- loose hardware connections
+- BIOS/UEFI issues
+- motherboard issues
 - hardware failure
-- loose connection
-- motherboard issue
+
+Key lesson:  
+If hardware is not detected at this layer, higher-level troubleshooting will usually fail.
 
 ---
 
-### 2. Kernel Detection
+## Kernel Detection
 
-Check whether the Linux kernel detected the hardware during boot or connection.
+The Linux kernel detects and initializes hardware during boot or device connection.
 
-Common tools:
-
-```bash
-journalctl -k
-```
-
-Examples:
-
-- NIC initialization messages
-- NVMe detection during boot
-- PCIe device errors
-
-If kernel logs show errors:
-- unsupported hardware
-- initialization failure
-- firmware issue
-- driver/module problem
-
----
-
-### 3. Driver/Module Loading
-
-Check whether the correct kernel driver/module is loaded.
-
-Common tools:
-```bash
-lsmod
-modprobe
-lspci -k
-```
-
-Examples:
-- `ixgbe` for Intel NICs
-- `nvme` for NVMe storage
-- `kvm` for virtualization support
-
-If driver is missing:
-- device detected but unusable
-- functionality unavailable
-
----
-
-### 4. Firmware Initialization
-
-Some hardware requires firmware files before functioning properly.
-
-Common tools:
-```bash
-dmesg | grep -i firmware
-```
-
-Examples:
-- NIC firmware loading
-- RAID controller firmware
-- storage controller firmware
-
-Missing firmware may cause:
-- unstable hardware
-- partial functionality
-- device initialization failure
-
----
-
-### 5. Service Interaction
-
-Some hardware depends on Linux services to function properly.
-
-Common tools:
-```bash
-systemctl status
-```
-
-Examples:
-- `NetworkManager`
-- `sshd`
-- `libvirtd`
-- `multipathd`
-
-If service fails:
-- hardware may exist but not function correctly
-
----
-
-### 6. User-Space Functionality
-
-Final layer where applications interact with the hardware.
-
-Examples:
-- SSH connectivity working
-- storage mounted successfully
-- VM starts correctly
-- network communication operational
-
-If lower layers work but functionality fails:
-- permissions issue
-- configuration issue
-- service misconfiguration
-- application-level issue
-
----
-
-## Core Diagnostic Workflow
-
-Hardware troubleshooting should generally move from lower-level detection toward higher-level functionality
-
-### Step 1 - Confirm Symptoms
-
-Identify:
-- What is failing
-- When issue occurs
-- Whether issue is intermittent or consistent
-
-Examples:
-- network interface unavailable
-- storage device missing
-- VM unable to start
-- SSH connectivity failing
-
----
-
-### Step 2 - Check Hardware Detection
-
-Determine whether Linux can physically detect the hardware.
-
-
-Common tools
-```bash
-lspci
-lsusb
-lsblk
-```
-
-If hardware is missing:
-- BIOS/UEFI issue
-- hardware issue
-- cable/connection issue
-- motherboard issue
-
----
-
-### Step 3 - Check Kernel Logs
-
-Verify whether the Linux kernel detected errors during initialization.
-
-Common tools
+Common Tools:
 ```bash
 dmesg
 journalctl -k
 ```
 
-Look for:
+Common Troubleshooting Areas:
 - initialization failures
+- unsupported hardware
 - PCIe errors
-- firmware loading failures
-- device resets
+- device reset issues
+- hardware timeouts
+
+Key lesson:  
+Hardware may physically exist but fail during kernel initialization.
 
 ---
 
-### Step 4 - Check Kernel Modules
+## Kernel Modules
 
-Verify whether the required kernel modules are loaded.
+Kernel modules provide hardware functionality within Linux.
 
-Common tools:
+Common Tools:
 ```bash
 lsmod
 modprobe
 lspci -k
 ```
 
-Examples:
-- `ixgbe`
-- `nvme`
-- `kvm`
+Common Troubleshooting Areas:
+- missing modules
+- incorrect modules
+- module conflicts
+- blacklisted modules
 
-If modules are missing:
-- hardware may appear detected
-- functionality may remain unavailable
+Key lesson:  
+Hardware may appear detected but remain unusable without the correct kernel module.
 
 ---
 
-### Step 5 - Check Services
+## Firmware Initialization
 
-Verify whether required services are operational.
+Some hardware requires firmware before becoming fully operational.
 
-Common tools:
+Common Tools:
+```bash
+dmesg | grep -i firmware
+journalctl -k
+```
+
+Common Troubleshooting Areas:
+- missing firmware
+- corrupted firmware
+- initialization failures
+- unstable hardware behavior
+
+Key lesson:  
+Firmware problems commonly cause partial or unstable hardware functionality.
+
+---
+
+## Service Interaction
+
+Some hardware depends on Linux services to function correctly.
+
+Common Tools:
 ```bash
 systemctl status
 ```
 
-Examples:
+Common Troubleshooting Areas:
+- failed services
+- service startup problems
+- hardware unavailable despite detection
+
+Common Service Examples:
 - `NetworkManager`
-- `sshd`
 - `libvirtd`
+- `multipathd`
 
-If services fail:
-- hardware may exist but remain unusable
+Key lesson:  
+Hardware may exist correctly but remain unusable if supporting services fail.
 
 ---
 
-### Step 6 - Test Operational Functionality
+## Operational Functionality
 
-Verify whether the system can use the hardware successfully.
+Final layer where Linux applications and users interact with the hardware.
 
-Examples:
-- SSH connection successful
-- storage mounted correctly
-- network communication operational
-- virtual machines starting normally
+Common Examples:
+- network connectivity working
+- storage mounted successfully
+- virtual machines starting correctly
 
-If lower layers function correctly but operations fail:
-- permissions issue
-- configuration issue
+Common Troubleshooting Areas:
+- permissions issues
+- configuration problems
+- applicaiton-level failures
 - service misconfiguration
-- application-level issue
+
+Key lesson:  
+Successful hardware detection does not always guarantee operational functionality.
 
 ---
 
-## Hardware Troubleshooting Examples
+## Common Hardware Troubleshooting Examples
 
 ### Network Interface Not Detected
 
 Common Symptoms:
-- No network connectivity
-- Interface missing from `ip a`
-- Unable to obtain IP address
+- no network connectivity
+- interface missing from `ip a`
+- unable to obtain IP address
 
 Common Checks:
 ```bash
@@ -301,11 +176,11 @@ lsmod
 
 Common Causes:
 - NIC disabled in BIOS
-- Loose cable
-- Missing kernel module
-- Hardware failure
+- loose cable
+- missing kernel module
+- hardware failure
 
-Key Lesson:  
+Key lesson:  
 If the NIC is missing from `lspci`, Linux cannot detect the hardware.
 
 ---
@@ -313,9 +188,9 @@ If the NIC is missing from `lspci`, Linux cannot detect the hardware.
 ### NVMe Drive Not Detected
 
 Common Symptoms:
-- Storage device missing
-- Filesystem unavailable
-- Mount failures
+- storage device missing
+- filesystem unavailable
+- mount failures
 
 Common Checks:
 ```bash
@@ -325,12 +200,12 @@ dmesg | grep -i nvme
 ```
 
 Common Causes:
-- Loose NVMe connection
+- loose NVMe connection
 - BIOS storage configuration issue
 - NVMe initialization failure
-- Hardware failure
+- hardware failure
 
-Key Lesson:  
+Key lesson:  
 Storage controllers may appear in `lspci` even if the disk itself is unusable.
 
 ---
@@ -338,11 +213,11 @@ Storage controllers may appear in `lspci` even if the disk itself is unusable.
 ### Hard Disk Drive Not Detected
 
 Common Symptoms:
-- Disk missing from Linux
-- Boot failures
-- Filesystem unavailable
+- disk missing from Linux
+- boot failures
+- filesystem unavailable
 
-Common Checks
+Common Checks:
 ```bash
 lsblk
 fdisk -l
@@ -350,37 +225,30 @@ dmesg | grep -i sata
 ```
 
 Common Causes:
-- Loose SATA cable
-- Power issue
-- Failed disk
-- Disabled SATA controller
+- loose SATA cable
+- power issue
+- failed disk
+- disabled SATA controller
 
-Key Lesson:  
+Key lesson:  
 Always verify both data and power connections during storage troubleshooting.
 
 ---
 
 ### USB Device Not Recognized
 
-Common Symptoms
+Common Symptoms:
 - USB device unavailable
-- Device disconnects repeatedly
-- Hardware missing after insertion
-
-Common Checks:
-```bash
-lsusb
-dmesg -w
-lsblk
-```
+- device disconnects repeatedly
+- hardware missing after insertion
 
 Common Causes:
-- Faulty USB port
-- Insufficient power
-- Faulty device
-- Hardware initialization failure
+- faulty USB port
+- insufficient power
+- faulty device
+- hardware initialization failure
 
-Key Lesson:  
+Key lesson:  
 `dmesg -w` is useful for monitoring live USB events.
 
 ---
@@ -388,24 +256,24 @@ Key Lesson:
 ### Required Kernel Module Not Loaded
 
 Common Symptoms:
-- Hardware detected but unusable
-- Expected functionality missing
-- Device initialization incomplete
+- hardware detected but unusable
+- expected functionality missing
+- device initialization incomplete
 
 Common Checks:
 ```bash
-lsmod
+lsmod 
 lspci -k
 modprobe
 ```
 
 Common Causes:
-- Module not loaded
-- Incorrect module
-- Missing dependencies
-- Blacklisted module
+- module not loaded
+- incorrect module
+- missing dependencies
+- blacklisted module
 
-Key Lesson:  
+Key lesson:  
 Hardware may exist but remain unusable without the required kernel module.
 
 ---
@@ -413,9 +281,9 @@ Hardware may exist but remain unusable without the required kernel module.
 ### Firmware Initialization Failure
 
 Common Symptoms:
-- Hardware instability
-- Device partially working
-- Initialization errors during boot
+- hardware instability
+- device partially working
+- initialization errors during boot
 
 Common Checks:
 ```bash
@@ -424,21 +292,21 @@ journalctl -k
 ```
 
 Common Causes:
-- Missing firmware package
-- Corrupted firmware
-- Unsupported hardware
+- missing firmware package
+- corrupted firmware
+- unsupported hardware
 
-Key Lesson:  
+Key lesson:  
 Some hardware requires firmware before becoming fully operational.
 
 ---
 
 ### Virtualization Unavailable in BIOS
 
-Common Symptoms
-- Virtual machines fail to start
+Common Symptoms:
+- virtual machines fail to start
 - KVM unavailable
-- Virtualization errors
+- virtualization errors
 
 Common Checks:
 ```bash
@@ -447,12 +315,12 @@ lsmod | grep kvm
 dmesg | grep -i kvm
 ```
 
-Common Causes
+Common Causes:
 - Intel VT-x disabled
 - AMD-V disabled
 - BIOS configuration issue
 
-Key Lesson:  
+Key lesson:  
 Virtualization requires both hardware and BIOS support.
 
 ---
@@ -461,8 +329,8 @@ Virtualization requires both hardware and BIOS support.
 
 Common Symptoms:
 - RAID volumes missing
-- Storage inaccessible
-- Boot failures
+- storage inaccessible
+- boot failures
 
 Common Checks:
 ```bash
@@ -471,22 +339,22 @@ lsblk
 dmesg | grep -i raid
 ```
 
-Common Causes
+Common Causes:
 - RAID controller failure
-- Missing RAID module
+- missing RAID module
 - RAID configuration corruption
 
-Key Lesson:  
-RAID problems can affect multiple disks simultaneously.
+Key lesson:  
+RAID problems can affect multiple disks simultaenously.
 
 ---
 
 ### PCIe Device Not Detected
 
 Common Symptoms:
-- Hardware unavailable
-- Device missing from Linux
-- Functionality unavailable
+- hardware unavailable
+- device missing from Linux
+- functionality unavailable
 
 Common Checks:
 ```bash
@@ -495,12 +363,12 @@ dmesg | grep -i pci
 ```
 
 Common Causes:
-- Hardware not seated properly
+- hardware not seated properly
 - PCIe slot issue
 - BIOS disabled device
-- Hardware failure
+- hardware failure
 
-Key Lesson:  
+Key lesson:  
 If a PCIe device is missing from `lspci`, detection failed at hardware level.
 
 ---
@@ -508,9 +376,9 @@ If a PCIe device is missing from `lspci`, detection failed at hardware level.
 ### Hardware Intermittently Disconnecting
 
 Common Symptoms:
-- Random disconnects
-- Device reconnects automatically
-- Unstable hardware behavior
+- random disconnects
+- device reconnects automatically
+- unstable hardware behavior
 
 Common Checks:
 ```bash
@@ -519,12 +387,12 @@ journalctl -f
 ```
 
 Common Causes:
-- Faulty cable
-- Power instability
-- Overheating
-- Hardware degradation
+- faulty cable
+- power instability
+- overheating
+- hardware degradation
 
-Key Lesson:  
+Key lesson:  
 Intermittent issues commonly appear in live system logs.
 
 ---
@@ -532,23 +400,16 @@ Intermittent issues commonly appear in live system logs.
 ### Filesystem Mounted Read-Only
 
 Common Symptoms:
-- Unable to write files
-- Filesystem errors
-- Applications failing to save data
+- unable to write files
+- filesystem errors
+- applications fialing to save data
 
 Common Checks:
-```bash
-mount
-dmesg
-journalctl -k
-```
+- filesystem corruption
+- disk I/O errors
+- storage instability
 
-Common Causes:
-- Filesystem corruption
-- Disk I/O errors
-- Storage instability
-
-Key Lesson:  
+Key lesson:  
 Linux may remount filesystems as read-only to protect data integrity.
 
 ---
@@ -556,418 +417,4 @@ Linux may remount filesystems as read-only to protect data integrity.
 ### SMART Disk Failure Detected
 
 Common Symptoms:
-- Slow disk performance
-- I/O errors
-- Disk warnings during boot
-
-Common Checks:
-```bash
-smartctl -a /dev/sda
-dmesg
-```
-
-Common Causes:
-- Aging disk
-- Bad sectors
-- Hardware degradation
-
-Key Lesson:  
-SMART warnings commonly indicate impending disk failure.
-
----
-
-### Fan/Sensor Monitoring Failure
-
-Common Symptoms:
-- Missing temperature readings
-- Fan speed unavailable
-- Unexpected overheating
-
-Common Checks:
-```bash
-sensors
-dmesg
-```
-
-Common Causes:
-- Missing sensor modules
-- Unsupported motherboard
-- Hardware monitoring failure
-
-Key Lesson:  
-Hardware monitoring is important for system stability and thermal management.
-
----
-
-## Common Diagnostic Commands
-
-### Hardware Detection
-
-Commands used to verify whether Linux can physically detect hardware devices.
-
----
-
-#### `lspci`
-
-List PCI/PCIe devices detected by the system.
-
-Commonly used for :
-- network interfaces
-- GPUs
-- RAID controllers
-- NVMe controllers
-
-Basic usage:
-```bash
-lspci
-```
-
-Example output:
-```
-04:00.0 Ethernet controller: Intel Corporation Ethernet Controller I225-V
-06:00.0 VGA compatible controller: NVIDIA Corporation TU116 [GeForce GTX 1660 SUPER]
-```
-
-Output meaning:
-|Section|Meaning|
-|---|---|
-|`04:00.0`|PCI device address|
-|`Ethernet controller`|Device type|
-|`Intel Corporation`|Vendor|
-|`I225-V`|Device model|
-
-Common options:
-|Command|Purpose|
-|---|---|
-|`lspci`|List PCI devices|
-|`lspci -k`|Show kernel modules|
-|`lspci -v`|Verbose information|
-|`lspci | grep -i ethernet`||
-
----
-
-#### `lsusb`
-
-List USB devices detected by the system.
-
-Commonly used for:
-- USB storage
-- wireless adapters
-- keyboards/mice
-- USB peripherals
-
-Basic usage:
-```bash
-lsusb
-```
-
-Example output:
-```
-Bus 001 Device 002: ID 17ef:60a9 Lenovo Wireless Keyboard and Mouse Combo
-```
-
-Output meaning:
-|Section|Meaning|
-|---|---|
-|`Bus 001`|USB bus number|
-|`Device 002`|USB device ID|
-|`17ef:60a9`|Vendor/device identifier|
-|`Lenovo`|Vendor/device name|
-
-Common options:
-|Command|Purpose|
-|---|---|
-|`lsusb`|List USB devices|
-|`lsusb -v`|Verbose information|
-|`lsusb -t`|USB topology tree|
-
----
-
-#### `lsblk`
-
-List block storage devices.
-
-Commonly used for:
-- disks
-- partitions
-- mount points
-
-Basic usage:
-```bash
-lsblk
-```
-
-Example output:
-```
-NAME        SIZE TYPE MOUNTPOINT
-nvme0n1       1T disk
-├─nvme0n1p1 512M part /boot/efi
-└─nvme0n1p2 300G part /
-```
-
-Output meaning:
-|Section|Meaning|
-|---|---|
-|`nvme0n1`|Physical disk|
-|`part`|Partition|
-|`/`|Mounted filesystem|
-
-Common options:
-|Commond|Purpose|
-|---|---|
-|`lsblk -f`|Show filesystem info|
-|`lsblk -p`|Full device paths|
-|`lsblk -o NAME,SIZE,MOUNTPOINT`|Custom columns|
-
----
-
-### Kernel & System Logs
-
-Commands used to investigate hardware initialization and kernel events.
-
----
-
-#### `dmesg`
-
-Display Linux kernel messages.
-
-Commonly used for:
-- hardware initialization
-- firmware errors
-- device failures
-- boot troubleshooting
-
-Basic usage:
-```bash
-dmesg
-```
-
-Example output:
-```
-[    2.184221] nvme nvme0: pci function 0000:01:00.0
-[    2.193441] EXT4-fs (nvme0n1p2): mounted filesystem
-```
-
-Output meaning:
-|Section|Meaning|
-|---|---|
-|`[2.184221]`|Seconds since boot|
-|`nvme0`|Device name|
-|`mounted filesystem`|Successful mount|
-
-Common options
-|Command|Purpose|
-|---|---|
-|`dmesg -T`|Human-readable timestamps|
-|`dmesg -W`|Monitor logs live|
-|`dmesg | grep -i error`||
-
----
-
-#### `journalctl`
-Query logs from the systemd journal.
-
-Commonly used for:
-- kernel logs
-- service logs
-- boot investigation
-
-Basic usage:
-```bash
-journalctl
-```
-
-Common options:
-|Command|Purpose|
-|---|---|
-|`journalctl -k`|Kernel logs|
-|`journalctl -xe`|Recend detailed logs|
-|`journalctl -f`|Live log monitoring|
-|`journalctl -u ssh`|Logs for specific service|
-
----
-
-### Kernel Modules
-
-Commands used to troubleshoot Linux kernel modules.
-
----
-
-#### `lsmod`
-Display loaded kernel modules.
-
-Basic usage:
-```bash
-lsmod
-```
-
-Example output:
-```
-kvm_intel             409600  0
-kvm                  1343488  1 kvm_intel
-```
-
-Output meaning:
-|Section|Meaning|
-|---|---|
-|`kvm_intel`|Module name|
-|`409600`|Module size|
-|`0`|Usage count|
-
-Common options
-|Command|Purpose|
-|---|---|
-|`lsmod`|List modules|
-|`lsmod \| grep kvm`|Search for KVM modules|
-
----
-
-#### `modprobe`
-
-Load or remove kernel modules
-
-Basic usage:
-```bash
-sudo modprobe kvm
-```
-
-Common options:
-|Command|Purpose|
-|---|---|
-|`modprobe kvm`|Load module|
-|`modprobe -r kvm`|Remove module|
-|`modprobe -c`|Show module config|
-
----
-
-### Services
-
-Commands used to troubleshoot Linux services.
-
----
-
-#### `systemctl`
-
-Manage systemd services.
-
-Basic usage:
-```bash
-systemctl status ssh
-```
-
-Example output:
-```
-Loaded: loaded
-Active: active (running)
-```
-
-Output meaning:
-|Section|Meaning|
-|---|---|
-|`Loaded`|Service configuration loaded|
-|`active (running)`|Service operational|
-
-Common options
-|Command|Purpose|
-|---|---|
-|`systemctl status ssh`|Service status|
-|`systemctl restart ssh`|Restart service|
-|`systemctl enable ssh`|Start at boot|
-|`systemctl --failed`|Failed services|
-
----
-
-### Network Diagnostics
-
-Commands used to troubleshoot networking issues.
-
----
-
-#### `ip`
-
-DIsplay and manage networking information.
-
-Basic usage:
-```bash
-ip a
-```
-
-Example output:
-```
-2: enp5s0: <BROADCAST,MULTICAST,UP,LOWER_UP>
-    inet 192.168.1.100/24
-```
-
-Output meaning:
-|Section|Meaning|
-|---|---|
-|`enp5s0`|Interface name|
-|`UP`|Interface enabled|
-|`LOWER_UP`|Physical link active|
-|`192.168.1.100/24`|IP address|
-
-Common options:
-|Command|Purpose|
-|---|---|
-|`ip a`|Show interfaces|
-|`ip route`|Routing table|
-|`ip link`|Interface status|
-|`ip neigh`|ARP table|
-
----
-
-#### `ping`
-
-Test network connectivity.
-
-Basic usage:
-```bash
-ping 8.8.8.8
-```
-
-Common options:
-|Command|Purpose|
-|---|---|
-|`ping 8.8.8.8`|Connectivity test|
-|`ping -c 4 host`|Limited packet count|
-|`ping google.com`|Test DNS resolution|
-
----
-
-### Storage DIagnostics
-
-Commands used to troubleshoot storage and filesystem issues.
-
----
-
-#### `df`
-
-Display filesystem disk usage.
-
-Basic usage:
-```bash
-df -h
-```
-
-Example output:
-```
-Filesystem      Size  Used Avail Use%
-/dev/nvme0n1p2  300G   40G  245G  15%
-```
-
-Output meaning:
-|Section|Meaning|
-|---|---|
-|`Size`|Total filesystem size|
-|`Used`|Used storage|
-|`Avail`|Available storage|
-|`Use%`|Usage percentage|
-
-Common options:
-|Command|Purpose|
-|---|---|
-|`df -h`|Human-readable sizes|
-|`df -T`|Filesystem type|
-|`df -i`|Inode usage|
-
----
+- 
