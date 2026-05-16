@@ -632,7 +632,7 @@ Output meaning:
 |Section|Meaning|
 |---|---|
 |`04:00.0`|PCI device address|
-|`Ethernet controller|Device type|
+|`Ethernet controller`|Device type|
 |`Intel Corporation`|Vendor|
 |`I225-V`|Device model|
 
@@ -818,7 +818,7 @@ Common options
 |Command|Purpose|
 |---|---|
 |`lsmod`|List modules|
-|`lsmod | grep kvm`||
+|`lsmod | grep kvm`|Search for KVM modules|
 
 ---
 
