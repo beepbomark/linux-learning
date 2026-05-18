@@ -417,4 +417,64 @@ Linux may remount filesystems as read-only to protect data integrity.
 ### SMART Disk Failure Detected
 
 Common Symptoms:
-- 
+- slow disk performance
+- I/O errors
+- disk warnings during boot
+
+Common Checks:
+```bash
+smartctl -a /dev/sda
+dmesg
+```
+
+Common Causes:
+- aging disk
+- bad sectors
+- hardware degradation
+
+Key lesson:  
+SMART warnings commonly indicate impending disk failure.
+
+---
+
+### Fan/Sensor Monitoring Failure
+
+Common Symptoms:
+- missing temperature readings
+- fan speed unavailable
+- unexpected overheating
+
+Common Checks:
+```bash
+sensors 
+dmesg
+```
+
+Common Causes:
+- missing sensor modules
+- unsupported motherboard
+- hardware monitoring failure
+
+Key lesson:  
+Hardware monitoring is important for system stability and thermal management.
+
+---
+
+## Common Hardware Commands
+
+|Command|Purpose|
+|---|---|
+|`lspci`|List PCI/PCIe devices|
+|`lsusb`|List USB devices|
+|`lsblk`|List block storage devices|
+|`dmesg`|View kernel hardware logs|
+|`journalctl -k`|View kernel logs|
+|`lsmod`|List loaded kernel modules|
+|`modprobe`|Load/remove kernel modules|
+|`lspci -k`|Show device kernel modules|
+|`systemctl status`|Check service status|
+|`smartctl`|Display SMART disk health|
+|`sensors`|Display hardware sensor information|
+
+---
+ 
