@@ -34,7 +34,7 @@ virt-manager
 ```
 
 Screenshot:  
-![virt-manager](image.png)
+![virt-manager](images/lab/image.png)
 
 ---
 
@@ -44,7 +44,7 @@ Select:
 - Create a new virtual machine
 
 Screenshot:  
-![alt text](image-1.png)
+![alt text](images/lab/image-1.png)
 
 ---
 
@@ -54,7 +54,7 @@ Choose:
 - Local install media (ISO image or CDROM)
 
 Screenshot:  
-![new-virtual-machine](image-2.png)
+![new-virtual-machine](images/lab/image-2.png)
 
 ---
 
@@ -64,7 +64,7 @@ Browse and select:
 - Ubuntu Server 24.04 ISO
 
 Screenshot:  
-![iso-selection](image-3.png)
+![iso-selection](images/lab/image-3.png)
 
 ---
 
@@ -75,7 +75,7 @@ Configure:
 - 4096 MB RAM
 
 Screenshot:  
-![cpu-memory](image-4.png)
+![cpu-memory](images/lab/image-4.png)
 
 ---
 
@@ -87,7 +87,7 @@ Configure:
 - Disk size: 40 GB
 
 Screenshot:  
-![storage](image-9.png)
+![storage](images/lab/image-9.png)
 
 ---
 
@@ -101,7 +101,7 @@ Screenshot:
 | Firmware | BIOS |
 
 Screenshot:  
-![vm-summary](image-8.png)
+![vm-summary](images/lab/image-8.png)
 
 ---
 
@@ -115,7 +115,7 @@ English
 ```
 
 Screenshot:  
-![language](image-11.png)
+![language](images/lab/image-11.png)
 
 ---
 
@@ -132,7 +132,7 @@ Reason:
 - system packages can be updated after installation
 
 Screenshot:  
-![install-update](image-12.png)
+![install-update](images/lab/image-12.png)
 
 ---
 
@@ -144,7 +144,7 @@ English (US)
 ```
 
 Screenshot:
-![keyboard](image-13.png)
+![keyboard](images/lab/image-13.png)
 
 ---
 
@@ -156,7 +156,7 @@ Ubuntu Server
 ```
 
 Screenshot:  
-![installation-type](image-14.png)
+![installation-type](images/lab/image-14.png)
 
 ---
 
@@ -169,7 +169,7 @@ Assigned IP:
 - 192.168.122.150/24
 - 
 Screenshot:  
-![network](image-15.png)
+![network](images/lab/image-15.png)
 
 ---
 
@@ -184,120 +184,18 @@ Disk:
 - /dev/vda
 
 Screenshot:  
-![storage-config](image-16.png)
+![storage-config](images/lab/image-16.png)
 
 ---
 
 ## Storage Summary
 
 Screenshot:  
-![storage-summary](image-17.png)
+![storage-summary](images/lab/image-17.png)
 
-
-
-#### Detected Network Interface
-|Setting|Value|
-|---|---|
-|Interface|enp1s0|
-|Address Assignment|DHCPv4|
-|Assigned IP|192.168.122.150/24|
-|Network Device|VirtIO network device|
 
 ---
 
-#### Network Architecture
-
-The VM was connected using:
-- libvirt default NAT network
-- virbr0 virtual bridge
-
-Network flow:
-```text
-Ubuntu Server VM
-↓
-VirtIO virtual NIC
-↓
-virbr0 bridge
-↓
-Ubuntu Desktop Host
-↓
-Internet
-```
-
----
-
-#### DHCP Networking
-
-The VM automatically received:
-- IP address
-- gateway
-- DNS configuration
-
-Provided by:
-- libvirt internal DHCP server
-
----
-
-#### VirtIO Network Device
-
-The network adapter uses:
-- VirtIO paravirtualized networking
-
----
-
-### Proxy Configuration
-
-Proxy:
-- Not configured
-
----
-
-### Ubuntu Archive Mirror
-
-Selected:
-- Default Ubuntu mirror
-
----
-
-### Configure Storage
-
-Screenshot:
-![alt text](image-16.png)
-
-Selected:
-|Selected|Value|
-|---|---|
-|Storage Layout|Use entire disk|
-|Disk Device|/dev/vda|
-|Disk Size|40 GB|
-|LVM|Enabled|
-|LUKS Encryption|Disabled|
-
----
-
-### Storage Summary
-The installer automatically configured:
-- partition table
-- root filesystem
-- boot partition
-
-Screenshot:
-![alt text](image-17.png)
-
----
-
-### Install OpenSSH Server
-
-Screenshot:
-![openssh](image-18.png)
-
-Purpose:
-- remote server management
-- SSH terminal access
-- VS Code Remote SSH support
-- future automation and deployment
-
----
 # Issues Encountered
 
 ## ISO Permission Denied
