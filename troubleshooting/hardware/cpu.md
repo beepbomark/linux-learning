@@ -876,3 +876,204 @@ Helps identify:
 - high-traffic connections
 
 ---
+
+#### `nload`
+
+Purpose: Display network throughput visualization.
+
+```bash
+nload
+```
+
+---
+
+##### Important Areas
+
+| Area | Meaning |
+|---|---|
+| Incoming | Download traffic |
+| Outgoing | Upload traffic |
+| Current traffic | Real-time bandwidth |
+| Average traffic | Average network usage |
+
+---
+
+##### Why It Matters
+
+Helps identify:
+- sustained heavy traffic
+- network congestion
+- unusual bandwidth usage
+
+---
+
+#### `ss -tulnp`
+
+Purpose: Display listening ports and active network sockets.
+
+```bash
+ss -tulnp
+```
+
+---
+
+##### Important Areas
+
+| Field | Meaning |
+|---|---|
+| tcp / udp | Connection protocol |
+| LISTEN | Service waiting for connections |
+| Local Address | Local listening address |
+| Peer Address | Remote endpoint |
+| Process | Process using socket |
+
+---
+
+##### Why It Matters
+
+Helps identify:
+- excessive network connections
+- suspicious listening services
+- overloaded applications
+- unexpected open ports
+
+---
+
+#### `ip -s link`
+
+Purpose: Display interface statistics and network errors.
+
+```bash
+ip -s link
+```
+
+---
+
+##### Important Areas
+
+| Field | Meaning |
+|---|---|
+| RX | Received packets |
+| TX | Transmitted packets |
+| dropped | Dropped packets |
+| errors | Interface errors |
+| overruns | Buffer overflow conditions |
+
+---
+
+##### Why It Matters
+
+Helps identify:
+- packet drops
+- network interface problems
+- driver issues
+- overloaded interfaces
+
+---
+
+### Identifying Network Bottlenecks
+
+| Observation | Tool | Meaning | Possible Cause |
+|---|---|---|---|
+| High latency | `ping` | Slow network response | Congestion or routing issue |
+| Packet loss | `ping` | Network instability | Poor connection or overload |
+| High bandwidth usage | `iftop`, `nload` | Network saturation | Heavy downloads/uploads |
+| Excessive active connections | `ss -tulnp` | Socket overload | Traffic spikes or attacks |
+| Large RX/TX traffic | `iftop`, `nload` | Heavy network workload | Streaming, backups, replication |
+| Dropped packets | `ip -s link` | Interface unable to keep up | NIC overload |
+| High interrupt activity | `/proc/interrupts` | CPU processing excessive packets | Interrupt storm |
+| High `%sy` CPU usage | `top` | Kernel networking overhead | Packet processing |
+| Slow application response | `ping`, `ss` | Network delay | Congestion or latency |
+| Network interface DOWN | `ip a` | Interface inactive | Cable/adapter issue |
+
+---
+
+### Common Root Causes
+
+| Cause | Description |
+|---|---|
+| Network congestion | Excessive traffic volume |
+| Packet flood/DDoS | Abnormal inbound traffic |
+| High bandwidth usage | Heavy transfers or backups |
+| Faulty NIC | Hardware/network adapter issue |
+| Driver problems | NIC driver instability |
+| Firewall overload | Excessive packet filtering |
+| VPN encryption overhead | CPU-heavy encryption processing |
+| Excessive socket connections | Application overload |
+| Routing issue | Incorrect network path |
+| Interface misconfiguration | Incorrect IP/gateway setup |
+
+---
+
+### Resolution Commands
+
+#### Restart Network Interface
+
+```bash
+sudo ip link set eth0 down
+sudo ip link set eth0 up
+```
+
+Purpose:
+- reset problematic interface
+
+---
+
+#### Restart Network Service
+
+```bash
+sudo systemctl restart NetworkManager
+```
+
+Purpose:
+- reload network configuration
+
+---
+
+#### Stop Problematic Service
+
+```bash
+systemctl stop service_name
+```
+
+Purpose:
+- stop applications generating excessive traffic
+
+---
+
+#### Block Suspicious Connections
+
+```bash
+sudo ufw deny from IP_ADDRESS
+```
+
+Purpose:
+- block abusive or suspicious traffic
+
+---
+
+### Why These Commands Are Used
+
+| Command | Purpose |
+|---|---|
+| ip link set | Reset network interface |
+| systemctl restart | Restart network services |
+| systemctl stop | Stop traffic-heavy service |
+| ufw deny | Block suspicious traffic |
+
+---
+
+### General Troubleshooting Guidelines
+
+| Observation | Recommended Action |
+|---|---|
+| High bandwidth usage | Investigate traffic source |
+| Excessive connections | Check applications/services |
+| Packet drops | Investigate NIC or congestion |
+| High latency | Check routing and network load |
+| High `%sy` CPU usage | Investigate packet processing |
+| Suspicious traffic | Block or rate-limit connections |
+| Interface DOWN | Check cable/NIC configuration |
+
+---
+
