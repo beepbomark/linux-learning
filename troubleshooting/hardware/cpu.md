@@ -29,7 +29,7 @@ The goal of CPU troubleshooting is to:
 
 ## CPU Troubleshooting Flow
 
-![](./images/high-cpu-troubleshooting.png)
+![cpu-troubleshooting](./images/high-cpu-troubleshooting.png)
 
 ## Step 1 - Check CPU Usage
 
