@@ -372,3 +372,99 @@ may prevent Linux from booting.
 
 ---
 
+## Step 5 - Disk Hardware Issue
+
+### Why
+
+Disk hardware issues involve:
+- failing SSDs/HDDs
+- communication failures
+- bad sectors
+- hardware degradation
+- controller problems
+
+Hardware issues may cause:
+- IO errors
+- filesystem corruption
+- disappearing disks
+- boot failures
+- kernel disk errors
+
+---
+
+### Commands
+
+* `smartctl` - Display SMART disk health information.
+* `dmesg` - Display kernel hardware and disk errors.
+* `lsblk` - Verify disk detection and visibility.
+
+---
+
+### Important Linux Concept - SMART Monitoring
+
+SMART (Self-Monitoring, Analysis and Reporting Technology) allows disks to report:
+- health status
+- bad sectors
+- pending failures
+- hardware degradation
+
+---
+
+### Identifying Disk Hardware Problems
+
+| Observation | Meaning | Possible Cause |
+|---|---|---|
+| Disk missing | Device not detected | Cable/controller issue |
+| SMART errors | Disk degradation | Failing storage device |
+| Kernel IO errors | Communication failure | Controller/cable issue |
+| Frequent disk resets | Hardware instability | Firmware or power issue |
+
+---
+
+### Root Causes
+
+| Root Cause | Description |
+|---|---|
+| Failing Disk | Physical storage degradation |
+| Disk Communication Issue | Cable/controller/driver issue |
+| Disk Connection Failure | Device not properly connected |
+
+---
+
+### Resolution Actions
+
+| Action | Purpose |
+|---|---|
+| Backup data | Prevent data loss |
+| Replace disk | Remove failing hardware |
+| Check cables | Verify physical connections |
+| Update firmware | Resolve firmware instability |
+| Check controller/driver | Resolve communication issues |
+
+---
+
+## Important Linux Troubleshooting Insights
+
+| Insight | Meaning |
+|---|---|
+| High load average does not always mean CPU issue | Processes may be waiting on storage |
+| High `wa` values indicate IO wait | Storage may be bottleneck |
+| Full filesystem does not always mean no storage | Inodes may be exhausted |
+| Filesystem issue does not always mean hardware failure | Configuration/corruption may exist |
+| SMART healthy does not guarantee no issue | Cable/controller problems may still exist |
+
+---
+
+## Quick Recall
+
+| Problem | Possible Cause |
+|---|---|
+| Filesystem full | Storage exhaustion |
+| Cannot create files with free space available | Inode exhaustion |
+| High `wa` values | Disk IO bottleneck |
+| Heavy swap activity | Swap thrashing |
+| Mount failure | Incorrect fstab |
+| Read-only filesystem | Filesystem corruption |
+| SMART errors | Failing disk |
+| Disk missing | Connection/controller issue |
+| Kernel disk errors | Communication issue |
