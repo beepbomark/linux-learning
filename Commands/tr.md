@@ -144,3 +144,77 @@ tr ',' '\t'
 
 ---
 
+## 7. Character Classes
+
+Instead of writing ranges, character classes can be used.
+
+|Class|Meaning|
+|---|---|
+|`[:lower:]`|Lowercase letters|
+|`[:upper:]`|Uppercase letters|
+|`[:digit:]`|Digits|
+|`[:alpha:]`|Letters|
+|`[:alnum:]`|Letters and numbers|
+|`[:space:]`|Whitespace|
+
+Example:
+```bash
+echo "linux" | tr '[:lower:]` '[:upper:]`
+```
+
+Output:
+```bash
+LINUX
+```
+
+---
+
+## 8. Delete Digits
+
+```bash
+echo "user123" | tr -d '0-9'        # Using a range
+
+echo "user123" | tr -d '[:digit:]'  # Using a character class
+```
+
+---
+
+## 9. Complement a Set
+
+Use:
+```bash
+-c
+```
+
+Example:
+```bash
+echo "abc123!" | tr -cd '0-9'
+```
+
+Output:
+```bash
+123
+```
+
+Meaning:
+- `c -> every except digits`
+- `-d -> delete`
+
+---
+
+## 10. Reading From a File
+
+`tr` normally reads standard input.
+
+Use input redirection:
+```bash
+tr 'a-z' 'A-Z' < file.txt
+```
+
+Or:
+```bash
+cat file.txt | tr 'a-z' 'A-Z'
+```
+
+---
+
