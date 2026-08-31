@@ -152,7 +152,7 @@ sed '/Linux/s/server/system/' file.txt      # replace text only on matching line
 ```bash
 sed '3i\New line' file.txt              # insert text before a line
 
-sed '3a\New line' file.txt              # appened text after a line
+sed '3a\New line' file.txt              # append text after a line
 
 sed '3c\Replacement line' file.txt      # replace an entire line
 ```
