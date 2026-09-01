@@ -256,3 +256,70 @@ sed 's/Linux/Ubuntu/g; /error/d' file.txt
 ```
 
 ---
+
+## Word Boundaries
+
+Word boundaries are used when you want `sed` to match a **whole word only**, instead of matching the same characters inside a larger word.
+
+For example:
+```bash
+sed 's/the/this/g' file.txt
+```
+
+will also change the word such as:
+```
+there
+thereby
+other
+```
+because `sed` is only looking for the characters `the`.
+
+To match only the whole word `the`, use word boundaries:
+```bash
+sed 's/\<the\>/this/g' file.txt
+```
+
+### Word Boundary Symbols
+
+|Pattern|Meaning|
+|---|---|
+|`\<`|Beginning of a word|
+|`/>`|End of a word|
+|`\b`|Word boundary, supported by GNU `sed`|
+
+Another GNU `sed` form is:
+```bash
+sed 's/\bthe\b/this/g' file.txt
+```
+
+---
+
+## Preserve Capitalization
+
+When replacing or wrapping text, `&` represents the **exact text that was matched**.
+
+This is useful when you want to preserve the original capitalization.
+
+Example:
+```bash
+sed 's/\bthy\b/{&}/gI' file.txt
+```
+
+Result:
+```
+thy  → {thy}
+Thy  → {Thy}
+THY  → {THY}
+```
+
+### Breakdown
+
+|Part|Meaning|
+|---|---|
+|`\bthy\b`|Match the whole word `thy`|
+|`&`|Reuse the exact matched text|
+|`{&}`|Wrap the matched word in `{ }`|
+|`g`|Replace all matches on each line|
+|`I`|Ignore case when matching|
+
+---
