@@ -58,3 +58,77 @@ If the patch file contains the target filename, `patch` can usually determine wh
 
 ## 3. Creating a Patch
 
+Suppose:
+`old.txt`
+```
+apple
+banana
+orange
+```
+`new.txt`
+```
+apple
+grape
+orange
+```
+
+Create the patch:
+```bash
+diff -u old.txt new.txt > changes.patch
+```
+
+`changes.patch` may contain:
+```Diff
+--- old.txt
++++ new.txt
+@@ -1,3 +1,3 @@
+ apple
+-banana
++grape
+ orange
+```
+
+---
+
+## 4. Apply a Patch
+
+```bash
+patch old.txt < changes.patch
+```
+
+After applying:
+```
+apple
+grape
+orange
+```
+
+---
+
+## 5. Dry Run
+
+Before applying a patch, test it with:
+```bash
+patch --dry-run < changes.patch
+```
+
+This checks whether the patch can be applied without modifying anything.
+
+This is a good habit before applying unfamiliar patches.
+
+---
+
+## 6. Reverse a Patch
+
+Use:
+```bash
+patch -R < changes.patch
+```
+
+This reverses the changes.
+
+Example:
+```
+grape
+```
+
