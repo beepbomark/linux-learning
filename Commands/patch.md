@@ -131,4 +131,180 @@ Example:
 ```
 grape
 ```
+can be changed back to:
+```
+banana
+```
+using the same patch file with `-R`.
 
+---
+
+## 7. Patch Directory Paths
+
+Patch files often contain paths such as:
+```
+a/src/file.txt
+b/src/file.txt
+```
+
+May need:
+```bash
+patch -p1 < changes.patch
+```
+The `-p` option removes directory levels from paths.
+
+---
+
+## 8. Understanding `-p`
+
+Suppose the patch refers to:
+```
+a/src/config.txt
+```
+
+`-p0`
+```bash
+patch -p0 < changes.patch
+```
+Keeps the full path:
+```
+a/src/config.txt
+```
+
+`-p1`
+```bash
+patch -p1 < changes.patch
+```
+
+Removes the first directory:
+```
+src/config.txt
+```
+
+`-p2`
+```bash
+patch -p2 < changes.patch
+```
+
+Removes:
+```
+a/src/
+```
+leaving:
+```
+config.txt
+```
+
+---
+
+### `-p` Quick Reference
+
+|Option|Original Path|Result|
+|---|---|---|
+|`-p0`|`a/src/file.txt`|`a/src/file.txt`|
+|`-p1`|`a/src/file.txt`|`src/file.txt`|
+|`-p2`|`a/src/file.txt`|`file.txt`|
+
+---
+
+## 10. Apply Patch to a Directory
+
+Change into the project directory:
+```bash
+cd project/
+```
+
+Then:
+```bash
+patch -p1 < ../changes.patch
+```
+
+Or specify a directory:
+```bash
+patch -d project -p1 < changes.patch
+```
+
+---
+
+## 11. Create Backup Files
+
+Use:
+```bash
+patch -b < changes.patch
+```
+
+This creates a backup of the original file before modifying it.
+
+May see files such as:
+```
+file.txt.orig
+```
+
+---
+
+## 12. Patch Rejection
+
+If part of the patch cannot be applied, `patch` may create a reject file:
+```
+file.txt.rej
+```
+This contains the changes that could not be applied.
+
+May also see:
+```
+file.txt.orig
+```
+which may contain the original file.
+
+---
+
+## 13. Why a Patch May Fail
+
+A patch may fail because:
+- The file has already changed
+- The patch was already applied
+- The wrong directory is being used
+- The wrong `-p` value is used
+- The expected lines no longer exist
+- The patch was created against a different version
+
+Test with:
+```bash
+patch --dry-run -p1 < changes.patch
+```
+
+---
+
+## 14. Useful Options
+
+|Option|Meaning|
+|---|---|
+|`pN`|Remove N directory levels from paths|
+|`-R`|Reverse the patch|
+|`-b`|Create backup files|
+|`-d DIR`|Change to directory before applying|
+|`--dry-run`|Test without modifying files|
+|`-s`|Silent / less output|
+|`-N`|Ignore patches that appear already applied|
+
+---
+
+## 15. Recommended Workflow
+
+```bash
+diff -u old.text new.txt > changes.patch
+
+# then inspect
+cat changes.patch
+
+# test
+patch --dry-run < changes.patch
+
+# apply
+patch < changes.patch
+
+# if necessary, reverse
+patch -R < changes.patch
+```
+
+---
