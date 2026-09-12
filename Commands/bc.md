@@ -177,3 +177,157 @@ Result: 15
 
 ---
 
+## Using Positional Parameters
+
+```bash
+# Script is run as:
+./calculator.sh 10 + 5
+
+# arguments:
+# $1 = 10
+# $2 = +
+# $3 = 5
+
+# Script
+#!/bin/bash
+
+result=$(echo "$1 $2 $3" | bc)
+
+echo "Result: $result"  # output 15
+```
+
+---
+
+## Calculator Using `case`
+
+```bash
+#!/bin/bash
+
+case "$2" in
+    +|-|/|%)
+        operator="$2"
+        ;;
+    x)
+        operator="*"
+    *)
+        echo "Invalid operator"
+        exit 1
+        ;;
+esac
+
+result=$(echo "scale=2; $1 $operator $3" | bc)
+
+echo "Arithmetic operation performed is $2"
+echo "Therefore ${1}${2}${3} = $result"
+```
+
+Example:
+
+```bash
+./calculator.sh 10 x 5
+```
+
+Output:
+
+```text
+Arithmetic operation performed is x
+Therefore 10x5 = 50
+```
+
+Example:
+
+```bash
+./calculator.sh 10 / 4
+```
+
+Output:
+
+```text
+Arithmetic operation performed is /
+Therefore 10/4 = 2.50
+```
+
+---
+
+## Mathematical Library
+
+Use:
+
+```bash
+bc -l
+```
+
+to load the standard mathematical library.
+
+Example:
+
+```bash
+echo "sqrt(25)" | bc -l
+```
+
+Output:
+
+```text
+5.00000000000000000000
+```
+
+You can control the output using `scale`:
+
+```bash
+echo "scale=2; sqrt(25)" | bc -l
+```
+
+Output:
+
+```text
+5.00
+```
+
+---
+
+# Square Root
+
+```bash
+echo "sqrt(81)" | bc -l
+```
+
+Output:
+
+```text
+9.00000000000000000000
+```
+
+With scale:
+
+```bash
+echo "scale=2; sqrt(10)" | bc -l
+```
+
+---
+
+## Comparison Operators
+
+`bc` can also perform comparisons.
+
+| Operator | Meaning |
+|---|---|
+| `==` | Equal |
+| `!=` | Not equal |
+| `<` | Less than |
+| `>` | Greater than |
+| `<=` | Less than or equal |
+| `>=` | Greater than or equal |
+
+Example:
+```bash
+echo "10 > 5" | bc  # 1
+
+echo "10 < 5" | bc  # 0
+
+# 1 means true
+# 0 means false
+
+---
+
+
+
