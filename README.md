@@ -23,9 +23,12 @@ Two projects are planned:
 
 ## Current status
 
-The repository currently contains reference notes and two introductory lab walkthroughs. The operational projects are planned; their implementation and verification will be added as work progresses.
+The repository currently contains command references, Bash programming exercises, certification notes and two introductory lab walkthroughs. The operational projects are planned; their implementation and verification will be added as work progresses.
 
 ## Reference notes
+
+- [Command and Bash references](Commands/)
+- [Bash programming exercises](practice/suss-structured-programming/lab-1/)
 
 - [CompTIA Linux objectives](comptia-linux/00-the-exam-objectives.md)
 - [Rescue-mode exercise](comptia-linux/01-using-rescue-mode.md)
