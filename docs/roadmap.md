@@ -4,6 +4,8 @@ October 15, 2026–January 31, 2027
 
 ## Scope
 
+**Current adjustment (October 16):** follow the [IT Operations interview preparation plan](interview-prep/it-operations-2026-10-22.md) through October 22. All exercises use the home lab. DigitalOcean work in the original schedule below is deferred until the final Linux recap; the original dates are planning targets and will be revised after the interview.
+
 This 15-week plan covers Linux administration, networking and automation through two projects on a home lab and a DigitalOcean server. The target is to complete both projects and prepare for Linux engineering interviews by January 2027.
 
 Time allocation: 15 hours per week, following a short setup period. Job applications run alongside the technical work from November.

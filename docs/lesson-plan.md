@@ -1,5 +1,7 @@
 # Linux Administration Lab Syllabus
 
+Current focus: [IT Operations interview preparation, October 16–22](interview-prep/it-operations-2026-10-22.md). Use the home lab for all exercises; DigitalOcean is reserved for the final Linux recap.
+
 This syllabus accompanies the [weekly development plan](roadmap.md). Week 1 establishes the server baseline; subsequent labs cover administration, networking, automation and deployment. Commands and procedures will be adapted to the distributions and existing workloads recorded in that baseline.
 
 ## Session format
