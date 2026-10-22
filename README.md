@@ -15,6 +15,7 @@ The server inventory and network diagram are the first planned deliverables. Dis
 
 - [Weekly schedule and milestones](docs/roadmap.md)
 - [Lab syllabus and Week 1 exercises](docs/lesson-plan.md)
+- [IT Operations interview notes](<interview questions/nextsoft-it-ops-eng.md>) — responsibilities, requirements and Linux command recaps.
 
 Two projects are planned:
 
