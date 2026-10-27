@@ -11,11 +11,41 @@ Hands-on Linux administration, troubleshooting and automation using a home lab a
 
 The server inventory and network diagram are the first planned deliverables. Distribution details and tested configurations will be documented with the labs.
 
-## Development plan
+## Notes by topic
 
-- [Weekly schedule and milestones](docs/roadmap.md)
-- [Lab syllabus and Week 1 exercises](docs/lesson-plan.md)
-- [IT Operations interview notes](<interview questions/nextsoft-it-ops-eng.md>) — responsibilities, requirements and Linux command recaps.
+Reference notes live in [`notes/`](notes/), one folder per area. Search them with `grep -rni 'pattern' notes/`.
+
+Something broken? Start with the [runbooks](notes/troubleshooting/runbooks/): disk full, service won't start, can't SSH, high load, DNS. Command notes open with a **Common** section of copy-ready commands and **Gotchas**, including GNU vs macOS differences.
+
+| Folder | Covers |
+| --- | --- |
+| [bash](notes/bash/) | Variables, arithmetic, conditionals, loops, arrays, `read`, script arguments, shell scripting |
+| [text](notes/text/) | `grep`, `sed`, `awk`, `cut`, `sort`, `uniq`, `tr`, `paste`, `join`, `comm`, `column`, `diff`, `patch`, `head`/`tail` |
+| [files](notes/files/) | `find`, `tar`, `zip`, checksums, file management, backup and restore |
+| [services](notes/services/) | systemd, processes and jobs, cron |
+| [storage](notes/storage/) | LVM, partitions, filesystems, disk layout |
+| [networking](notes/networking/) | Network services and configuration, firewalls |
+| [users](notes/users/) | Local accounts and groups |
+| [security](notes/security/) | Authentication, hardening, cryptography, compliance |
+| [packages](notes/packages/) | Software and package management |
+| [boot-recovery](notes/boot-recovery/) | Boot process, runlevels and targets, basic concepts |
+| [hardware](notes/hardware/) | Devices and hardware settings |
+| [virtualization](notes/virtualization/) | Virtual machines and containers |
+| [automation](notes/automation/) | Automation, Python, Git |
+| [troubleshooting](notes/troubleshooting/) | Monitoring, hardware/storage/OS, network, security and performance issues |
+
+## Certification checklists
+
+- [CompTIA Linux+ XK0-006](certs/comptia-xk0-006.md): objectives linked to the notes above.
+- [LPIC-1](certs/lpic-1.md): objectives outline; unlinked objectives are not yet covered.
+
+## Labs and exercises
+
+- [Lab records](labs/), including the CompTIA rescue-mode and network-environment exercises.
+- [Bash programming exercises](practice/suss-structured-programming/lab-1/)
+- [Lab servers](infra/)
+
+## Plan
 
 Two projects are planned:
 
@@ -25,16 +55,6 @@ Two projects are planned:
 ## Current status
 
 The repository currently contains command references, Bash programming exercises, certification notes and two introductory lab walkthroughs. The operational projects are planned; their implementation and verification will be added as work progresses.
-
-## Reference notes
-
-- [Command and Bash references](Commands/)
-- [Bash programming exercises](practice/suss-structured-programming/lab-1/)
-
-- [CompTIA Linux objectives](comptia-linux/00-the-exam-objectives.md)
-- [Rescue-mode exercise](comptia-linux/01-using-rescue-mode.md)
-- [Networking exercise](comptia-linux/02-determining-the-network-environment.md)
-- [LPIC-1 knowledge areas](LPIC-1/key-knowledge-areas.md)
 
 ## Lab documentation
 
