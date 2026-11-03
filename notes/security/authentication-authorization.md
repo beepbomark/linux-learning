@@ -18,17 +18,24 @@ User -> request -> Polkit -> policy check -> allow/deny
 /usr/share/polkit-1/actions/    # policy definitions
 /etc/polkit-1/rules.d/          # custom rules
 ```
-### Example rule
-```JavaScript
-polkit.addRule(function(action, subject) {
-    if (subject.isInGroup("sudo")) {
-        return polkit.Result.YES;
-    }
-});
+### Inspect actions before writing a policy
+```bash
+pkaction --verbose
 ```
+Lists installed Polkit actions and their default authorization requirements.
+This inspects policy; it does not grant permissions.
+
+Do not return `polkit.Result.YES` based only on membership in `sudo`: without an
+action check, that approves every action reaching the rule without requiring an
+authentication prompt. A real rule needs a specific action, intended user/group
+and authentication requirements, reviewed on a disposable machine first.
+
+Use the distribution's existing sudo/Polkit policy while learning. See the
+[Polkit manual](https://polkit.pages.freedesktop.org/polkit/polkit.8.html) before
+creating a local rule.
 ### Polkit vs sudo
-- Polkit -> fine-grained control
-- sudo -> full command execution
+- Polkit -> authorization for actions exposed by participating services
+- sudo -> command execution according to sudoers policy; it can also be narrowly scoped
 ### Notes
 - used in desktop and system services
 - allows limited privileged escalation
@@ -53,7 +60,7 @@ Framework for managing authentication and access control.
 - session -> session setup
 ### Control flags
 - required -> must pass
-- requiste -> fail immediately
+- requisite -> fail immediately
 - sufficient -> success skips rest
 - optional -> not critical
 ### Example
@@ -86,11 +93,11 @@ systemctl status sssd
 - part of Samba
 - used for Active Directory integration
 ```bash
-/etc/sambda/smb.conf
+/etc/samba/smb.conf
 systemctl status winbind
 ```
 ### Integration
-- PAM -> authentcation
+- PAM -> authentication
 - NSS -> user lookup
 ```bash
 /etc/nsswitch.conf
@@ -111,7 +118,7 @@ getent passwd
 - supports offline login
 ### Real-world scenario
 1. User logs in using domain credentials
-2. SSSSD contacts AD/LDAP
+2. SSSD contacts AD/LDAP
 3. Authentication succeeds
 ---
 ## realm
@@ -239,7 +246,12 @@ sudo apt install samba
 ```bash
 /etc/samba/smb.conf
 ```
-### Example share
+### Disposable-lab guest share example
+
+This permits unauthenticated access subject to filesystem permissions. Do not
+use it for sensitive files or expose SMB publicly. Prefer authenticated users
+for a real deployment. Validate with `testparm` before applying changes.
+
 ```INI
 [shared]
 path = /srv/samba/share

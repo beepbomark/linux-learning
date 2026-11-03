@@ -164,7 +164,7 @@ systemctl restart ssh
 - `~/.ssh/config` -> client-side configuration
 ### Hardening techniques
 - Disable root login (`PermitRootLogin no`)
-- Disable password authentication (`PasswordAuthentiction no`)
+- Disable password authentication (`PasswordAuthentication no`)
 - Change default SSH port (optional security by obscurity)
 - Use key-based authentication only
 - Limit users/groups (`AllowUsers`, `AllowGroups`)
