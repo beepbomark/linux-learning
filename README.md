@@ -34,6 +34,9 @@ Something broken? Start with the [runbooks](notes/troubleshooting/runbooks/): di
 | [automation](notes/automation/) | Automation, Python, Git |
 | [docker](notes/docker/) | Container basics, a first Compose project, daily commands and storage |
 | [ansible](notes/ansible/) | Inventory, a first playbook, safe targeting and troubleshooting |
+| [cloudflare](notes/cloudflare/) | DNS, Access, origin HTTPS and downloading IPv4/IPv6 allowlists for Nginx |
+| [prometheus](notes/prometheus/) | Ubuntu setup, private metrics collection and everyday queries |
+| [grafana](notes/grafana/) | Ubuntu setup, dashboards and protected public HTTPS |
 | [troubleshooting](notes/troubleshooting/) | Monitoring, hardware/storage/OS, network, security and performance issues |
 
 ## Certification checklists
