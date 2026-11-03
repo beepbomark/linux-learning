@@ -32,6 +32,8 @@ Something broken? Start with the [runbooks](notes/troubleshooting/runbooks/): di
 | [hardware](notes/hardware/) | Devices and hardware settings |
 | [virtualization](notes/virtualization/) | Virtual machines and containers |
 | [automation](notes/automation/) | Automation, Python, Git |
+| [docker](notes/docker/) | Container basics, a first Compose project, daily commands and storage |
+| [ansible](notes/ansible/) | Inventory, a first playbook, safe targeting and troubleshooting |
 | [troubleshooting](notes/troubleshooting/) | Monitoring, hardware/storage/OS, network, security and performance issues |
 
 ## Certification checklists
