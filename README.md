@@ -22,7 +22,7 @@ Something broken? Start with the [runbooks](notes/troubleshooting/runbooks/): di
 | [bash](notes/bash/) | Variables, arithmetic, conditionals, loops, arrays, `read`, script arguments, shell scripting |
 | [text](notes/text/) | `grep`, `sed`, `awk`, `cut`, `sort`, `uniq`, `tr`, `paste`, `join`, `comm`, `column`, `diff`, `patch`, `head`/`tail` |
 | [files](notes/files/) | `find`, `tar`, `zip`, checksums, file management, backup and restore |
-| [services](notes/services/) | systemd, processes and jobs, cron |
+| [services](notes/services/) | systemd, processes and jobs, cron, [log retention](notes/services/log-retention.md) |
 | [storage](notes/storage/) | LVM, partitions, filesystems, disk layout |
 | [networking](notes/networking/) | Network services and configuration, firewalls |
 | [users](notes/users/) | Local accounts and groups |

@@ -43,6 +43,11 @@ here for Grafana; inspect logs if startup fails.
 | Public 403 after allowlist | Proxy status, source IP/real-IP settings and current CF lists |
 | Dashboard works but no alerts arrive | Rules, contact point, notification policy and delivery test |
 
+## Log retention
+
+Use the [general log-retention guide](../services/log-retention.md#4-grafana-built-in-file-rotation)
+for Grafana's built-in file rotation and the separate journal policy.
+
 ## Backups and recovery
 
 Keep a record of installed versions, public hostname, service/config paths,

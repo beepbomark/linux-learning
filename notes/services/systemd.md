@@ -2,6 +2,8 @@
 
 Source: CompTIA Linux+ XK0-006, objective 2.5
 
+For journal storage and expiry, see [log retention](log-retention.md).
+
 ## Common
 
 ```bash
