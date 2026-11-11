@@ -39,3 +39,5 @@ The repository currently contains command references, Bash programming exercises
 ## Lab documentation
 
 Lab records will include the tested environment, commands, results and recovery steps. Simulated incidents and example output will be labelled. Credentials and private connection details are excluded from published examples.
+
+- [Cisco Packet Tracer networking lab](labs/04-networking-basics/README.md)
