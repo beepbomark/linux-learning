@@ -29,6 +29,7 @@ The repository currently contains command references, Bash programming exercises
 ## Reference notes
 
 - [Command and Bash references](Commands/)
+- [Codex and essential Linux commands](codex/)
 - [Bash programming exercises](practice/suss-structured-programming/lab-1/)
 
 - [CompTIA Linux objectives](comptia-linux/00-the-exam-objectives.md)
