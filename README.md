@@ -86,3 +86,5 @@ No project-wide reuse licence has been selected. Do not assume the absence of a 
 ## Lab documentation
 
 Lab records will include the tested environment, commands, results and recovery steps. Simulated incidents and example output will be labelled. Credentials and private connection details are excluded from published examples.
+
+- [Cisco Packet Tracer networking lab](labs/04-networking-basics/README.md)
