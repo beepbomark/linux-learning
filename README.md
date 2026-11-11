@@ -65,6 +65,10 @@ Something broken? Start with the [runbooks](notes/troubleshooting/runbooks/): di
 
 I have used related Linux hosting and monitoring tools in a separate personal project. This repository deliberately keeps its setup guides general; it does not publish that project's live configuration or claim every guide is a tested deployment.
 
+- [Command and Bash references](Commands/)
+- [Codex CLI quick reference](codex/)
+- [Bash programming exercises](practice/suss-structured-programming/lab-1/)
+
 Next learning work: document a repeatable disposable-VM setup, a backup/restore exercise and incident troubleshooting with commands, observed results and limitations.
 
 ## Using these notes
