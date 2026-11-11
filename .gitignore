@@ -1,2 +1,37 @@
-# Keep the in-progress Packet Tracer networking lab local until it is ready.
-labs/04-networking-basics/
+# Private planning notes
+plan/
+
+# Credentials and local configuration (examples may be committed)
+.env
+.env.*
+!.env.example
+!.env.sample
+*.env
+!*.env.example
+*.key
+*.pem
+*.p12
+*.pfx
+id_rsa*
+id_ed25519*
+credentials.json
+*.tfstate
+*.tfstate.*
+
+# Logs, database dumps and backup archives
+*.log
+*.dump
+*.sql.gz
+*.tar
+*.tar.gz
+*.tgz
+*.bak
+
+# Local development/tool output
+.DS_Store
+.venv/
+venv/
+__pycache__/
+*.pyc
+node_modules/
+.playwright-mcp/
