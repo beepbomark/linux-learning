@@ -65,7 +65,7 @@ find . -type f -name "*.md"           # Find documentation files
 grep -R "pattern" .                  # Search repository text
 ```
 
-For a complete Linux command reference, see [`Commands/`](../Commands/).
+For Linux command references, see the topic index in the repository [README](../README.md).
 
 ## Project instructions with `AGENTS.md`
 
@@ -200,4 +200,4 @@ When a tool is missing or behaves unexpectedly, check the executable path, the i
 - [Codex overview](https://developers.openai.com/learn/codex)
 - [OpenAI Docs MCP](https://developers.openai.com/learn/docs-mcp)
 - [Plugins and skills](https://developers.openai.com/learn/developers-codex-plugin)
-- [Linux command references in this repository](../Commands/)
+- [Linux administration learning portfolio](../README.md)

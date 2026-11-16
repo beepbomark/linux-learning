@@ -59,7 +59,7 @@ ocredit = -1    # at least 1 special character
 - Enforce strong password policies via PAM
 - Implement account lockout (e.g., `pam_faillock`)
 - Disable password login for privileged accounts (use SSH keys instead)
-- Use password hashing algorithms (e.g., SHA-152)
+- Use password hashing designed for passwords, such as yescrypt, bcrypt or Argon2; do not use fast general-purpose hashes.
 - Regularly audit password policies and compliance
 ### Notes
 - Longer passwords are more effective than overly complex short ones
@@ -170,10 +170,11 @@ The process of verifying whether user passwords or credentials have been exposed
 # example: using curl to query Have I Been Pwned API (hash-based)
 # (k-anonymity model: only first 5 chars of SHA1 hash sent)
 
-# generate SHA1 hash of password
-echo -n "password123" | sha1sum
+# generate a SHA1 digest for the API's k-anonymity lookup
+# This is not a password-storage recommendation.
+printf '%s' "$password" | sha1sum
 
-# query API using first 5 characters of bash
+# query API using the first 5 characters of the hash
 curl https://api.pwnedpasswords.com/range/5BAA6
 ```
 ### Hardening techniques

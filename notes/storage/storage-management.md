@@ -168,7 +168,7 @@ RAID combines multiple disks to improve performance and/or redundancy.
 - RAID 10 -> mirror + stripe (fast + safe)
 ### Key commands
 ```bash
-mdadm --creat /dev/md0 --level=1 --raid-devices=2 /dev/sdb /dev/sdc
+mdadm --create /dev/md0 --level=1 --raid-devices=2 /dev/sdb /dev/sdc
 cat /proc/mdstat
 mdadm --detail /dev/md0
 ```

@@ -1,4 +1,4 @@
-# Log retention: journals, Nginx, syslog and Grafana
+# Log retention: journals, Nginx and syslog
 
 A practical guide for a small Ubuntu server with systemd and native packages.
 Run server commands on your own server; these examples do not change any server
@@ -49,9 +49,6 @@ Example starting policy, not a compliance requirement:
 | System and service journal | journald | Up to 14 days; 500 MiB persistent storage budget |
 | Nginx access/error files | logrotate | Daily; 14 archives; compress older files |
 | Syslog/auth/kernel files | logrotate | Weekly; 4 archives; compress older files |
-| Grafana file log | Grafana's own rotation | Daily or around 16 MiB; 14 days |
-
-Prometheus stores metrics, not logs: its retention is [configured separately](../prometheus/setup.md).
 `journalctl` reads the journal; journald is the service whose retention you configure.
 
 ## 1. System/application journals: journald
@@ -213,66 +210,7 @@ file list and the package's rsyslog reopen hook. Leave a working weekly/four-arc
 policy unchanged if it suits the server. A duplicate log copy in journal and
 syslog is not inherently an error; each has separate storage and retention.
 
-## 4. Grafana: built-in file rotation
-
-For native packages, inspect the log directory and file settings:
-
-```bash
-sudo ls -lh /var/log/grafana/
-sudo grep -nE '^\[log\]$|^\[log\.file\]$|^[[:space:]]*;?[[:space:]]*(mode|log_rotate|max_lines|max_size_shift|daily_rotate|max_days)[[:space:]]*=' /etc/grafana/grafana.ini
-sudo ls -l /etc/logrotate.d/grafana*
-```
-
-`grep -n` shows matching settings and their line numbers. A leading semicolon means
-the default is used unless overridden elsewhere. The final command looks for an
-external policy; no matching file is fine. Do not configure built-in AND external
-rotation for the same file. If environment overrides are used, inspect their
-relevant logging settings privately; do not print all environment values.
-
-```bash
-sudo nano /etc/grafana/grafana.ini
-```
-
-Edit the EXISTING [log.file] section, uncommenting these values. Do not duplicate
-sections or replace the whole file:
-
-```ini
-[log.file]
-log_rotate = true
-max_lines = 1000000
-max_size_shift = 24
-daily_rotate = true
-max_days = 14
-```
-
-These apply only if file logging is enabled in [log] mode. With console-only
-logging, use the journal policy instead. If both outputs are enabled, both policies matter.
-
-- log_rotate: enable Grafana's own rotation.
-- max_lines: rotate after one million lines.
-- max_size_shift: 2 to this power in bytes; 24 means approximately 16 MiB per file.
-- daily_rotate: rotate daily even when the size threshold is not reached.
-- max_days: remove files older than 14 days as rotation cleanup runs.
-
-This is not a cap on total directory size and does not enable compression.
-Do not add an uncoordinated gzip/logrotate job around Grafana's managed files.
-
-Apply during a suitable maintenance moment:
-
-```bash
-systemctl is-active grafana-server.service
-sudo systemctl restart grafana-server.service
-curl --fail --silent --show-error http://127.0.0.1:3000/api/health
-sudo journalctl -u grafana-server.service --since "5 minutes ago" --no-pager
-```
-
-Check initial state, restart only Grafana, then expect database ok after startup.
-Retry health after a few seconds if needed. Read the full startup logs, not just
-journal priority filtering: some application-formatted warnings may not have the
-expected journal priority. Prometheus keeps collecting while Grafana restarts;
-Grafana alert evaluations pause. Inspect only log lines needed, and sanitize before sharing.
-
-## 5. Confirm scheduled file rotation
+## 4. Confirm scheduled file rotation
 
 ```bash
 systemctl status logrotate.timer --no-pager
@@ -295,13 +233,13 @@ how logrotate was installed before relying on daily/weekly policies.
 After a scheduled rotation, inspect filenames and sizes:
 
 ```bash
-sudo ls -lh /var/log/nginx/ /var/log/grafana/
+sudo ls -lh /var/log/nginx/
 sudo journalctl --disk-usage
 sudo du -sh /var/log
 ```
 
 Look for archives and a current file still receiving new entries. An empty log
-may not rotate, and Grafana rotates on its own rather than through logrotate.timer.
+may not rotate.
 A healthy restart does NOT prove rotation occurred. Do not generate excessive
 production traffic merely to force a size threshold.
 
@@ -314,9 +252,6 @@ production traffic merely to force a size threshold.
   Prefer the application's supported reopen hook.
 - If a policy edit breaks logrotate, restore its saved configuration and rerun
   --debug. Do not delete logrotate's state file to make errors disappear.
-- For journald/Grafana, restore the previous settings and restart the specific
-  logging service/application; recheck health. Deleting retention settings does
-  not recover history already expired.
 - Monitor free disk space and growth. Age/count policies cannot guarantee space
   remains available during a burst of logs.
 - Long-term centralized logs and protected incident archives are separate work;
@@ -331,4 +266,3 @@ Do not put real logs, keys or server addresses into the learning repository.
 
 Sources: [systemd journald settings](https://www.freedesktop.org/software/systemd/man/journald.conf.html),
 [logrotate manual](https://man7.org/linux/man-pages/man8/logrotate.8.html),
-[Grafana logging configuration](https://grafana.com/docs/grafana/latest/setup-grafana/configure-grafana/#logfile).

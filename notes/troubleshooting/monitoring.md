@@ -53,7 +53,6 @@ tail -f /var/log/syslog
 ```
 ### Automation tools
 - Nagios -> monitoring and alerting
-- Prometheus -> metrics collection
 - Zabbix -> enterprise monitoring
 - systemd timers -> scheduled checks
 ### Best practices
@@ -72,7 +71,7 @@ tail -f /var/log/syslog
 - Ignoring resource usage (CPU, memory)
 - Monitoring too many non-critical services
 ### Real-world scenario
-1. Admin monitors web server using `sytemctl status`
+1. Admin monitors web server using `systemctl status`
 2. Detects service failure (inactive/failed)
 3. Checks logs using `journalctl`
 4. Restarts service and verifies port is listening
@@ -111,7 +110,7 @@ journalctl -f
 - Installed agents collect and send data to central system
 - Examples:
   - Zabbix agent
-  - Prometheus node exporter
+  - monitoring agents
 #### 4. Agentless monitoring
 - Uses protocols like SSH, SNMP to collect data remotely
 ```bash
@@ -229,7 +228,6 @@ ping -c 4 host
 ```
 ### Monitoring tools configuration
 - Nagios -> define hosts, services, thresholds
-- Prometheus -> configure scrape targets
 - Zabbix -> define items, triggers, actions
 ### Alert configuration
 - Email notifications

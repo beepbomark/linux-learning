@@ -328,8 +328,11 @@ apt update
 # upgrade packages
 apt upgrade
 
-# verify package signatures
-apt-key list
+# refresh package lists and verify repository signatures
+sudo apt-get update
+
+# inspect configured repository candidates
+apt-cache policy
 
 # check installed packages
 dpkg -l

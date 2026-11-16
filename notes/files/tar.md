@@ -12,7 +12,6 @@ It can also:
 > `tar` itself archives files. Compression is added with options such as `-z`, `-j`, or `-J`.
 
 ---
-
 ## Common
 
 ```bash
@@ -137,5 +136,3 @@ tar -tJf backup.tar.xz
 ```
 
 ---
-
-## 

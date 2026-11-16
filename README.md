@@ -1,6 +1,21 @@
 # Linux Administration Learning Portfolio
 
-Personal study notes, lab records and setup guides as I build practical Linux administration skills. Topics include Ubuntu, services, permissions, networking, backups, monitoring, Bash, Ansible and Docker.
+Practical Linux administration portfolio focused on safe operations, troubleshooting and clear technical documentation.
+
+This repository shows how I learn and apply Linux fundamentals across Ubuntu, services, permissions, networking, backups, monitoring, Bash, Ansible and Docker. It is a learning portfolio, so each guide distinguishes tested lab work from reference material.
+
+## Resume snapshot
+
+| Area | Evidence in this repository |
+| --- | --- |
+| Linux operations | Users, groups, permissions, processes, systemd, cron, packages and storage |
+| Troubleshooting | Runbooks for SSH, DNS, disk-full, high-load and service-start failures |
+| Networking | A rebuildable Packet Tracer lab covering VLANs, trunks, OSPF, DHCP, DNS, NAT/PAT, ACLs and wireless segmentation |
+| Monitoring | systemd health checks, process/resource inspection and log-retention guidance |
+| Automation | Bash exercises, Python fundamentals, Git, Ansible inventory and first-playbook practice |
+| Security mindset | Account hardening, authentication, cryptography, firewall concepts, backup awareness and publication hygiene |
+
+The strongest starting points for a reviewer are the [network administration lab](labs/04-networking-basics/README.md), [troubleshooting runbooks](notes/troubleshooting/runbooks/README.md), [Linux+ checklist](certs/comptia-xk0-006.md), and [publication checklist](PUBLICATION.md).
 
 I use AI to help research, explain commands and draft notes. The focus is practising Linux fundamentals and explaining what I learn. Completed lab records include observations and corrections; reference guides are not proof that every command has been tested.
 
@@ -39,9 +54,10 @@ Something broken? Start with the [runbooks](notes/troubleshooting/runbooks/): di
 | [docker](notes/docker/) | Container basics, a first Compose project, daily commands and storage |
 | [ansible](notes/ansible/) | Inventory, a first playbook, safe targeting and troubleshooting |
 | [cloudflare](notes/cloudflare/) | DNS, Access, origin HTTPS and downloading IPv4/IPv6 allowlists for Nginx |
-| [prometheus](notes/prometheus/) | Ubuntu setup, private metrics collection and everyday queries |
-| [grafana](notes/grafana/) | Ubuntu setup, dashboards and protected public HTTPS |
 | [troubleshooting](notes/troubleshooting/) | Monitoring, hardware/storage/OS, network, security and performance issues |
+
+For authoritative command details, use the [Linux reference links](notes/REFERENCES.md)
+and verify behavior against the local system's `man` pages.
 
 ## Certification checklists
 
@@ -59,13 +75,12 @@ Something broken? Start with the [runbooks](notes/troubleshooting/runbooks/): di
 | Material | What is available | What it demonstrates |
 | --- | --- | --- |
 | Lab records | Files/navigation, users/permissions/services, rescue mode and network exercises | Dated observations and troubleshooting reasoning; see each record's limits |
-| Setup/reference guides | Docker, Ansible, Cloudflare, Prometheus, Grafana and log retention | Explained procedures for adaptation; not all examples have been executed |
+| Setup/reference guides | Docker, Ansible, Cloudflare and log retention | Explained procedures for adaptation; not all examples have been executed |
 | Practice scripts | Bash coursework exercises | Learning exercises, not production automation |
 | Study checklists | Linux+ and LPIC-1 topic maps | Study coverage, not certification completion |
 
 I have used related Linux hosting and monitoring tools in a separate personal project. This repository deliberately keeps its setup guides general; it does not publish that project's live configuration or claim every guide is a tested deployment.
 
-- [Command and Bash references](Commands/)
 - [Codex CLI quick reference](codex/)
 - [Bash programming exercises](practice/suss-structured-programming/lab-1/)
 

@@ -4,7 +4,7 @@ Cloudflare can provide DNS, an HTTPS reverse proxy and an identity gate in front
 of a website. These are separate features; turning on one does not configure the others.
 
 These are reusable learning guides for an Ubuntu server with Nginx. Replace
-`grafana.example.com` and the SSH alias `my-server` with your own values.
+`app.example.com` and the SSH alias `my-server` with your own values.
 Run server commands yourself; the examples are not deployment records.
 
 ## Read in this order
@@ -12,7 +12,6 @@ Run server commands yourself; the examples are not deployment records.
 1. [Cloudflare IPv4/IPv6 → Nginx allowlist](nginx-allowlist.md): download both
    lists, generate rules, include them in one site, validate and reload.
 2. [Protected HTTPS setup](protected-https.md): DNS, Access and a certificate.
-3. [Grafana public route](../grafana/public-access.md): a complete Nginx example.
 
 ## The parts
 
@@ -36,7 +35,7 @@ ordinary browsers do not trust that certificate directly.
 
 ```bash
 # Run on a laptop or server: inspect public DNS.
-dig +short grafana.example.com
+ dig +short app.example.com
 ```
 
 `dig` shows the public DNS answer, not proof of an Access policy or origin routing.
