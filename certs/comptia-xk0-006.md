@@ -55,8 +55,8 @@ by **Raymond Rhine**
 
 All trademarks and copyrights belong to their respective owners.  
 This repository contains independently written study notes and summaries for educational purposes.
-## Use of AI Tools
+## Research and review
 
-AI tools were used as a productivity aid to help organize information, improve formatting, and accelerate note creation.
+Reference material was compared with vendor documentation and local manual pages. Commands and examples are the author's responsibility and are labelled as tested or reference material where appropriate.
 
 All technical commands, explanations, and lab work were personally reviewed and verified through independent study and practical testing.

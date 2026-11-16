@@ -17,7 +17,7 @@ This repository shows how I learn and apply Linux fundamentals across Ubuntu, se
 
 The strongest starting points for a reviewer are the [network administration lab](labs/04-networking-basics/README.md), [troubleshooting runbooks](notes/troubleshooting/runbooks/README.md), [Linux+ checklist](certs/comptia-xk0-006.md), and [publication checklist](PUBLICATION.md).
 
-I use AI to help research, explain commands and draft notes. The focus is practising Linux fundamentals and explaining what I learn. Completed lab records include observations and corrections; reference guides are not proof that every command has been tested.
+The notes are built from hands-on practice, command output, corrections and follow-up research. Completed lab records identify the environment and observed results; reference guides are clearly marked when a procedure has not been tested end to end.
 
 Start with the [lab records](labs/03-users-permissions-and-services.md), [troubleshooting runbooks](notes/troubleshooting/runbooks/README.md), or the topic index below.
 
@@ -81,7 +81,6 @@ and verify behavior against the local system's `man` pages.
 
 I have used related Linux hosting and monitoring tools in a separate personal project. This repository deliberately keeps its setup guides general; it does not publish that project's live configuration or claim every guide is a tested deployment.
 
-- [Codex CLI quick reference](codex/)
 - [Bash programming exercises](practice/suss-structured-programming/lab-1/)
 
 Next learning work: document a repeatable disposable-VM setup, a backup/restore exercise and incident troubleshooting with commands, observed results and limitations.
@@ -94,7 +93,7 @@ Next learning work: document a repeatable disposable-VM setup, a backup/restore 
 - Older study notes are being reviewed; verify security-sensitive examples against current vendor documentation.
 - Never upload real passwords, keys, environment files, unsanitized logs or private infrastructure details.
 
-Before making the repository public, follow the [publication checklist](PUBLICATION.md).
+If you publish this portfolio, review the [publication checklist](PUBLICATION.md) first.
 
 ## Attribution and reuse
 

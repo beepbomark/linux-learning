@@ -402,6 +402,5 @@ smartctl -a /dev/sda
 --- 
 
 
-AI tools were used as a productivity aid to help organize information, improve formatting, and accelerate note creation.
 
 All technical commands, explanations, and lab work were personally reviewed and verified through independent study and practical testing.
