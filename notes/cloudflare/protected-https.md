@@ -1,6 +1,6 @@
 # Cloudflare: protected hostname and HTTPS
 
-Example: `grafana.example.com` → Cloudflare → Nginx → private application.
+Example: `app.example.com` → Cloudflare → Nginx → private application.
 Use your own domain. This assumes the domain is already active in Cloudflare
 and Nginx is installed. A new zone also needs nameserver setup at the registrar.
 
@@ -10,8 +10,8 @@ In Zero Trust → Access → Applications, create a Self-hosted application:
 
 | Setting | Example |
 | --- | --- |
-| Name | Grafana |
-| Public hostname | grafana.example.com |
+| Name | Private application |
+| Public hostname | app.example.com |
 | Path | Empty: protect the whole hostname |
 | Session | 8 hours, adjustable |
 | Policy action | Allow |
@@ -32,17 +32,17 @@ In the regular domain dashboard → SSL/TLS → Origin Server → Create Certifi
 Run on the server:
 
 ```bash
-sudo install -d -m 0700 /etc/nginx/ssl/grafana
-sudo install -m 0600 /dev/null /etc/nginx/ssl/grafana/origin.pem
-sudo install -m 0600 /dev/null /etc/nginx/ssl/grafana/origin.key
+sudo install -d -m 0700 /etc/nginx/ssl/app
+sudo install -m 0600 /dev/null /etc/nginx/ssl/app/origin.pem
+sudo install -m 0600 /dev/null /etc/nginx/ssl/app/origin.key
 ```
 
 These create a root-only directory and empty private files. FIRST SETUP ONLY:
 `install` overwrites existing files, so do not run it over a working certificate.
 
 ```bash
-sudo nano /etc/nginx/ssl/grafana/origin.pem
-sudo nano /etc/nginx/ssl/grafana/origin.key
+sudo nano /etc/nginx/ssl/app/origin.pem
+sudo nano /etc/nginx/ssl/app/origin.key
 ```
 
 Paste the certificate into the first file and private key into the second, including
@@ -50,18 +50,18 @@ their BEGIN/END lines. Save each with Ctrl+O, Enter, Ctrl+X. Never put keys into
 shell command arguments, chat, screenshots or Git.
 
 ```bash
-sudo openssl x509 -in /etc/nginx/ssl/grafana/origin.pem   -noout -dates -ext subjectAltName
+sudo openssl x509 -in /etc/nginx/ssl/app/origin.pem   -noout -dates -ext subjectAltName
 ```
 
 This displays the public certificate's expiry and hostnames. Check key matching:
 
 ```bash
-sudo openssl x509 -in /etc/nginx/ssl/grafana/origin.pem -pubkey -noout |
+sudo openssl x509 -in /etc/nginx/ssl/app/origin.pem -pubkey -noout |
   openssl pkey -pubin -outform DER | sha256sum
 ```
 
 ```bash
-sudo openssl pkey -in /etc/nginx/ssl/grafana/origin.key -pubout -outform DER |
+sudo openssl pkey -in /etc/nginx/ssl/app/origin.key -pubout -outform DER |
   sha256sum
 ```
 
@@ -69,13 +69,13 @@ Both commands fingerprint PUBLIC keys only. Expect identical hashes; stop on any
 
 ## 3. Configure the origin before adding DNS
 
-Follow the [network allowlist](nginx-allowlist.md), then the
-[Grafana Nginx example](../grafana/public-access.md) if using Grafana.
+Follow the [network allowlist](nginx-allowlist.md), then configure the Nginx
+site for the private application.
 Validate Nginx before reload. Test existing sites afterward.
 
 ## 4. Publish using the Cloudflare proxy
 
-Add an A record `grafana` pointing to your actual origin IPv4 address, with proxy
+Add an A record `app` pointing to your actual origin IPv4 address, with proxy
 status Proxied (orange cloud). Add AAAA only if origin IPv6 is intentionally configured.
 
 Use Full (strict) SSL mode. Changing a zone-wide mode affects other hostnames:

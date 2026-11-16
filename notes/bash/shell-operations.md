@@ -25,7 +25,7 @@ unset VAR           # remove variable
 ```bash
 nano ~/.bashrc          # edit shell config file
 export MYVAR="test"     # add variable
-source ~/.basrc         # remove variable
+source ~/.bashrc        # reload configuration
 ```
 ### Notes
 * Variables are accessed using $

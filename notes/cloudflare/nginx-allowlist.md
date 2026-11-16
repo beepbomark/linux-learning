@@ -110,8 +110,8 @@ Inside that site's HTTPS `server { ... }` block, add:
 include /etc/nginx/snippets/cloudflare-only.conf;
 ```
 
-Do not replace the whole existing site with this one line. See the complete
-[Grafana example](../grafana/public-access.md) for a fresh dedicated site.
+Do not replace the whole existing site with this one line. Use the existing
+application server block as the reference for a fresh dedicated site.
 Save Nano with Ctrl+O, Enter; exit with Ctrl+X.
 
 A location containing its own `allow` or `deny` directives overrides inherited
@@ -146,7 +146,7 @@ Open the proxied hostname in a private browser window. Confirm Access login
 On the server, using the REAL hostname:
 
 ```bash
-curl --insecure --silent --show-error   --resolve grafana.example.com:443:127.0.0.1   --output /dev/null --write-out '%{http_code}\n'   https://grafana.example.com/
+curl --insecure --silent --show-error   --resolve app.example.com:443:127.0.0.1   --output /dev/null --write-out '%{http_code}\n'   https://app.example.com/
 ```
 
 `--resolve` connects directly to local Nginx while retaining hostname/SNI.
@@ -164,7 +164,7 @@ separate controlled check; do not publish the origin address.
 - Cloudflare's source networks are shared: this is not proof of your account,
   your Access policy, or a particular user. Do not disable application login.
 - This is an Nginx restriction, not a firewall covering every port.
-- Do not open backend ports 3000, 9090 or 9100 publicly for troubleshooting.
+- Do not open backend application ports publicly for troubleshooting.
 
 Sources: [official IPv4](https://www.cloudflare.com/ips-v4),
 [official IPv6](https://www.cloudflare.com/ips-v6),
