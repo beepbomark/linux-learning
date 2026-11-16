@@ -65,7 +65,7 @@ A GUI is a series of components that work together to provide the graphical sett
 ---
 ## Software licensing
 
-* **Copyleft Licenses**: Allow you to download and use the softwaresource code, but restrictions apply on how you can use or distribute it. Any changes you make to the code inherit the license terms of the parent software.
+* **Copyleft Licenses**: Allow you to download and use the software source code, but restrictions apply to how you can use or distribute it. Any changes you make to the code inherit the license terms of the parent software.
     * **GNU General Public License (GPL)**: Allows you to make changes to the source code, but you must release your changes to the public under the GPL license.
     * **GNU Lesser General Public License (LGPL)**: Allows you to integrate the source code (or even just parts of it) into your own project without having to release it to the public
 * **Permissive Licenses**: Allow you to download and use the source code, but don't place any restrictions on the redistribution of it. 

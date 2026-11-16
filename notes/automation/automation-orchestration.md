@@ -214,7 +214,7 @@ resource "aws_instance" "example" {
 ---
 ## Unattended deployment
 ### What it is
-The automated installation and configuration of operating systems or softwares without manual intervention, using predefined configuration files and scripts.
+The automated installation and configuration of operating systems or software without manual intervention, using predefined configuration files and scripts.
 ### Purpose
 - Automate system provisioning at scale
 - Ensure consistent system setups

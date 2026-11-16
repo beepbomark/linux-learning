@@ -57,6 +57,6 @@ All trademarks and copyrights belong to their respective owners.
 This repository contains independently written study notes and summaries for educational purposes.
 ## Research and review
 
-Reference material was compared with vendor documentation and local manual pages. Commands and examples are the author's responsibility and are labelled as tested or reference material where appropriate.
+AI was used for some research, organisation and drafting. Reference material was compared with vendor documentation and local manual pages; commands and examples were reviewed and corrected by the author and are labelled as tested or reference material where appropriate.
 
 All technical commands, explanations, and lab work were personally reviewed and verified through independent study and practical testing.

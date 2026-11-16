@@ -17,7 +17,7 @@ This repository shows how I learn and apply Linux fundamentals across Ubuntu, se
 
 The strongest starting points for a reviewer are the [network administration lab](labs/04-networking-basics/README.md), [troubleshooting runbooks](notes/troubleshooting/runbooks/README.md), [Linux+ checklist](certs/comptia-xk0-006.md), and [publication checklist](PUBLICATION.md).
 
-The notes are built from hands-on practice, command output, corrections and follow-up research. Completed lab records identify the environment and observed results; reference guides are clearly marked when a procedure has not been tested end to end.
+The notes combine hands-on practice, command output, follow-up research and AI-assisted drafting. I review and correct the material, and I label completed lab records with their environment and observed results; reference guides are clearly marked when a procedure has not been tested end to end.
 
 Start with the [lab records](labs/03-users-permissions-and-services.md), [troubleshooting runbooks](notes/troubleshooting/runbooks/README.md), or the topic index below.
 

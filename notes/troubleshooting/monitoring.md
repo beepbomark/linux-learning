@@ -4,7 +4,7 @@ Source: CompTIA Linux+ XK0-006, objective 5.1
 
 ## Service monitoring
 ### What it is
-THe process of tracking the status, performance, and availability of system services to ensure they are running correctly.
+The process of tracking the status, performance, and availability of system services to ensure they are running correctly.
 ### Purpose
 - Ensure critical services are running
 - Detect failures or downtimes quickly
@@ -14,7 +14,7 @@ THe process of tracking the status, performance, and availability of system serv
 - Service state -> active, inactive, failed
 - Uptime monitoring -> ensure continuous operation
 - Health checks -> verify service functionality
-- ALerts -> notify when issues occur
+- Alerts -> notify when issues occur
 ### Common services monitored
 - Web servers -> Apache, Nginx
 - Database services -> MySQL, PostgreSQL

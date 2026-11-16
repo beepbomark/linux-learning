@@ -261,7 +261,7 @@ pip install git+https://github.com/user/repo.git
 2. Identifies required libraries (e.g., requests, paramiko)
 3. Installs dependencies using pip in virtual environment
 4. Saves dependencies to `requirements.txt
-5. Shares project with repoducible setup for other systems
+5. Shares the project with a reproducible setup for other systems
 ---
 ## Python fundamentals
 ### What it is
