@@ -242,7 +242,7 @@ systemctl status ssh
 ---
 ## Disable unused file systems
 ### What it is
-THe practice of disabling support for unnecessary or unused filesystem types in the Linux kernel to reduce the system's attack surface.
+The practice of disabling support for unnecessary or unused filesystem types in the Linux kernel to reduce the system's attack surface.
 ### Why it matters
 - Unused filesystems can be exploited by attackers
 - Some legacy filesystems have known vulnerabilities

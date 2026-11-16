@@ -1,6 +1,6 @@
 # Linux `md5sum` Command
 
-THe `md5sum` command calculates and verifies an **MD5 checksum** for files or input.
+The `md5sum` command calculates and verifies an **MD5 checksum** for files or input.
 
 It is commonly used to:
 - Check file integrity
